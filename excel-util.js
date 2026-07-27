@@ -98,22 +98,22 @@
       document.body.appendChild(box);
     }
     box.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-lg w-full p-7 my-auto">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 my-auto max-h-[92vh] overflow-y-auto overscroll-contain">
         <h3 class="font-bold text-slate-900 text-[15px]">${esc(title)} 가져오기 확인</h3>
         <p class="text-[12.5px] text-slate-500 mt-1.5">아래 내용대로 반영됩니다. 확인 후 진행해 주세요.</p>
 
-        <div class="grid grid-cols-3 gap-3 mt-5">
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-5">
           <div class="border border-emerald-200 bg-emerald-50 rounded-xl p-4 text-center">
             <div class="text-[11.5px] font-semibold text-emerald-700">신규 추가</div>
-            <div class="text-2xl font-extrabold text-emerald-600 mt-1">${news.length}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1">${news.length}</div>
           </div>
           <div class="border border-amber-200 bg-amber-50 rounded-xl p-4 text-center">
             <div class="text-[11.5px] font-semibold text-amber-700">기존과 중복</div>
-            <div class="text-2xl font-extrabold text-amber-600 mt-1">${dups.length}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-amber-600 mt-1">${dups.length}</div>
           </div>
           <div class="border border-rose-200 bg-rose-50 rounded-xl p-4 text-center">
             <div class="text-[11.5px] font-semibold text-rose-700">오류·제외</div>
-            <div class="text-2xl font-extrabold text-rose-600 mt-1">${errs.length}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1">${errs.length}</div>
           </div>
         </div>
 
@@ -191,13 +191,15 @@
 
   /** 탭 상단 엑셀 버튼 묶음 HTML */
   window.excelButtons = function(exportFn, importFn, templateFn){
-    return `<div class="flex gap-1.5">
+    return `<div class="flex gap-1.5 shrink-0">
       <button onclick="${exportFn}" title="현재 목록을 엑셀로 내려받습니다"
-        class="px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-[12.5px] font-bold hover:bg-emerald-50 transition">⬇ 내보내기</button>
+        class="px-2.5 sm:px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-[12.5px] font-bold hover:bg-emerald-50 transition whitespace-nowrap">
+        ⬇<span class="hidden sm:inline"> 내보내기</span></button>
       <button onclick="${importFn}" title="엑셀 파일에서 데이터를 가져옵니다"
-        class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-[12.5px] font-bold hover:bg-slate-50 transition">⬆ 가져오기</button>
+        class="px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-[12.5px] font-bold hover:bg-slate-50 transition whitespace-nowrap">
+        ⬆<span class="hidden sm:inline"> 가져오기</span></button>
       <button onclick="${templateFn}" title="가져오기용 빈 엑셀 양식을 내려받습니다"
-        class="px-3 py-2 rounded-lg border border-slate-200 text-slate-400 text-[12.5px] font-bold hover:bg-slate-50 transition">양식</button>
+        class="px-2.5 sm:px-3 py-2 rounded-lg border border-slate-200 text-slate-400 text-[12.5px] font-bold hover:bg-slate-50 transition whitespace-nowrap">양식</button>
     </div>`;
   };
 })();

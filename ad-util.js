@@ -95,13 +95,13 @@
     }
     const price = m.price ? m.price.toLocaleString('ko-KR') : '-';
     box.innerHTML =
-      `<div class="bg-white rounded-2xl max-w-sm w-full p-7">
+      `<div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto overscroll-contain">
          <h3 class="font-bold text-slate-900 text-[15px]">광고 게재 안내</h3>
          <div class="mt-4 space-y-2 text-[13px]">
-           <div class="flex justify-between"><span class="text-slate-500">지면</span><b class="text-slate-800">${m.grade}급 · ${esc(m.label)}</b></div>
-           <div class="flex justify-between"><span class="text-slate-500">노출 대상</span><span class="text-slate-700">${esc(m.who)}</span></div>
-           <div class="flex justify-between"><span class="text-slate-500">권장 규격</span><span class="text-slate-700">${esc(m.px)} px</span></div>
-           <div class="flex justify-between"><span class="text-slate-500">월 단가</span><b class="text-indigo-600">${price}원</b></div>
+           <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">지면</span><b class="text-slate-800 text-right">${m.grade}급 · ${esc(m.label)}</b></div>
+           <div class="flex justify-between"><span class="text-slate-500 shrink-0">노출 대상</span><span class="text-slate-700 text-right">${esc(m.who)}</span></div>
+           <div class="flex justify-between"><span class="text-slate-500 shrink-0">권장 규격</span><span class="text-slate-700 text-right">${esc(m.px)} px</span></div>
+           <div class="flex justify-between"><span class="text-slate-500 shrink-0">월 단가</span><b class="text-indigo-600 text-right">${price}원</b></div>
          </div>
          <div class="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 text-[12.5px] text-slate-500 leading-relaxed">
            3개월 정가 · 6개월 10% · 12개월 20% 할인<br>
@@ -110,7 +110,7 @@
          <div class="mt-4">
            <div class="text-[12.5px] font-semibold text-slate-600 mb-1.5">문의 이메일</div>
            <div class="flex gap-2">
-             <input readonly value="${OM_AD_CONTACT}" class="flex-1 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-[13px] text-slate-600 select-all">
+             <input readonly value="${OM_AD_CONTACT}" class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-[13px] text-slate-600 select-all">
              <button onclick="omCopyAdEmail(this)" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition shrink-0">복사</button>
            </div>
          </div>

@@ -82,7 +82,7 @@
     if(c.tel)         info.push(`전화 ${esc(c.tel)}`);
 
     box.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-sm w-full p-7">
+      <div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto overscroll-contain">
         <div class="flex items-center gap-2.5">
           <img src="logo-symbol.png" alt="" class="w-9 h-7 object-contain">
           <h3 class="font-bold text-slate-900 text-[15px]">${title}</h3>
@@ -91,7 +91,7 @@
         <div class="mt-4">
           <div class="text-[12.5px] font-semibold text-slate-600 mb-1.5">이메일</div>
           <div class="flex gap-2">
-            <input readonly value="${esc(addr)}" class="flex-1 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-[13px] text-slate-600 select-all">
+            <input readonly value="${esc(addr)}" class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-[13px] text-slate-600 select-all">
             <button onclick="omCopyContact(this,'${esc(addr)}')" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition shrink-0">복사</button>
           </div>
           <a href="mailto:${esc(addr)}?subject=[오픈매니저] ${encodeURIComponent(title)}"

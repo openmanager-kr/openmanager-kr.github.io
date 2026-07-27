@@ -132,19 +132,19 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
         <button onclick="switchView('stores')" class="text-left bg-white border border-slate-200 rounded-xl p-4 sm:p-5 hover:border-indigo-300 transition">
           <div class="text-[12px] font-semibold text-slate-500">전체 매장</div>
-          <div id="statStores" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+          <div id="statStores" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5 break-all leading-tight">–</div>
         </button>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">오픈 준비 중</div>
-          <div id="statPreparing" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+          <div id="statPreparing" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">오픈 완료</div>
-          <div id="statOpened" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="statOpened" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">이번 달 오픈 예정</div>
-          <div id="statThisMonth" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="statThisMonth" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
       <div class="mt-8 border border-slate-200 bg-white rounded-xl p-5">
@@ -162,27 +162,27 @@
           <h1 class="text-xl font-extrabold text-slate-900">매장 관리</h1>
           <p class="text-[13px] text-slate-500 mt-1">가입 매장 현황 및 점주 공유 링크 관리</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <div id="xlsStore"></div>
-          <button onclick="openStoreModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 매장 등록</button>
+          <button onclick="openStoreModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 매장 등록</button>
         </div>
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">전체 매장</div>
-          <div id="stTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+          <div id="stTotal" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">계약 완료</div>
-          <div id="stContract" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+          <div id="stContract" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">가입비 완납</div>
-          <div id="stPaid" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="stPaid" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">이번 달 신규</div>
-          <div id="stNew" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="stNew" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
 
@@ -227,28 +227,28 @@
           <h1 class="text-xl font-extrabold text-slate-900">상담 관리</h1>
           <p class="text-[13px] text-slate-500 mt-1">가맹 문의 접수부터 계약까지 진행 현황 관리</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <div id="xlsLead"></div>
-          <button onclick="openLeadModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 상담 등록</button>
+          <button onclick="openLeadModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 상담 등록</button>
         </div>
       </div>
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">전체 상담</div>
-          <div id="leadTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+          <div id="leadTotal" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">진행 중</div>
-          <div id="leadActive" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+          <div id="leadActive" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">가입 완료</div>
-          <div id="leadDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="leadDone" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">전환율</div>
-          <div id="leadRate" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="leadRate" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
 
@@ -304,19 +304,19 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">오픈 준비 중</div>
-          <div id="opPreparing" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+          <div id="opPreparing" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">2주 내 오픈 예정</div>
-          <div id="opSoon" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="opSoon" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">오픈일 경과</div>
-          <div id="opOverdue" class="text-2xl font-extrabold text-rose-600 mt-1.5">–</div>
+          <div id="opOverdue" class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">오픈 완료</div>
-          <div id="opDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="opDone" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
 
@@ -368,28 +368,28 @@
           <h1 class="text-xl font-extrabold text-slate-900">파트너사 매칭</h1>
           <p class="text-[13px] text-slate-500 mt-1">매장별 협력업체 배정·진행 상태·금액 관리 <span class="text-slate-400">(등록하면 매장 관리에도 자동 반영)</span></p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <div id="xlsPartner"></div>
-          <button onclick="openPmModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 항목 추가</button>
+          <button onclick="openPmModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 항목 추가</button>
         </div>
       </div>
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">전체 항목</div>
-          <div id="pmTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+          <div id="pmTotal" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">진행 중</div>
-          <div id="pmActive" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+          <div id="pmActive" class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">완료</div>
-          <div id="pmDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="pmDone" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">총 금액</div>
-          <div id="pmAmount" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="pmAmount" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
 
@@ -434,28 +434,28 @@
           <h1 class="text-xl font-extrabold text-slate-900">POS 관리</h1>
           <p class="text-[13px] text-slate-500 mt-1">매장별 POS 설치·계약·월요금 정산 관리</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <div id="xlsPos"></div>
-          <button onclick="openPosModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 연동 등록</button>
+          <button onclick="openPosModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 연동 등록</button>
         </div>
       </div>
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">연동 매장</div>
-          <div id="posTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+          <div id="posTotal" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">설치 완료</div>
-          <div id="posDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+          <div id="posDone" class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">CMS 미연동</div>
-          <div id="posCms" class="text-2xl font-extrabold text-rose-600 mt-1.5">–</div>
+          <div id="posCms" class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-1.5 break-all leading-tight">–</div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
           <div class="text-[12px] font-semibold text-slate-500">월 정산 합계</div>
-          <div id="posAmount" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+          <div id="posAmount" class="text-xl sm:text-2xl font-extrabold text-violet-600 mt-1.5 break-all leading-tight">–</div>
         </div>
       </div>
 
@@ -527,7 +527,7 @@
 
 <!-- 매장 등록/수정 모달 -->
 <div id="storeModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
     <h3 id="storeModalTitle" class="font-bold text-slate-900 text-[15px]">매장 등록</h3>
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
       <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">지점명 <span class="text-rose-500">*</span></label>
@@ -584,7 +584,7 @@
 
 <!-- 공유 링크 모달 -->
 <div id="shareModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
-  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto overscroll-contain">
     <div class="flex items-start justify-between gap-3">
       <div>
         <h3 class="font-bold text-slate-900 text-[15px]">점주 공유 링크</h3>
@@ -594,7 +594,7 @@
         class="shrink-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[11.5px] font-bold hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50 transition whitespace-nowrap">↻ 링크 재발급</button>
     </div>
     <div class="mt-4 flex gap-2">
-      <input id="shareLinkInput" type="text" readonly class="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-[12px] bg-slate-50 text-slate-600">
+      <input id="shareLinkInput" type="text" readonly class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-[12px] bg-slate-50 text-slate-600">
       <button onclick="copyShareLink()" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition shrink-0">복사</button>
     </div>
     <button onclick="document.getElementById('shareModal').classList.add('hidden')" class="mt-3 w-full py-2 rounded-lg text-slate-400 text-[12.5px] font-semibold hover:text-slate-600 transition">닫기</button>
@@ -603,7 +603,7 @@
 
 <!-- 상담 등록/수정 모달 -->
 <div id="leadModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
     <h3 id="leadModalTitle" class="font-bold text-slate-900 text-[15px]">상담 등록</h3>
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
       <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">상담일자 <span class="text-rose-500">*</span></label>
@@ -657,7 +657,7 @@
 
 <!-- POS 관리 등록/수정 모달 -->
 <div id="posModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
     <h3 id="posModalTitle" class="font-bold text-slate-900 text-[15px]">POS 연동 등록</h3>
     <div id="posStoreWrap" class="mt-4">
       <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">매장 <span class="text-rose-500">*</span></label>
@@ -703,7 +703,7 @@
 
 <!-- 파트너 항목 수정 모달 -->
 <div id="pmModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
-  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto overscroll-contain">
     <h3 id="pmTitle" class="font-bold text-slate-900 text-[15px]">파트너사 정보</h3>
     <div id="pmInfo" class="mt-2 text-[13px] text-slate-500 bg-slate-50 rounded-lg px-3.5 py-2.5"></div>
     <div id="pmNewFields" class="hidden mt-4 grid grid-cols-2 gap-3">
@@ -748,7 +748,7 @@
 
 <!-- 오픈 진행 타임라인 모달 -->
 <div id="timelineModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
     <h3 class="font-bold text-slate-900 text-[15px]"><span id="tlBranch"></span> — 오픈 진행 타임라인</h3>
     <p class="text-[12.5px] text-slate-500 mt-1.5">단계 상태를 변경하면 <b class="text-indigo-600">점주 공유 페이지에 실시간 반영</b>됩니다. 단계명은 자유롭게 수정·추가할 수 있어요.</p>
     <div class="mt-4 flex items-center gap-3">
@@ -1252,17 +1252,17 @@ function renderTlRows(){
   document.getElementById('tlBar').style.width = pct+'%';
   document.getElementById('tlPct').textContent = pct+'%';
   document.getElementById('tlRows').innerHTML = tlSteps.map((st,i)=>`
-    <div class="flex items-center gap-2">
-      <span class="w-6 text-center text-[12px] font-bold text-slate-400">${i+1}</span>
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <span class="w-4 shrink-0 text-center text-[12px] font-bold text-slate-400">${i+1}</span>
       <input value="${esc(st.name)}" onchange="tlSteps[${i}].name=this.value"
-        class="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm transition">
+        class="flex-1 min-w-0 px-2.5 py-2 rounded-lg border border-slate-200 text-base sm:text-sm transition">
       <select onchange="tlSteps[${i}].status=this.value"
-        class="px-2.5 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition ${st.status==='완료'?'text-emerald-600 font-bold':st.status==='진행중'?'text-indigo-600 font-bold':'text-slate-500'}">
+        class="w-24 shrink-0 px-2 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition ${st.status==='완료'?'text-emerald-600 font-bold':st.status==='진행중'?'text-indigo-600 font-bold':'text-slate-500'}">
         <option ${st.status==='대기'?'selected':''}>대기</option>
         <option ${st.status==='진행중'?'selected':''}>진행중</option>
         <option ${st.status==='완료'?'selected':''}>완료</option>
       </select>
-      <button onclick="tlSteps.splice(${i},1);renderTlRows()" class="text-slate-300 hover:text-rose-500 text-lg leading-none px-1">&times;</button>
+      <button onclick="tlSteps.splice(${i},1);renderTlRows()" class="shrink-0 w-6 text-slate-300 hover:text-rose-500 text-lg leading-none">&times;</button>
     </div>`).join('');
 }
 window.renderTlRows = renderTlRows;

@@ -15,8 +15,8 @@
     if(!side) return;
     side.classList.remove('-translate-x-full');
     if(ov){ ov.classList.remove('hidden'); requestAnimationFrame(()=>ov.classList.remove('opacity-0')); }
-    document.body.style.overflow = 'hidden';
     opened = true;
+    syncScrollLock();
   };
 
   window.omDrawerClose = function(){
@@ -24,8 +24,8 @@
     if(!side) return;
     // 데스크톱에서는 항상 열린 상태이므로 클래스만 정리
     if(window.matchMedia('(min-width: 768px)').matches){
-      document.body.style.overflow = '';
       opened = false;
+      syncScrollLock();
       return;
     }
     side.classList.add('-translate-x-full');
@@ -33,8 +33,8 @@
       ov.classList.add('opacity-0');
       setTimeout(()=>ov.classList.add('hidden'), 200);
     }
-    document.body.style.overflow = '';
     opened = false;
+    setTimeout(syncScrollLock, 210);
   };
 
   window.omDrawerToggle = function(){ opened ? omDrawerClose() : omDrawerOpen(); };
@@ -54,6 +54,25 @@
   window.addEventListener('resize', () => {
     if(window.matchMedia('(min-width: 768px)').matches && opened) omDrawerClose();
   });
+
+  // ── 모달이 열리면 배경 스크롤 잠금 (모든 모달에 자동 적용) ──
+  function anyModalOpen(){
+    return [...document.querySelectorAll('.fixed.inset-0')].some(el => {
+      if(el.classList.contains('hidden')) return false;
+      const st = getComputedStyle(el);
+      return st.display !== 'none' && st.visibility !== 'hidden';
+    });
+  }
+  function syncScrollLock(){
+    document.body.style.overflow = anyModalOpen() ? 'hidden' : '';
+  }
+  const mo = new MutationObserver(syncScrollLock);
+  document.addEventListener('DOMContentLoaded', () => {
+    mo.observe(document.body, { attributes:true, attributeFilter:['class','style'],
+                                childList:true, subtree:true });
+    syncScrollLock();
+  });
+  window.omSyncScrollLock = syncScrollLock;
 
   /** 현재 기기 구분 — 광고 통계·소재 분기용 */
   window.omDevice = function(){
