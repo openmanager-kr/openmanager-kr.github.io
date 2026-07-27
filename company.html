@@ -773,7 +773,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
@@ -785,7 +785,16 @@ const app = initializeApp({
 });
 const auth = getAuth(app);
 auth.languageCode = 'ko';
-const db = getFirestore(app);
+// 로컬 캐시 활성화 — 같은 브라우저 재방문 시 서버 읽기를 크게 줄인다
+let db;
+try{
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+}catch(e){
+  // 이미 초기화됐거나 브라우저가 미지원인 경우 기본 방식으로
+  db = getFirestore(app);
+}
 
 let MY = { uid:null, companyId:null, company:null };
 let storeCache = [];
@@ -874,7 +883,7 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('pwGate').classList.remove('hidden');
       return;   // 변경 완료 전까지 본 화면 접근 차단
     }
-    await loadStores(); await loadLeads();
+    await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
     mountExcelButtons();
   }catch(e){
@@ -915,7 +924,7 @@ window.changePassword = async () => {
     await updatePassword(auth.currentUser, pw);
     await updateDoc(doc(db,'users',MY.uid), { mustChangePassword: false });
     document.getElementById('pwGate').classList.add('hidden');
-    await loadStores(); await loadLeads();
+    await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
     mountExcelButtons();
   }catch(e){
@@ -940,6 +949,8 @@ window.switchView = v => {
   document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
   document.getElementById('view-'+v).classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+  // 상담 데이터는 실제로 탭을 열 때 한 번만 구독 (불필요한 읽기 방지)
+  if(v === 'lead') loadLeads();
 };
 
 // ===== 매장 =====

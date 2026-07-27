@@ -382,7 +382,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, limit, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, limit, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
@@ -393,7 +393,16 @@ const app = initializeApp({
   appId: "1:249141913323:web:f5f5fd678b895dc02400ae"
 });
 const auth = getAuth(app);
-const db = getFirestore(app);
+// 로컬 캐시 활성화 — 같은 브라우저 재방문 시 서버 읽기를 크게 줄인다
+let db;
+try{
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+}catch(e){
+  // 이미 초기화됐거나 브라우저가 미지원인 경우 기본 방식으로
+  db = getFirestore(app);
+}
 
 // ===== 지면 정의 =====
 const SLOTS = [
