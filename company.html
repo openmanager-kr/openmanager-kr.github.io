@@ -1024,7 +1024,12 @@ window.renderStores = () => {
   if(kw) list = list.filter(s => [s.branchName,s.ownerName,s.phone].some(v => (v||'').includes(kw)));
   if(ft) list = list.filter(s => s.openStatus === ft);
   if(list.length===0){
-    rows.innerHTML = '<tr><td colspan="10" class="px-4 py-14 text-center text-slate-400 text-[13px]">'+(storeCache.length===0?'아직 등록된 매장이 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 매장 등록]으로 시작하세요.</span>':'검색 조건에 맞는 매장이 없습니다.')+'</td></tr>'; return;
+    const em = storeCache.length===0
+      ? '아직 등록된 매장이 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 매장 등록]으로 시작하세요.</span>'
+      : '검색 조건에 맞는 매장이 없습니다.';
+    rows.innerHTML = '<tr><td colspan="10" class="px-4 py-14 text-center text-slate-400 text-[13px]">'+em+'</td></tr>';
+    renderCards('storeCards', [], em);
+    return;
   }
   const stBadge = s => s==='오픈완료' ? 'bg-emerald-50 text-emerald-600' : s==='진행중' ? 'bg-indigo-50 text-indigo-600' : s==='보류' ? 'bg-slate-100 text-slate-500' : 'bg-violet-50 text-violet-600';
   rows.innerHTML = list.map(s=>`<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
@@ -1043,6 +1048,19 @@ window.renderStores = () => {
       <button onclick="deleteStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
     </td>
   </tr>`).join('');
+
+  // 모바일 카드
+  renderCards('storeCards', list.map(s=>({
+    title: esc(s.branchName),
+    sub: `${esc(s.ownerName)}${s.phone ? ' · ' + esc(fmtPhone(s.phone)) : ''}`,
+    badges: [`<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${stBadge(s.openStatus)}">${esc(s.openStatus)||'–'}</span>`],
+    fields: [['오픈일', esc(s.openDate)], ['계약', esc(s.contractStatus)],
+             ['가입비', esc(s.paymentStatus)], ['담당', esc(s.managerSV)],
+             ['파트너사', partnerSummary(s)]],
+    actions: mBtn('링크', `openShare('${s.id}')`)
+           + mBtn('수정', `openStoreModal('${s.id}')`, 'primary')
+           + mBtn('삭제', `deleteStore('${s.id}')`, 'ghost')
+  })), '');
 };
 
 function renderStoreStats(){
