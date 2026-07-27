@@ -15,7 +15,12 @@
 <script src="footer-util.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-  body{font-family:'Pretendard',-apple-system,sans-serif;}
+
+  body{font-family:'Pretendard',-apple-system,sans-serif; word-break:keep-all;}
+  /* 한국어는 단어 중간에서 끊기지 않게 — 어절 단위 줄바꿈 */
+  h1,h2,h3,h4,p,li,td,th,label,button,a{word-break:keep-all;}
+  /* 이메일·URL 등 긴 영문은 예외 */
+  .break-all,.select-all,input,textarea{word-break:break-all;}
   .mock{font-size:9px; line-height:1.35;}
 </style>
 </head>
@@ -39,14 +44,14 @@
     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-indigo-100 text-indigo-600 text-[12px] font-bold">
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 무료로 제공되는 서비스입니다
     </div>
-    <h1 class="text-[30px] sm:text-[42px] font-extrabold text-slate-900 mt-5 leading-[1.25] tracking-tight">
+    <h1 class="text-[30px] sm:text-[42px] font-extrabold text-slate-900 mt-5 leading-[1.3] tracking-tight break-keep">
       매장 하나가 문을 열기까지,<br>
       <span class="text-indigo-600">본부와 점주가 같은 화면</span>을 봅니다
     </h1>
     <p class="text-[15px] sm:text-[16px] text-slate-500 mt-5 leading-relaxed">
-      상담 접수부터 계약, 인허가, 시공, 오픈까지.<br class="hidden sm:block">
-      엑셀과 카카오톡에 흩어져 있던 오픈 과정을 <b class="text-slate-700">한 화면에서 관리</b>하고,<br class="hidden sm:block">
-      점주에게는 <b class="text-slate-700">링크 하나로 진행 상황을 공유</b>합니다.
+      상담 접수부터 계약, 인허가, 시공, 오픈까지<br class="hidden sm:block">
+      흩어져 있던 과정을 <b class="text-slate-700">한 화면에서 관리</b>하고,
+      점주에게는 <b class="text-slate-700">링크 하나로 공유</b>합니다.
     </p>
     <div class="flex flex-wrap gap-2.5 justify-center mt-8">
       <a href="signup.html" class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[15px] font-bold transition shadow-sm">무료로 시작하기</a>
@@ -130,7 +135,7 @@
 <!-- ===== 문제 제기 ===== -->
 <section class="max-w-6xl mx-auto px-5 py-16">
   <div class="text-center">
-    <h2 class="text-[24px] sm:text-[28px] font-extrabold text-slate-900">이런 적, 있으셨죠?</h2>
+    <h2 class="text-[23px] sm:text-[28px] font-extrabold text-slate-900 break-keep">이런 적, 있으셨죠?</h2>
     <p class="text-[14.5px] text-slate-500 mt-3">소규모 프랜차이즈 본부라면 대부분 겪는 일입니다.</p>
   </div>
   <div class="grid sm:grid-cols-3 gap-4 mt-9">
@@ -138,7 +143,7 @@
       <div class="text-[22px]">📊</div>
       <div class="text-[15px] font-bold text-slate-900 mt-3">엑셀 파일이 계속 늘어난다</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
-        상담 명단, 매장 목록, 시공 일정이 각각 다른 파일에.
+        상담 명단, 매장 목록, 시공 일정이 각각 다른 파일에 있어
         어느 게 최신인지 매번 확인해야 합니다.
       </p>
     </div>
@@ -146,7 +151,7 @@
       <div class="text-[22px]">📞</div>
       <div class="text-[15px] font-bold text-slate-900 mt-3">점주 전화가 끊이지 않는다</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
-        "인테리어 언제 들어가요?" "간판은요?"
+        "인테리어 언제 들어가요?" "간판은요?"<br>
         같은 질문에 하루에도 몇 번씩 답합니다.
       </p>
     </div>
@@ -155,7 +160,7 @@
       <div class="text-[15px] font-bold text-slate-900 mt-3">진행 상황이 흩어져 있다</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
         상담 기록은 엑셀에, 시공 일정은 카톡에, 계약서는 메일에.
-        담당자만 아는 정보가 됩니다.
+        결국 담당자만 아는 정보가 됩니다.
       </p>
     </div>
   </div>
@@ -167,12 +172,12 @@
     <div class="grid lg:grid-cols-2 gap-10 items-center">
       <div>
         <div class="inline-block px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-[12px] font-bold">가장 큰 변화</div>
-        <h2 class="text-[26px] sm:text-[32px] font-extrabold text-white mt-4 leading-tight">
+        <h2 class="text-[24px] sm:text-[32px] font-extrabold text-white mt-4 leading-tight break-keep">
           점주가 직접 확인합니다.<br>전화하지 않고도.
         </h2>
         <p class="text-[14.5px] text-slate-400 mt-5 leading-relaxed">
           매장마다 <b class="text-white">전용 링크</b>가 자동으로 만들어집니다.
-          점주에게 그 링크만 보내면, 로그인 없이 자기 매장의 오픈 진행 상황을 볼 수 있습니다.
+          점주에게 링크만 보내면, 로그인 없이 자기 매장의 진행 상황을 확인할 수 있습니다.
         </p>
         <ul class="mt-6 space-y-3">
           <li class="flex gap-3 text-[14px] text-slate-300">
@@ -298,7 +303,7 @@
 <!-- ===== 기능 ===== -->
 <section id="how" class="max-w-6xl mx-auto px-5 py-16">
   <div class="text-center">
-    <h2 class="text-[24px] sm:text-[28px] font-extrabold text-slate-900">상담부터 오픈까지, 끊기지 않게</h2>
+    <h2 class="text-[23px] sm:text-[28px] font-extrabold text-slate-900 break-keep">상담부터 오픈까지, 끊기지 않게</h2>
     <p class="text-[14.5px] text-slate-500 mt-3">각 단계가 따로 놀지 않고 하나의 흐름으로 이어집니다.</p>
   </div>
 
@@ -320,8 +325,8 @@
         <div class="text-[12px] font-extrabold text-indigo-600">상담 관리</div>
         <div class="text-[17px] font-bold text-slate-900 mt-1.5">놓치는 상담이 없도록</div>
         <p class="text-[13.5px] text-slate-500 mt-2 leading-relaxed">
-          리마인드 날짜를 정해두면 연락할 때가 된 상담을 화면 위에 모아서 보여줍니다.
-          가입이 확정되면 <b class="text-slate-700">버튼 하나로 매장으로 전환</b>되어 정보를 다시 입력할 필요가 없습니다.
+          리마인드 날짜를 정해두면 연락할 때가 된 상담을 화면 위에 모아 보여줍니다.
+          가입이 확정되면 <b class="text-slate-700">버튼 하나로 매장 전환</b>되어 정보를 다시 입력할 필요가 없습니다.
         </p>
       </div>
       <div class="mock bg-slate-50 border-t border-slate-200 p-3.5">
@@ -362,8 +367,9 @@
         <div class="text-[12px] font-extrabold text-indigo-600">오픈 관리</div>
         <div class="text-[17px] font-bold text-slate-900 mt-1.5">어느 매장이 어디까지 왔는지</div>
         <p class="text-[13.5px] text-slate-500 mt-2 leading-relaxed">
-          모든 매장의 진행률을 한 줄로 확인합니다. 오픈 예정일이 지났는데 완료되지 않은 매장은
-          <b class="text-slate-700">자동으로 경고</b>합니다. 단계 이름은 업종에 맞게 직접 바꿀 수 있습니다.
+          모든 매장의 진행률을 한 줄로 확인합니다.
+          오픈 예정일이 지났는데 완료되지 않은 매장은 <b class="text-slate-700">자동으로 경고</b>하며,
+          단계 이름은 업종에 맞게 직접 바꿀 수 있습니다.
         </p>
       </div>
       <div class="mock bg-slate-50 border-t border-slate-200 p-3.5">
@@ -422,8 +428,8 @@
         <div class="text-[12px] font-extrabold text-indigo-600">파트너사 매칭</div>
         <div class="text-[17px] font-bold text-slate-900 mt-1.5">어느 업체가 어디까지 진행했는지</div>
         <p class="text-[13.5px] text-slate-500 mt-2 leading-relaxed">
-          인테리어·간판·설비·집기 등 항목별로 <b class="text-slate-700">업체·진행 상태·금액</b>을 따로 관리합니다.
-          매장 화면과 자동으로 연동되어 어느 쪽에서 입력해도 같은 결과입니다.
+          인테리어·간판·설비·집기 등 항목별로 <b class="text-slate-700">업체·진행 상태·금액</b>을 관리합니다.
+          매장 화면과 자동 연동되어 어느 쪽에서 입력해도 같은 결과입니다.
         </p>
       </div>
       <div class="mock bg-slate-50 border-t border-slate-200 p-3.5">
@@ -460,7 +466,7 @@
         <div class="text-[12px] font-extrabold text-indigo-600">매장 관리 · 엑셀 백업</div>
         <div class="text-[17px] font-bold text-slate-900 mt-1.5">쓰던 엑셀도 그대로 가져오기</div>
         <p class="text-[13.5px] text-slate-500 mt-2 leading-relaxed">
-          기존 엑셀 파일을 그대로 올릴 수 있고, 언제든 다시 내려받을 수 있습니다.
+          쓰던 엑셀 파일을 그대로 올릴 수 있고, 언제든 다시 내려받을 수 있습니다.
           가져오기 전에 <b class="text-slate-700">몇 건이 추가·수정되는지 미리 확인</b>하므로 실수로 덮어쓸 일이 없습니다.
         </p>
       </div>
@@ -503,14 +509,14 @@
 <section class="bg-slate-50 border-y border-slate-200">
   <div class="max-w-6xl mx-auto px-5 py-16">
     <div class="text-center">
-      <h2 class="text-[24px] sm:text-[28px] font-extrabold text-slate-900">데이터는 회사의 것입니다</h2>
+      <h2 class="text-[23px] sm:text-[28px] font-extrabold text-slate-900 break-keep">데이터는 회사의 것입니다</h2>
       <p class="text-[14.5px] text-slate-500 mt-3">약속이 아니라, 시스템으로 막아두었습니다.</p>
     </div>
     <div class="grid sm:grid-cols-3 gap-4 mt-9">
       <div class="bg-white border border-slate-200 rounded-2xl p-6">
         <div class="text-[15px] font-bold text-slate-900">운영자도 볼 수 없습니다</div>
         <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
-          서비스 운영자는 회사 승인과 광고 관리만 합니다.
+          운영자는 회사 승인과 광고 관리만 합니다.
           각 회사의 매장·점주 기록은 <b class="text-slate-700">데이터베이스 권한 자체가 차단</b>되어 있어
           마음먹어도 열람할 수 없습니다.
         </p>
@@ -536,7 +542,7 @@
 <!-- ===== 이용 안내 ===== -->
 <section class="max-w-6xl mx-auto px-5 py-16">
   <div class="text-center">
-    <h2 class="text-[24px] sm:text-[28px] font-extrabold text-slate-900">이용료는 없습니다</h2>
+    <h2 class="text-[23px] sm:text-[28px] font-extrabold text-slate-900 break-keep">이용료는 없습니다</h2>
     <p class="text-[14.5px] text-slate-500 mt-3">
       서비스 화면 일부에 광고가 표시되며, 그 수익으로 운영합니다.
     </p>
@@ -590,7 +596,7 @@
 <section class="bg-slate-900">
   <div class="max-w-6xl mx-auto px-5 py-16 text-center">
     <img src="logo-symbol-white.png" alt="" class="h-9 w-auto object-contain mx-auto opacity-90">
-    <h2 class="text-[24px] sm:text-[30px] font-extrabold text-white mt-5 leading-tight">
+    <h2 class="text-[22px] sm:text-[30px] font-extrabold text-white mt-5 leading-tight break-keep">
       다음 매장 오픈부터, 전화 대신 링크로
     </h2>
     <p class="text-[14.5px] text-slate-400 mt-4">신청은 1분이면 끝납니다. 비용도, 설치도 없습니다.</p>
