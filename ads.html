@@ -29,7 +29,7 @@
 
 <!-- 히어로 -->
 <section class="bg-white border-b border-slate-200">
-  <div class="max-w-5xl mx-auto px-5 py-14 text-center">
+  <div class="max-w-5xl mx-auto px-5 py-11 sm:py-14 text-center">
     <div class="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[12px] font-bold">광고 지면 안내</div>
     <h1 class="text-[28px] sm:text-[34px] font-extrabold text-slate-900 mt-4 leading-tight">
       프랜차이즈 본부와 점주에게<br class="hidden sm:block"> 직접 닿는 광고
@@ -46,10 +46,10 @@
 </section>
 
 <!-- 왜 여기인가 -->
-<section class="max-w-5xl mx-auto px-5 py-12">
+<section class="max-w-5xl mx-auto px-5 py-10 sm:py-12">
   <h2 class="text-[20px] font-extrabold text-slate-900 text-center">왜 오픈매니저인가요</h2>
-  <div class="grid sm:grid-cols-3 gap-4 mt-7">
-    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
       <div class="text-[13px] font-extrabold text-indigo-600">타이밍</div>
       <div class="text-[15px] font-bold text-slate-900 mt-2">매장을 여는 그 시점</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
@@ -57,7 +57,7 @@
         광고를 찾아 나서지 않아도, 필요한 순간에 눈에 띕니다.
       </p>
     </div>
-    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
       <div class="text-[13px] font-extrabold text-indigo-600">대상</div>
       <div class="text-[15px] font-bold text-slate-900 mt-2">결정권자에게 직접</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
@@ -65,12 +65,77 @@
         그리고 실제 비용을 쓰는 <b class="text-slate-700">신규 매장 점주</b>. 불특정 다수가 아닙니다.
       </p>
     </div>
-    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
       <div class="text-[13px] font-extrabold text-indigo-600">독점</div>
       <div class="text-[15px] font-bold text-slate-900 mt-2">지면당 광고 1개</div>
       <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
         한 지면에는 <b class="text-slate-700">한 광고주만</b> 게재됩니다.
         경쟁사와 나란히 놓이거나, 여러 배너에 묻히는 일이 없습니다.
+      </p>
+    </div>
+    <div class="bg-white border-2 border-indigo-200 rounded-2xl p-5 sm:p-6">
+      <div class="text-[13px] font-extrabold text-indigo-600">통합</div>
+      <div class="text-[15px] font-bold text-slate-900 mt-2">PC · 모바일 한 번에</div>
+      <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
+        하나만 계약하시면 <b class="text-slate-700">PC와 모바일 모두</b> 노출됩니다.
+        따로 사실 필요도, 추가 비용도 없습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PC·모바일 노출 방식 -->
+<section class="bg-slate-900">
+  <div class="max-w-5xl mx-auto px-5 py-14">
+    <div class="text-center">
+      <div class="inline-block px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-[12px] font-bold">모바일 대응</div>
+      <h2 class="text-[22px] sm:text-[26px] font-extrabold text-white mt-4">기기에 맞는 자리에 노출됩니다</h2>
+      <p class="text-[14px] text-slate-400 mt-3 leading-relaxed">
+        PC 이미지를 모바일에서 억지로 줄여 보여주지 않습니다.<br class="hidden sm:block">
+        화면 구조가 다른 만큼, <b class="text-white">노출 위치도 기기에 맞게</b> 조정됩니다.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4 mt-9">
+      <!-- PC -->
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 sm:p-6">
+        <div class="flex items-center gap-2">
+          <span class="text-[18px]">🖥</span>
+          <span class="text-[15px] font-bold text-white">PC 화면</span>
+        </div>
+        <ul class="mt-4 space-y-2.5 text-[13px] text-slate-300">
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>상단 와이드 배너</li>
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>좌·우 세로형 배너 (스크롤 따라 고정)</li>
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>대시보드·업무 화면 하단 배너</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-slate-700 text-[12px] text-slate-400">
+          권장 규격 · 가로형 <b class="text-slate-200">1200 × 200</b> / 세로형 <b class="text-slate-200">300 × 1050</b>
+        </div>
+      </div>
+
+      <!-- 모바일 -->
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 sm:p-6">
+        <div class="flex items-center gap-2">
+          <span class="text-[18px]">📱</span>
+          <span class="text-[15px] font-bold text-white">모바일 화면</span>
+        </div>
+        <ul class="mt-4 space-y-2.5 text-[13px] text-slate-300">
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>화면 폭에 꽉 차는 가로 배너</li>
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>세로형 지면은 <b class="text-white">콘텐츠 사이 배너</b>로 전환</li>
+          <li class="flex gap-2.5"><span class="text-indigo-400 shrink-0">·</span>진행 현황을 확인하는 흐름 중간에 자연스럽게 노출</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-slate-700 text-[12px] text-slate-400">
+          권장 규격 · <b class="text-slate-200">720 × 240</b> (가로 3:1 비율)
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5">
+      <div class="text-[13.5px] font-bold text-indigo-200">소재는 두 가지로 주시면 가장 좋습니다</div>
+      <p class="text-[13px] text-slate-400 mt-2 leading-relaxed">
+        PC용 · 모바일용 이미지를 각각 주시면 기기에 맞춰 자동으로 바꿔 보여드립니다.
+        <b class="text-slate-200">한 가지만 주셔도 게재는 가능합니다</b> —
+        이 경우 이미지를 잘라내지 않고 비율을 유지해 표시하므로, 문구나 로고가 잘리는 일은 없습니다.
       </p>
     </div>
   </div>
@@ -79,15 +144,15 @@
 <!-- 지면 안내 -->
 <section id="slots" class="max-w-5xl mx-auto px-5 py-8">
   <h2 class="text-[20px] font-extrabold text-slate-900 text-center">지면 안내</h2>
-  <p class="text-[13.5px] text-slate-500 text-center mt-2">등급은 노출량(보는 사람 수 × 빈도) 기준입니다.</p>
+  <p class="text-[13.5px] text-slate-500 text-center mt-2">등급은 노출량(보는 사람 수 × 빈도) 기준입니다. <b class="text-slate-700">모든 지면은 PC·모바일에 함께 노출</b>됩니다.</p>
 
   <!-- S급 -->
   <div class="mt-8 bg-white border-2 border-indigo-200 rounded-2xl overflow-hidden">
-    <div class="bg-indigo-600 px-6 py-3 flex items-center justify-between">
-      <div class="text-white font-extrabold text-[15px]">S급 · 점주 열람 페이지</div>
-      <div class="text-indigo-100 text-[13px] font-bold">월 100,000원</div>
+    <div class="bg-indigo-600 px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="text-white font-extrabold text-[14px] sm:text-[15px] min-w-0">S급 · 점주 열람 페이지</div>
+      <div class="text-indigo-100 text-[13px] font-bold whitespace-nowrap shrink-0">월 100,000원</div>
     </div>
-    <div class="p-6">
+    <div class="p-5 sm:p-6">
       <p class="text-[13.5px] text-slate-600 leading-relaxed">
         신규 매장 <b class="text-slate-900">점주가 직접 보는 화면</b>입니다. 본부가 점주에게 링크를 보내면,
         점주는 자기 매장의 오픈 진행 상황을 확인하려고 <b class="text-slate-900">오픈 준비 기간 내내 반복해서</b> 들어옵니다.
@@ -99,18 +164,21 @@
       <div class="grid sm:grid-cols-3 gap-3 mt-5">
         <div class="border border-slate-200 rounded-xl p-4">
           <div class="text-[13px] font-bold text-slate-800">상단 배너</div>
-          <div class="text-[12px] text-slate-400 mt-1">페이지 최상단 가로 배너</div>
-          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 1200 × 200 px</div>
+          <div class="text-[12px] text-slate-400 mt-1">🖥 페이지 최상단 가로 배너</div>
+          <div class="text-[12px] text-slate-400">📱 화면 폭 가로 배너</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">1200×200 / 720×240</div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4">
           <div class="text-[13px] font-bold text-slate-800">좌측 세로형</div>
-          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
-          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+          <div class="text-[12px] text-slate-400 mt-1">🖥 스크롤 따라 고정 노출</div>
+          <div class="text-[12px] text-slate-400">📱 콘텐츠 사이 가로 배너로 전환</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">300×1050 / 720×240</div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4">
           <div class="text-[13px] font-bold text-slate-800">우측 세로형</div>
-          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
-          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+          <div class="text-[12px] text-slate-400 mt-1">🖥 스크롤 따라 고정 노출</div>
+          <div class="text-[12px] text-slate-400">📱 콘텐츠 사이 가로 배너로 전환</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">300×1050 / 720×240</div>
         </div>
       </div>
     </div>
@@ -118,11 +186,11 @@
 
   <!-- A급 -->
   <div class="mt-5 bg-white border border-slate-200 rounded-2xl overflow-hidden">
-    <div class="bg-slate-800 px-6 py-3 flex items-center justify-between">
-      <div class="text-white font-extrabold text-[15px]">A급 · 본부 관리자 메인</div>
-      <div class="text-slate-300 text-[13px] font-bold">월 80,000원</div>
+    <div class="bg-slate-800 px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="text-white font-extrabold text-[14px] sm:text-[15px] min-w-0">A급 · 본부 관리자 메인</div>
+      <div class="text-slate-300 text-[13px] font-bold whitespace-nowrap shrink-0">월 80,000원</div>
     </div>
-    <div class="p-6">
+    <div class="p-5 sm:p-6">
       <p class="text-[13.5px] text-slate-600 leading-relaxed">
         프랜차이즈 <b class="text-slate-900">본부 담당자가 매일 업무 중 보는 화면</b>입니다.
         협력업체 선정, 계약, 발주를 실제로 결정하는 사람에게 노출됩니다.
@@ -133,13 +201,15 @@
       <div class="grid sm:grid-cols-2 gap-3 mt-5">
         <div class="border border-slate-200 rounded-xl p-4">
           <div class="text-[13px] font-bold text-slate-800">메인 상단 배너</div>
-          <div class="text-[12px] text-slate-400 mt-1">모든 화면 최상단 고정</div>
-          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 1200 × 200 px</div>
+          <div class="text-[12px] text-slate-400 mt-1">🖥 모든 업무 화면 최상단 고정</div>
+          <div class="text-[12px] text-slate-400">📱 화면 폭 가로 배너</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">1200×200 / 720×240</div>
         </div>
         <div class="border border-slate-200 rounded-xl p-4">
           <div class="text-[13px] font-bold text-slate-800">우측 세로형</div>
-          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
-          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+          <div class="text-[12px] text-slate-400 mt-1">🖥 스크롤 따라 고정 노출</div>
+          <div class="text-[12px] text-slate-400">📱 통계 카드 아래 가로 배너</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">300×1050 / 720×240</div>
         </div>
       </div>
     </div>
@@ -148,71 +218,79 @@
   <!-- B·C급 -->
   <div class="grid sm:grid-cols-2 gap-5 mt-5">
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-      <div class="bg-slate-600 px-6 py-3 flex items-center justify-between">
-        <div class="text-white font-extrabold text-[15px]">B급 · 대시보드 하단</div>
-        <div class="text-slate-300 text-[13px] font-bold">월 60,000원</div>
+      <div class="bg-slate-600 px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <div class="text-white font-extrabold text-[14px] sm:text-[15px] min-w-0">B급 · 대시보드 하단</div>
+        <div class="text-slate-300 text-[13px] font-bold whitespace-nowrap shrink-0">월 60,000원</div>
       </div>
-      <div class="p-6">
+      <div class="p-5 sm:p-6">
         <p class="text-[13.5px] text-slate-600 leading-relaxed">
           통합 대시보드와 각 업무 탭(매장·상담·오픈행정·파트너사) 하단.
           업무를 마치고 화면을 훑을 때 자연스럽게 시야에 들어옵니다.
         </p>
-        <div class="text-[12px] text-indigo-600 font-bold mt-3">권장 1200 × 200 px</div>
+        <div class="text-[12px] text-indigo-600 font-bold mt-3">1200×200 (PC) / 720×240 (모바일)</div>
       </div>
     </div>
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-      <div class="bg-slate-500 px-6 py-3 flex items-center justify-between">
-        <div class="text-white font-extrabold text-[15px]">C급 · 신규등록 화면</div>
-        <div class="text-slate-200 text-[13px] font-bold">월 50,000원</div>
+      <div class="bg-slate-500 px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <div class="text-white font-extrabold text-[14px] sm:text-[15px] min-w-0">C급 · 신규등록 화면</div>
+        <div class="text-slate-200 text-[13px] font-bold whitespace-nowrap shrink-0">월 50,000원</div>
       </div>
-      <div class="p-6">
+      <div class="p-5 sm:p-6">
         <p class="text-[13.5px] text-slate-600 leading-relaxed">
           새 매장·상담을 등록하는 입력 화면 하단.
           <b class="text-slate-900">신규 건이 발생하는 바로 그 순간</b>에 노출되는 지면입니다.
         </p>
-        <div class="text-[12px] text-indigo-600 font-bold mt-3">권장 1200 × 200 px</div>
+        <div class="text-[12px] text-indigo-600 font-bold mt-3">1200×200 (PC) / 720×240 (모바일)</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- 계약 조건 -->
-<section class="max-w-5xl mx-auto px-5 py-12">
+<section class="max-w-5xl mx-auto px-5 py-10 sm:py-12">
   <h2 class="text-[20px] font-extrabold text-slate-900 text-center">계약 조건</h2>
-  <div class="mt-7 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+  <div class="mt-7 bg-white border border-slate-200 rounded-2xl overflow-hidden text-[13px] sm:text-[13.5px]">
     <table class="w-full text-[13.5px]">
       <tbody>
         <tr class="border-b border-slate-100">
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600 w-40">계약 기간</td>
-          <td class="px-6 py-4 text-slate-700">3개월 · 6개월 · 12개월 중 선택</td>
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 w-24 sm:w-40 align-top">계약 기간</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">3개월 · 6개월 · 12개월 중 선택</td>
         </tr>
         <tr class="border-b border-slate-100">
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">기간 할인</td>
-          <td class="px-6 py-4 text-slate-700">
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">기간 할인</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">
             3개월 정가 · <b class="text-indigo-600">6개월 10% 할인</b> · <b class="text-indigo-600">12개월 20% 할인</b>
           </td>
         </tr>
         <tr class="border-b border-slate-100">
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">무료 체험</td>
-          <td class="px-6 py-4 text-slate-700">
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">무료 체험</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">
             <b class="text-emerald-600">최초 1회, 1개월 무료</b>
             <span class="text-slate-400">(광고주당 1회에 한함)</span>
           </td>
         </tr>
         <tr class="border-b border-slate-100">
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">게재 방식</td>
-          <td class="px-6 py-4 text-slate-700">지면당 1개 독점 · 계약 기간 중 다른 광고 게재 없음</td>
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">게재 방식</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">지면당 1개 독점 · 계약 기간 중 다른 광고 게재 없음</td>
         </tr>
         <tr class="border-b border-slate-100">
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">소재 제출</td>
-          <td class="px-6 py-4 text-slate-700">
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">노출 기기</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">
+            <b class="text-indigo-600">PC · 모바일 통합</b> — 추가 비용 없이 양쪽 모두 노출<br>
+            <span class="text-slate-400 text-[12.5px]">기기별로 따로 구매하실 필요가 없습니다.</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-100">
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">소재 제출</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">
             이미지 파일(JPG·PNG) + 클릭 시 이동할 주소<br>
-            <span class="text-slate-400 text-[12.5px]">규격이 달라도 비율에 맞춰 조정해 드립니다.</span>
+            <b class="text-slate-800">PC용·모바일용 2종을 주시면 가장 좋습니다.</b><br>
+            <span class="text-slate-400 text-[12.5px]">1종만 주셔도 게재 가능하며, 잘리지 않게 비율을 유지해 표시합니다.</span>
           </td>
         </tr>
         <tr>
-          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">신청 절차</td>
-          <td class="px-6 py-4 text-slate-700">
+          <td class="px-4 sm:px-6 py-4 bg-slate-50 font-bold text-slate-600 align-top">신청 절차</td>
+          <td class="px-4 sm:px-6 py-4 text-slate-700">
             이메일 문의 → 지면·기간 확정 → 소재 전달 → 게재 시작
           </td>
         </tr>
@@ -230,7 +308,7 @@
 
 <!-- 문의 -->
 <section class="bg-white border-t border-slate-200">
-  <div class="max-w-5xl mx-auto px-5 py-14 text-center">
+  <div class="max-w-5xl mx-auto px-5 py-11 sm:py-14 text-center">
     <h2 class="text-[22px] font-extrabold text-slate-900">먼저 1개월 무료로 확인해 보세요</h2>
     <p class="text-[14px] text-slate-500 mt-3 leading-relaxed">
       지면 종류와 희망 기간을 알려주시면 안내해 드립니다.<br>
