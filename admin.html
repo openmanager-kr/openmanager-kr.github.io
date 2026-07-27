@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오픈매니저 — 슈퍼 어드민</title>
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <meta name="theme-color" content="#4F46E5">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="phone-util.js"></script>
+<script src="mobile-util.js"></script>
+<script src="footer-util.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="mail-config.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  body{font-family:'Pretendard',-apple-system,sans-serif;}
+  input:focus,select:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+  .nav-item.active{background:rgba(99,102,241,.16);color:#C7D2FE;}
+  .nav-item.active .nav-ico{color:#818CF8;}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- 로딩 가드 -->
+<div id="guard" class="fixed inset-0 bg-slate-50 z-[100] flex items-center justify-center">
+  <div class="text-slate-400 text-sm font-medium">권한 확인 중...</div>
+</div>
+
+<!-- 모바일 헤더 -->
+<header class="md:hidden sticky top-0 z-40 bg-white border-b border-slate-200">
+  <div class="flex items-center justify-between px-4 py-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <img src="logo-symbol.png" alt="오픈매니저" class="w-8 h-6 object-contain shrink-0">
+      <div class="min-w-0">
+        <div class="text-[14px] font-extrabold text-slate-900 leading-none">오픈매니저</div>
+        <div id="mobSubtitle" class="text-[10.5px] text-slate-400 truncate mt-0.5">&nbsp;</div>
+      </div>
+    </div>
+    <button onclick="omDrawerToggle()" aria-label="메뉴 열기"
+      class="w-11 h-11 -mr-2 rounded-lg flex flex-col items-center justify-center gap-[5px] hover:bg-slate-50 transition">
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+    </button>
+  </div>
+</header>
+
+<!-- 드로어 배경 -->
+<div id="omOverlay" onclick="omDrawerClose()"
+  class="hidden md:hidden fixed inset-0 bg-slate-900/50 z-40 opacity-0 transition-opacity duration-200"></div>
+
+<div class="flex min-h-screen">
+  <!-- ===== 사이드바 ===== -->
+  <aside id="omSidebar" class="w-60 shrink-0 bg-slate-900 flex flex-col fixed md:sticky top-0 left-0 h-screen z-50 overflow-y-auto -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out">
+    <div class="px-5 py-6 flex items-center gap-2.5 border-b border-slate-800">
+      <img src="logo-symbol-white.png" alt="오픈매니저 로고"
+        class="w-10 h-7 object-contain shrink-0">
+      <div>
+        <div class="text-white font-bold text-[15px] leading-none">오픈매니저</div>
+        <div class="text-[10px] text-indigo-300/70 font-semibold tracking-widest mt-1">SUPER ADMIN</div>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <button data-view="dashboard" onclick="switchView('dashboard')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+        <span class="nav-ico text-slate-500">▦</span> 대시보드
+      </button>
+      <button data-view="signups" onclick="switchView('signups')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+        <span class="nav-ico text-slate-500">✓</span> 가입 승인
+        <span id="badgeSignups" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-indigo-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+      </button>
+      <button data-view="companies" onclick="switchView('companies')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+        <span class="nav-ico text-slate-500">▤</span> 회사 관리
+        <span id="badgePurge" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+      </button>
+      <button data-view="consent" onclick="switchView('consent')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+        <span class="nav-ico text-slate-500">✎</span> 약관·수신 동의
+      </button>
+      <button data-view="ads" onclick="switchView('ads')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+        <span class="nav-ico text-slate-500">▣</span> 광고 관리
+        <span id="badgeAds" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+      </button>
+    </nav>
+    <div class="px-3 py-4 border-t border-slate-800">
+      <div class="flex items-center gap-2 px-3 pb-3">
+        <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+          <span id="adminInitial" class="text-[11px] font-bold text-indigo-300">·</span>
+        </div>
+        <div id="adminEmail" class="text-[11.5px] text-slate-500 truncate min-w-0"></div>
+      </div>
+      <button onclick="doLogout()" class="w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">로그아웃</button>
+      <div id="sideFooter" class="px-3 pt-3 mt-3 border-t border-slate-800"></div>
+    </div>
+  </aside>
+
+  <!-- ===== 메인 ===== -->
+  <main class="flex-1 min-w-0 px-4 sm:px-6 md:px-8 py-5 md:py-7 max-w-6xl">
+
+    <!-- ── 대시보드 ── -->
+    <section id="view-dashboard">
+      <h1 class="text-xl font-extrabold text-slate-900">대시보드</h1>
+      <p class="text-[13px] text-slate-500 mt-1">오픈매니저 전체 현황</p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
+        <button onclick="switchView('signups')" class="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition">
+          <div class="text-[12px] font-semibold text-slate-500">승인 대기</div>
+          <div id="statPending" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </button>
+        <button onclick="switchView('companies')" class="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition">
+          <div class="text-[12px] font-semibold text-slate-500">이용 중인 회사</div>
+          <div id="statCompanies" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </button>
+        <button onclick="switchView('ads')" class="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition">
+          <div class="text-[12px] font-semibold text-slate-500">게재 중 광고</div>
+          <div id="statAds" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </button>
+        <button onclick="switchView('companies')" class="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-rose-300 transition">
+          <div class="text-[12px] font-semibold text-slate-500">파기 대상</div>
+          <div id="statPurge" class="text-2xl font-extrabold text-rose-600 mt-1.5">–</div>
+        </button>
+      </div>
+      <div id="dashAlerts" class="mt-6 space-y-2"></div>
+    </section>
+
+    <!-- ── 가입 승인 ── -->
+    <section id="view-signups" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">가입 승인</h1>
+          <p class="text-[13px] text-slate-500 mt-1">신규 이용 신청을 확인하고 승인합니다</p>
+        </div>
+        <button id="bulkDeleteBtn" onclick="bulkDeleteSignups()" class="hidden px-4 py-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-[13px] font-bold hover:bg-rose-100 transition">선택 삭제</button>
+      </div>
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px]">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 w-10"><input type="checkbox" onchange="toggleAllSignups(this)" class="w-4 h-4 accent-indigo-600"></th>
+              <th class="px-4 py-3 font-semibold">신청일</th>
+              <th class="px-4 py-3 font-semibold">회사명</th>
+              <th class="px-4 py-3 font-semibold">실무자</th>
+              <th class="px-4 py-3 font-semibold">연락처</th>
+              <th class="px-4 py-3 font-semibold">이메일</th>
+              <th class="px-4 py-3 font-semibold">상태</th>
+              <th class="px-4 py-3 font-semibold text-right">처리</th>
+            </tr>
+          </thead>
+          <tbody id="signupRows"><tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="signupCards" class="md:hidden mt-4 space-y-2.5"></div>
+    </section>
+
+    <!-- ── 회사 관리 ── -->
+    <section id="view-companies" class="hidden">
+      <h1 class="text-xl font-extrabold text-slate-900">회사 관리</h1>
+      <p class="text-[13px] text-slate-500 mt-1">승인된 회사 현황 · 매장 내용은 열람하지 않습니다 (개수만 표시)</p>
+
+      <div id="purgeBox" class="hidden mt-5 border border-rose-200 bg-rose-50 rounded-xl p-4">
+        <div class="text-[13px] font-bold text-rose-700">🗑 완전 삭제 대상 (30일 유예 경과)</div>
+        <div id="purgeRows" class="mt-2 space-y-2"></div>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px]">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">회사명</th>
+              <th class="px-4 py-3 font-semibold">실무자</th>
+              <th class="px-4 py-3 font-semibold">연락처</th>
+              <th class="px-4 py-3 font-semibold">이메일</th>
+              <th class="px-4 py-3 font-semibold">매장 수</th>
+              <th class="px-4 py-3 font-semibold">가입일</th>
+              <th class="px-4 py-3 font-semibold">상태</th>
+              <th class="px-4 py-3 font-semibold text-right">처리</th>
+            </tr>
+          </thead>
+          <tbody id="companyRows"><tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="companyCards" class="md:hidden mt-4 space-y-2.5"></div>
+    </section>
+
+    <!-- ── 약관·수신 동의 ── -->
+    <section id="view-consent" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">약관·수신 동의</h1>
+          <p class="text-[13px] text-slate-500 mt-1">가입 시 동의 내역 확인 및 광고성 정보 수신 대상 관리</p>
+        </div>
+        <button onclick="copyMarketingEmails()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">📋 수신동의 이메일 복사</button>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전체 회사</div>
+          <div id="csTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">광고성 수신 동의</div>
+          <div id="csAgree" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">수신 거부</div>
+          <div id="csDeny" class="text-2xl font-extrabold text-slate-400 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">동의율</div>
+          <div id="csRate" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div class="mt-5 border border-amber-200 bg-amber-50 rounded-xl p-4 text-[12.5px] text-amber-800 leading-relaxed">
+        <b>⚠️ 광고성 정보 발송 시 준수사항</b> (정보통신망법)<br>
+        · <b>수신 동의한 대상에게만</b> 발송해야 합니다. 아래 [수신동의 이메일 복사]로 대상만 추출하세요.<br>
+        · 제목 앞에 <b>(광고)</b> 표기 필수 · 본문에 <b>수신거부 방법</b> 명시 필수<br>
+        · 수신거부 요청은 즉시 처리하고, 이 화면에서 상태를 <b>거부로 변경</b>해 주세요.
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="csSearch" oninput="renderConsent()" type="text" placeholder="회사명·실무자·이메일 검색"
+          class="w-full sm:w-64 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="csFilter" onchange="renderConsent()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체</option>
+          <option value="y">수신 동의</option>
+          <option value="n">수신 거부</option>
+        </select>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">회사명</th>
+              <th class="px-4 py-3 font-semibold">실무자</th>
+              <th class="px-4 py-3 font-semibold">이메일</th>
+              <th class="px-4 py-3 font-semibold">필수 3종</th>
+              <th class="px-4 py-3 font-semibold">광고성 수신</th>
+              <th class="px-4 py-3 font-semibold">동의 일시</th>
+              <th class="px-4 py-3 font-semibold">약관 버전</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="csRows"><tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="csCards" class="md:hidden mt-4 space-y-2.5"></div>
+    </section>
+
+    <!-- ── 광고 관리 ── -->
+    <section id="view-ads" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">광고 관리</h1>
+          <p class="text-[13px] text-slate-500 mt-1">지면별 광고 등록 · 지면당 1개 독점 게재</p>
+        </div>
+        <button onclick="openAdModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 광고 등록</button>
+      </div>
+      <div id="adCards" class="mt-5 grid gap-3"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== 승인 모달 ===== -->
+<div id="approveModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+    <h3 class="font-bold text-slate-900 text-[15px]">회사 승인</h3>
+    <div id="approveInfo" class="mt-3 text-[13px] text-slate-600 bg-slate-50 rounded-lg p-3.5 leading-relaxed"></div>
+    <div class="mt-4 text-[13px] text-slate-600 leading-relaxed border border-indigo-100 bg-indigo-50/60 rounded-lg p-3.5">
+      <b class="text-indigo-700">승인 전 준비 (Firebase 콘솔)</b><br>
+      ① Authentication → 사용자 → <b>사용자 추가</b><br>
+      ② 위 이메일 + 임시 비밀번호로 계정 생성<br>
+      ③ 생성된 행의 <b>UID</b>를 복사해 아래에 붙여넣기
+    </div>
+    <div class="mt-4 grid grid-cols-1 gap-3">
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">생성된 계정의 UID</label>
+        <input id="approveUid" type="text" placeholder="예: xK29fJ3mQp..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition font-mono">
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">설정한 임시 비밀번호 <span class="text-slate-400 font-normal">(안내 메일에 포함됩니다)</span></label>
+        <div class="flex gap-2">
+          <input id="approvePw" type="text" placeholder="콘솔에서 설정한 비밀번호" class="flex-1 px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition font-mono">
+          <button onclick="genTempPw()" class="px-3 py-2.5 rounded-lg border border-slate-200 text-slate-500 text-[12.5px] font-bold hover:bg-slate-50 transition shrink-0">자동생성</button>
+        </div>
+        <p class="text-[11.5px] text-slate-400 mt-1.5">[자동생성]으로 만든 뒤 복사해서 콘솔 계정 생성에 사용하면 편합니다.</p>
+      </div>
+      <label class="flex items-center gap-2 text-[13px] text-slate-600 cursor-pointer">
+        <input type="checkbox" id="approveSendMail" checked class="w-4 h-4 accent-indigo-600">
+        승인 완료 안내 메일 자동 발송
+      </label>
+    </div>
+    <p id="approveErr" class="hidden mt-2 text-[13px] text-rose-600 font-medium"></p>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closeApproveModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button id="approveConfirmBtn" onclick="confirmApprove()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">승인 완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 광고 등록/수정 모달 ===== -->
+<div id="adModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50 overflow-y-auto py-8">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 my-auto max-h-[92vh] overflow-y-auto">
+    <h3 id="adModalTitle" class="font-bold text-slate-900 text-[15px]">광고 등록</h3>
+    <div class="mt-4 space-y-3.5">
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">지면 (등급 · 월 단가)</label>
+        <select id="adSlot" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white transition"></select>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">광고회사명 <span class="text-rose-500">*</span></label>
+        <input id="adCompany" type="text" placeholder="예: (주)OO디자인" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+      </div>
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">담당자명</label>
+          <input id="adAdvertiser" type="text" placeholder="홍길동" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">연락처</label>
+          <input id="adContact" type="tel" placeholder="010-0000-0000" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">이메일</label>
+          <input id="adEmail" type="email" placeholder="ad@company.com" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">배너 이미지 주소 (imageUrl)</label>
+        <input id="adImageUrl" type="url" placeholder="https://... (GitHub 등에 올린 이미지 주소)" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">클릭 시 이동 주소 (linkUrl)</label>
+        <input id="adLinkUrl" type="url" placeholder="https://광고주 홈페이지" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm placeholder-slate-300 transition">
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">
+          모바일 전용 이미지 <span class="text-slate-400 font-normal">(선택 — 없으면 PC 이미지를 잘리지 않게 표시)</span>
+        </label>
+        <input id="adMobileImageUrl" type="url" placeholder="https://... 모바일용 소재" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+      </div>
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">계약 기간</label>
+          <select id="adMonths" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white transition" onchange="calcAdPrice()">
+            <option value="1">1개월 (무료체험)</option>
+            <option value="3" selected>3개월 (정가)</option>
+            <option value="6">6개월 (10%↓)</option>
+            <option value="12">12개월 (20%↓)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">시작일</label>
+          <input id="adStart" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm transition" onchange="calcAdPrice()">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">종료일 (자동)</label>
+          <input id="adEnd" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-slate-50 transition" readonly>
+        </div>
+      </div>
+      <div class="flex items-center justify-between bg-slate-50 rounded-lg px-4 py-3">
+        <span class="text-[13px] font-semibold text-slate-600">계약 금액 (할인 반영)</span>
+        <div class="flex items-center gap-1.5">
+          <input id="adPrice" type="text" inputmode="numeric" oninput="commaInput(this)"
+            class="w-32 px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-right font-bold transition">
+          <span class="text-[13px] text-slate-500">원</span>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">메모 <span class="text-slate-400 font-normal">(계약 협의 내용·특이사항)</span></label>
+        <textarea id="adMemo" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm transition"></textarea>
+      </div>
+    </div>
+    <p id="adErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closeAdModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button onclick="saveAd()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, limit, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
+  authDomain: "openmanager-d6571.firebaseapp.com",
+  projectId: "openmanager-d6571",
+  storageBucket: "openmanager-d6571.firebasestorage.app",
+  messagingSenderId: "249141913323",
+  appId: "1:249141913323:web:f5f5fd678b895dc02400ae"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ===== 지면 정의 =====
+const SLOTS = [
+  { code:'store_view_top',   label:'S급 · 점주페이지 상단',   base:100000 },
+  { code:'store_view_left',  label:'S급 · 점주페이지 좌측',   base:100000 },
+  { code:'store_view_right', label:'S급 · 점주페이지 우측',   base:100000 },
+  { code:'main_top',         label:'A급 · 메인 상단',         base:80000 },
+  { code:'main_left',        label:'A급 · 메인 좌측',         base:80000 },
+  { code:'main_right',       label:'A급 · 메인 우측',         base:80000 },
+  { code:'tab_dashboard_bottom',        label:'B급 · 탭 대시보드 하단',   base:60000 },
+  { code:'integrated_dashboard_bottom', label:'B급 · 통합 대시보드 하단', base:60000 },
+  { code:'tab_new_bottom',   label:'C급 · 신규등록 화면 하단', base:50000 },
+];
+const slotLabel = c => (SLOTS.find(s=>s.code===c)||{label:c}).label;
+
+// ── 모바일 카드 헬퍼 ──
+function renderCards(elId, rows, emptyMsg){
+  const box = document.getElementById(elId);
+  if(!box) return;
+  if(!rows.length){
+    box.innerHTML = `<div class="bg-white border border-slate-200 rounded-xl px-4 py-10 text-center text-slate-400 text-[13px]">${emptyMsg}</div>`;
+    return;
+  }
+  box.innerHTML = rows.map(r=>`
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="font-bold text-slate-800 text-[14px] break-words">${r.title}</div>
+          ${r.sub?`<div class="text-[12.5px] text-slate-500 mt-0.5 break-all">${r.sub}</div>`:''}
+        </div>
+        <div class="flex flex-wrap gap-1 justify-end shrink-0">${(r.badges||[]).join('')}</div>
+      </div>
+      ${(r.fields||[]).length?`<div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-x-3 gap-y-2">
+        ${r.fields.filter(f=>f[1]).map(f=>`<div class="min-w-0">
+          <div class="text-[11px] text-slate-400 font-semibold">${f[0]}</div>
+          <div class="text-[12.5px] text-slate-700 break-words mt-0.5">${f[1]}</div></div>`).join('')}
+      </div>`:''}
+      ${r.actions?`<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">${r.actions}</div>`:''}
+    </div>`).join('');
+}
+const mBtn = (label, onclick, tone) => {
+  const c = tone==='primary' ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+    : tone==='danger' ? 'bg-rose-600 hover:bg-rose-700 text-white'
+    : 'border border-slate-200 text-slate-600 hover:bg-slate-50';
+  return `<button onclick="${onclick}" class="flex-1 min-w-[72px] py-2.5 rounded-lg ${c} text-[12.5px] font-bold transition">${label}</button>`;
+};
+
+// 천단위 콤마
+const comma = n => (Number(n)||0).toLocaleString('ko-KR');
+const uncomma = v => Number(String(v||'').replace(/[^0-9]/g,'')) || 0;
+window.commaInput = el => {
+  const v = uncomma(el.value);
+  el.value = v ? v.toLocaleString('ko-KR') : '';
+};
+
+// ===== 권한 가드 =====
+onAuthStateChanged(auth, async user => {
+  if(!user){ location.href='login.html'; return; }
+  try{
+    const uSnap = await getDoc(doc(db,'users',user.uid));
+    if(!uSnap.exists() || uSnap.data().role !== 'super'){
+      alert('슈퍼 어드민 권한이 없습니다.');
+      await signOut(auth); location.href='login.html'; return;
+    }
+    document.getElementById('adminEmail').textContent = user.email;
+    const ai = document.getElementById('adminInitial');
+    if(ai) ai.textContent = (user.email||'?').charAt(0).toUpperCase();
+    document.getElementById('guard').remove();
+    renderFooter('sideFooter','dark');
+    loadAll();
+  }catch(e){
+    alert('권한 확인에 실패했습니다.'); location.href='login.html';
+  }
+});
+
+window.doLogout = async () => { await signOut(auth); location.href='login.html'; };
+
+// ===== 뷰 전환 =====
+window.switchView = v => {
+  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('view-'+v).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+};
+
+// ===== 데이터 로드 =====
+let signupCache = [], companyCache = [], adCache = [];
+
+// 실시간 구독 — 새 신청/변경이 자동으로 화면에 반영됨
+function loadAll(){
+  onSnapshot(collection(db,'signups'), snap => {
+    signupCache = snap.docs.map(d=>({id:d.id, ...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    renderSignups(); renderDashboard();
+  }, e => console.warn('signups 구독 오류:', e));
+
+  onSnapshot(collection(db,'companies'), snap => {
+    companyCache = snap.docs.map(d=>({id:d.id, ...d.data()}))
+      .sort((a,b)=>(b.approvedAt?.seconds||0)-(a.approvedAt?.seconds||0));
+    renderCompanies(); renderConsent(); renderDashboard();
+  }, e => console.warn('companies 구독 오류:', e));
+
+  onSnapshot(collection(db,'ads'), snap => {
+    adCache = snap.docs.map(d=>({id:d.id, ...d.data()}))
+      .sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||''));
+    renderAds(); renderDashboard();
+  }, e => console.warn('ads 구독 오류:', e));
+}
+
+const fmtDate = ts => {
+  if(!ts) return '–';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+};
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ── 가입 승인 ──
+function renderSignups(){
+  const pending = signupCache.filter(s=>s.status==='pending');
+  const badge = document.getElementById('badgeSignups');
+  badge.textContent = pending.length;
+  badge.classList.toggle('hidden', pending.length===0);
+
+  const rows = document.getElementById('signupRows');
+  // 렌더링 시 선택 상태 초기화 (삭제 후 버튼이 남는 문제 방지)
+  const headChk = document.querySelector('#view-signups thead input[type=checkbox]');
+  if(headChk) headChk.checked = false;
+  const bulkBtn = document.getElementById('bulkDeleteBtn');
+  bulkBtn.classList.add('hidden');
+  bulkBtn.textContent = '선택 삭제';
+  if(signupCache.length===0){
+    rows.innerHTML = '<tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">아직 신청 내역이 없습니다.<br><span class="text-[12px] text-slate-300">회사가 이용 신청을 하면 이곳에 표시됩니다.</span></td></tr>';
+    renderCards('signupCards', [], '아직 신청 내역이 없습니다.'); return;
+  }
+  rows.innerHTML = signupCache.map(s=>{
+    const st = s.status==='pending' ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">대기</span>'
+      : s.status==='approved' ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">승인됨</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">거절됨</span>';
+    const actions = s.status==='pending'
+      ? `<button onclick="openApprove('${s.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold transition">승인</button>
+         <button onclick="rejectSignup('${s.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">거절</button>`
+      : '';
+    return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+      <td class="px-4 py-3"><input type="checkbox" class="signup-chk w-4 h-4 accent-indigo-600" value="${s.id}" onchange="updateBulkBtn()"></td>
+      <td class="px-4 py-3 text-slate-500">${fmtDate(s.createdAt)}</td>
+      <td class="px-4 py-3 font-semibold text-slate-800">${esc(s.companyName)}</td>
+      <td class="px-4 py-3">${esc(s.managerName)}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(fmtPhone(s.managerPhone))}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(s.email)}</td>
+      <td class="px-4 py-3">${st}</td>
+      <td class="px-4 py-3 text-right space-x-1.5 whitespace-nowrap">${actions}</td>
+    </tr>`;
+  }).join('');
+
+  renderCards('signupCards', signupCache.map(s=>({
+    title: esc(s.companyName),
+    sub: esc(s.email),
+    badges: [ s.status==='pending' ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">대기</span>'
+      : s.status==='approved' ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">승인됨</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">거절됨</span>' ],
+    fields: [['신청일', fmtDate(s.createdAt)], ['실무자', esc(s.managerName)], ['연락처', esc(fmtPhone(s.managerPhone))]],
+    actions: s.status==='pending'
+      ? mBtn('승인', `openApprove('${s.id}')`, 'primary') + mBtn('거절', `rejectSignup('${s.id}')`)
+      : ''
+  })), '아직 신청 내역이 없습니다.');
+}
+
+window.toggleAllSignups = el => {
+  document.querySelectorAll('.signup-chk').forEach(c=>c.checked=el.checked);
+  updateBulkBtn();
+};
+window.updateBulkBtn = () => {
+  const n = document.querySelectorAll('.signup-chk:checked').length;
+  const btn = document.getElementById('bulkDeleteBtn');
+  btn.classList.toggle('hidden', n===0);
+  btn.textContent = `선택 삭제 (${n})`;
+};
+window.bulkDeleteSignups = async () => {
+  const ids = [...document.querySelectorAll('.signup-chk:checked')].map(c=>c.value);
+  if(ids.length===0) return;
+  if(!confirm(`선택한 ${ids.length}건의 신청을 삭제할까요? (스팸 청소용 — 되돌릴 수 없음)`)) return;
+  const batch = writeBatch(db);
+  ids.forEach(id => batch.delete(doc(db,'signups',id)));
+  await batch.commit();
+  // 실시간 구독으로 자동 반영
+};
+window.rejectSignup = async id => {
+  if(!confirm('이 신청을 거절 처리할까요?')) return;
+  await updateDoc(doc(db,'signups',id), {status:'rejected'});
+  // 실시간 구독으로 자동 반영
+};
+
+// 승인 모달
+let approvingId = null;
+window.openApprove = id => {
+  approvingId = id;
+  const s = signupCache.find(x=>x.id===id);
+  document.getElementById('approveInfo').innerHTML =
+    `<b>${esc(s.companyName)}</b><br>실무자: ${esc(s.managerName)} · ${esc(fmtPhone(s.managerPhone))}<br>이메일: <b class="select-all">${esc(s.email)}</b>`;
+  document.getElementById('approveUid').value='';
+  document.getElementById('approvePw').value='';
+  document.getElementById('approveSendMail').checked = true;
+  document.getElementById('approveErr').classList.add('hidden');
+  document.getElementById('approveModal').classList.remove('hidden');
+};
+window.closeApproveModal = () => document.getElementById('approveModal').classList.add('hidden');
+window.genTempPw = () => {
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#';
+  const a=new Uint32Array(10); crypto.getRandomValues(a);
+  const pw=[...a].map(n=>c[n%c.length]).join('');
+  document.getElementById('approvePw').value = pw;
+  navigator.clipboard.writeText(pw).catch(()=>{});
+};
+window.confirmApprove = async () => {
+  const uid = document.getElementById('approveUid').value.trim();
+  const tempPw = document.getElementById('approvePw').value.trim();
+  const sendMail = document.getElementById('approveSendMail').checked;
+  const err = document.getElementById('approveErr');
+  err.classList.add('hidden');
+  if(uid.length < 10){ err.textContent='UID가 올바르지 않습니다. 콘솔에서 다시 복사해 주세요.'; err.classList.remove('hidden'); return; }
+  if(sendMail && !tempPw){ err.textContent='안내 메일을 보내려면 임시 비밀번호를 입력해 주세요.'; err.classList.remove('hidden'); return; }
+  const s = signupCache.find(x=>x.id===approvingId);
+  const btn = document.getElementById('approveConfirmBtn');
+  btn.disabled=true; btn.textContent='처리 중...';
+  try{
+    // users 문서에 이미 다른 회사가 연결된 UID인지 확인
+    const existing = await getDoc(doc(db,'users',uid));
+    if(existing.exists()){ throw new Error('이미 사용 중인 UID입니다.'); }
+    const companyRef = await addDoc(collection(db,'companies'), {
+      companyName: s.companyName, email: s.email,
+      managerName: s.managerName, managerPhone: s.managerPhone,
+      status:'approved', plan:'free',
+      features:{ lead:true, store:true, open:true, partner:true, pos:true },
+      termsAgreed: s.termsAgreed || null,
+      storeCount: 0,
+      createdAt: s.createdAt || serverTimestamp(),
+      approvedAt: serverTimestamp()
+    });
+    await setDoc(doc(db,'users',uid), {
+      role:'company', companyId: companyRef.id, email:s.email, status:'approved',
+      mustChangePassword: true   // 최초 로그인 시 비밀번호 변경 강제
+    });
+    await updateDoc(doc(db,'signups',approvingId), {status:'approved', companyId: companyRef.id, uid});
+
+    let mailNote = '';
+    if(sendMail){
+      try{
+        if(window.OM_MAIL && !OM_MAIL.publicKey.startsWith('YOUR_')){
+          emailjs.init({ publicKey: OM_MAIL.publicKey });
+          await emailjs.send(OM_MAIL.serviceId, OM_MAIL.tplApproved, {
+            to_email: s.email,
+            company_name: s.companyName,
+            manager_name: s.managerName,
+            login_id: s.email,
+            temp_password: tempPw,
+            login_url: location.href.replace(/[^/]*$/,'') + 'login.html'
+          });
+          mailNote = '\n\n✅ 승인 안내 메일을 발송했습니다. (아이디 + 임시 비밀번호 + 변경 안내 포함)';
+        } else {
+          mailNote = '\n\n⚠️ 메일 설정(mail-config.js)이 아직 완료되지 않아 메일은 발송되지 않았습니다.';
+        }
+      }catch(mailErr){
+        mailNote = '\n\n⚠️ 메일 발송 실패: ' + (mailErr?.text || mailErr?.message || '알 수 없는 오류') + '\n승인 자체는 정상 완료되었습니다.';
+      }
+    }
+    closeApproveModal();
+    alert('승인 완료!' + mailNote);
+    // 실시간 구독으로 자동 반영
+  }catch(e){
+    err.textContent = '승인 처리 실패: ' + (e.message||e.code||'알 수 없는 오류');
+    err.classList.remove('hidden');
+  }
+  btn.disabled=false; btn.textContent='승인 완료';
+};
+
+// ── 회사 관리 ──
+function renderCompanies(){
+  const now = Date.now();
+  const purgeTargets = companyCache.filter(c=>c.status==='withdrawn' && c.withdrawScheduledAt && c.withdrawScheduledAt < now);
+  const waiting = companyCache.filter(c=>c.status==='withdrawn' && c.withdrawScheduledAt && c.withdrawScheduledAt >= now);
+
+  const badge = document.getElementById('badgePurge');
+  badge.textContent = purgeTargets.length;
+  badge.classList.toggle('hidden', purgeTargets.length===0);
+
+  // 파기 대상 박스
+  const box = document.getElementById('purgeBox');
+  box.classList.toggle('hidden', purgeTargets.length===0);
+  document.getElementById('purgeRows').innerHTML = purgeTargets.map(c=>`
+    <div class="flex items-center justify-between bg-white border border-rose-200 rounded-lg px-4 py-2.5">
+      <div class="text-[13px]"><b class="text-slate-800">${esc(c.companyName)}</b>
+        <span class="text-slate-500 ml-2">삭제 예정일 ${fmtDate(c.withdrawScheduledAt)} 경과</span></div>
+      <button onclick="purgeCompany('${c.id}')" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">완전 삭제</button>
+    </div>`).join('');
+
+  const rows = document.getElementById('companyRows');
+  if(companyCache.length===0){
+    rows.innerHTML = '<tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">아직 승인된 회사가 없습니다.<br><span class="text-[12px] text-slate-300">가입 승인 탭에서 신청을 처리해 주세요.</span></td></tr>';
+    renderCards('companyCards', [], '아직 승인된 회사가 없습니다.'); return;
+  }
+  rows.innerHTML = companyCache.map(c=>{
+    let st, action='';
+    if(c.status==='approved'){
+      st = '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">이용 중</span>';
+      action = `<button onclick="withdrawCompany('${c.id}')" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">탈퇴 처리</button>`;
+    } else if(c.status==='withdrawn'){
+      const dLeft = Math.ceil(((c.withdrawScheduledAt||0) - now)/86400000);
+      if(dLeft > 0){
+        st = `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold">삭제 D-${dLeft}</span>`;
+        action = `<button onclick="purgeCompany('${c.id}', true)" class="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-500 text-[12px] font-bold hover:bg-rose-50 transition">즉시 삭제</button>`;
+      }else{
+        st = '<span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[11px] font-bold">파기 대상</span>';
+        action = `<button onclick="purgeCompany('${c.id}')" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">완전 삭제</button>`;
+      }
+    } else {
+      st = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">${esc(c.status)}</span>`;
+    }
+    return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+      <td class="px-4 py-3 font-semibold text-slate-800">${esc(c.companyName)}</td>
+      <td class="px-4 py-3">${esc(c.managerName)}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(fmtPhone(c.managerPhone))}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(c.email)}</td>
+      <td class="px-4 py-3 font-bold text-slate-700">${c.storeCount ?? 0}</td>
+      <td class="px-4 py-3 text-slate-500">${fmtDate(c.approvedAt)}</td>
+      <td class="px-4 py-3">${st}</td>
+      <td class="px-4 py-3 text-right whitespace-nowrap">${action}</td>
+    </tr>`;
+  }).join('');
+
+  renderCards('companyCards', companyCache.map(c=>{
+    let badge, act = '';
+    if(c.status==='approved'){
+      badge = '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">이용 중</span>';
+      act = mBtn('탈퇴 처리', `withdrawCompany('${c.id}')`);
+    }else if(c.status==='withdrawn'){
+      const d = Math.ceil(((c.withdrawScheduledAt||0) - now)/86400000);
+      badge = d>0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold">삭제 D-${d}</span>`
+                  : '<span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[11px] font-bold">파기 대상</span>';
+      act = d>0 ? mBtn('즉시 삭제', `purgeCompany('${c.id}', true)`, 'danger')
+                : mBtn('완전 삭제', `purgeCompany('${c.id}')`, 'danger');
+    }else{
+      badge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">${esc(c.status)}</span>`;
+    }
+    return { title: esc(c.companyName), sub: esc(c.email), badges:[badge],
+      fields: [['실무자', esc(c.managerName)], ['연락처', esc(fmtPhone(c.managerPhone))],
+               ['매장 수', String(c.storeCount ?? 0)], ['가입일', fmtDate(c.approvedAt)]],
+      actions: act };
+  }), '아직 승인된 회사가 없습니다.');
+}
+
+window.withdrawCompany = async id => {
+  const c = companyCache.find(x=>x.id===id);
+  if(!confirm(`"${c.companyName}" 회사를 탈퇴 처리할까요?\n\n· 즉시 로그인·데이터 접근이 차단됩니다\n· 30일 후 완전 삭제 대상이 됩니다 (그 전까지 복구 가능)`)) return;
+  await updateDoc(doc(db,'companies',id), {
+    status:'withdrawn',
+    withdrawScheduledAt: Date.now() + 30*86400000
+  });
+  // 실시간 구독으로 자동 반영
+};
+
+window.purgeCompany = async (companyId, early) => {
+  const c = companyCache.find(x=>x.id===companyId);
+  if(early){
+    const dLeft = Math.ceil(((c.withdrawScheduledAt||0) - Date.now())/86400000);
+    if(!confirm(`⚠️ 유예 기간이 ${dLeft}일 남아 있습니다.\n\n"${c.companyName}"의 모든 데이터를 지금 즉시 완전 삭제합니다.\n복구가 불가능하며, 회사에 안내한 30일 보관 약속보다 앞당겨집니다.\n\n정말 진행할까요?`)) return;
+    if(!confirm(`마지막 확인입니다.\n"${c.companyName}" 데이터를 영구 삭제합니다.`)) return;
+  }else{
+    if(!confirm(`"${c.companyName}"의 모든 데이터를 완전 삭제합니다.\n이 작업은 되돌릴 수 없습니다. 계속할까요?`)) return;
+  }
+  try{
+    // stores / leads 삭제
+    // 보안규칙이 문서마다 회사 상태를 확인하므로(쿼리당 접근 20회 제한)
+    // 10건씩 나눠서 반복 삭제한다.
+    let total = 0;
+    for(const col of ['stores','leads']){
+      for(let guard=0; guard<200; guard++){
+        const snap = await getDocs(query(
+          collection(db,col), where('companyId','==',companyId), limit(5)
+        ));
+        if(snap.empty) break;
+        const batch = writeBatch(db);
+        snap.docs.forEach(d=>batch.delete(d.ref));
+        await batch.commit();
+        total += snap.size;
+      }
+    }
+    const refs = { length: total };
+    // users 삭제
+    const userSnap = await getDocs(query(collection(db,'users'), where('companyId','==',companyId)));
+    const ub = writeBatch(db);
+    userSnap.forEach(d=>ub.delete(d.ref));
+    await ub.commit();
+    // 회사 문서 삭제
+    await deleteDoc(doc(db,'companies',companyId));
+    alert(`완전 삭제 완료 (매장·상담 ${refs.length}건 포함)\n\n⚠️ 마지막 단계: Firebase 콘솔 → Authentication에서 해당 이메일 계정(${c.email})도 삭제해 주세요.`);
+    // 실시간 구독으로 자동 반영
+  }catch(e){
+    alert('삭제 중 오류: ' + (e.message||e.code) +
+          '\n\n권한 오류라면 Firestore 규칙이 최신인지 확인해 주세요.');
+  }
+};
+
+// ── 약관·수신 동의 ──
+window.renderConsent = () => {
+  const list0 = companyCache.filter(c=>c.status!=='withdrawn');
+  const agree = list0.filter(c=>c.termsAgreed?.marketingAd === true);
+  document.getElementById('csTotal').textContent = list0.length;
+  document.getElementById('csAgree').textContent = agree.length;
+  document.getElementById('csDeny').textContent = list0.length - agree.length;
+  document.getElementById('csRate').textContent = list0.length ? Math.round(agree.length/list0.length*100)+'%' : '–';
+
+  const kw = (document.getElementById('csSearch')?.value||'').trim();
+  const ft = document.getElementById('csFilter')?.value || '';
+  let list = list0;
+  if(kw) list = list.filter(c => [c.companyName,c.managerName,c.email].some(v=>(v||'').includes(kw)));
+  if(ft==='y') list = list.filter(c => c.termsAgreed?.marketingAd === true);
+  if(ft==='n') list = list.filter(c => c.termsAgreed?.marketingAd !== true);
+
+  const rows = document.getElementById('csRows');
+  if(list.length===0){
+    rows.innerHTML = '<tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">해당하는 회사가 없습니다.</td></tr>';
+    renderCards('csCards', [], '해당하는 회사가 없습니다.'); return;
+  }
+  rows.innerHTML = list.map(c=>{
+    const t = c.termsAgreed || {};
+    const req = (t.serviceTerms && t.privacyPolicy && t.companyResponsibility);
+    const reqBadge = req
+      ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">동의 완료</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">기록 없음</span>';
+    const mk = t.marketingAd === true;
+    const mkBadge = mk
+      ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">동의</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">거부</span>';
+    const at = t.agreedAt ? new Date(t.agreedAt).toLocaleString('ko-KR') : '–';
+    return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+      <td class="px-4 py-3 font-semibold text-slate-800">${esc(c.companyName)}</td>
+      <td class="px-4 py-3">${esc(c.managerName)}</td>
+      <td class="px-4 py-3 text-slate-500 select-all">${esc(c.email)}</td>
+      <td class="px-4 py-3">${reqBadge}</td>
+      <td class="px-4 py-3">${mkBadge}</td>
+      <td class="px-4 py-3 text-slate-400 text-[12px]">${esc(at)}</td>
+      <td class="px-4 py-3 text-slate-400 text-[12px]">${esc(t.termsVersion)||'–'}</td>
+      <td class="px-4 py-3 text-right">
+        <button onclick="toggleMarketing('${c.id}',${mk})" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">${mk?'수신거부 처리':'수신동의 처리'}</button>
+      </td></tr>`;
+  }).join('');
+
+  renderCards('csCards', list.map(c=>{
+    const t = c.termsAgreed || {};
+    const req = (t.serviceTerms && t.privacyPolicy && t.companyResponsibility);
+    const mk = t.marketingAd === true;
+    return {
+      title: esc(c.companyName), sub: esc(c.email),
+      badges: [ mk ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">수신 동의</span>'
+                   : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">수신 거부</span>' ],
+      fields: [['실무자', esc(c.managerName)],
+               ['필수 3종', req ? '<span class="text-emerald-600 font-bold">동의 완료</span>' : '<span class="text-slate-400">기록 없음</span>'],
+               ['동의 일시', t.agreedAt ? new Date(t.agreedAt).toLocaleString('ko-KR') : ''],
+               ['약관 버전', esc(t.termsVersion)]],
+      actions: mBtn(mk?'수신거부 처리':'수신동의 처리', `toggleMarketing('${c.id}',${mk})`)
+    };
+  }), '해당하는 회사가 없습니다.');
+};
+
+window.toggleMarketing = async (id, cur) => {
+  const c = companyCache.find(x=>x.id===id);
+  const next = !cur;
+  const msg = next
+    ? `"${c.companyName}"을(를) 광고성 정보 수신 동의 상태로 변경할까요?\n\n※ 반드시 회사로부터 동의를 받은 경우에만 변경하세요.`
+    : `"${c.companyName}"을(를) 수신 거부 상태로 변경할까요?\n(수신거부 요청을 받은 경우)`;
+  if(!confirm(msg)) return;
+  const t = { ...(c.termsAgreed||{}), marketingAd: next, marketingUpdatedAt: new Date().toISOString() };
+  await updateDoc(doc(db,'companies',id), { termsAgreed: t });
+};
+
+window.copyMarketingEmails = () => {
+  const emails = companyCache
+    .filter(c => c.status!=='withdrawn' && c.termsAgreed?.marketingAd === true)
+    .map(c => c.email).filter(Boolean);
+  if(emails.length===0){ alert('광고성 정보 수신에 동의한 회사가 없습니다.'); return; }
+  navigator.clipboard.writeText(emails.join(', ')).then(()=>{
+    alert(`수신 동의 ${emails.length}건의 이메일을 복사했습니다.\n\n메일 발송 시 반드시 지켜주세요:\n· 제목 앞에 (광고) 표기\n· 본문에 수신거부 방법 명시\n· 숨은참조(BCC)로 발송`);
+  }).catch(()=>{
+    prompt('아래 주소를 복사하세요:', emails.join(', '));
+  });
+};
+
+// ── 광고 관리 ──
+function fillSlotSelect(){
+  document.getElementById('adSlot').innerHTML = SLOTS.map(s=>{
+    const taken = adCache.some(a=>a.slot===s.code && adStatus(a)==='active');
+    return `<option value="${s.code}" ${taken?'data-taken="1"':''}>${s.label} · 월 ${s.base.toLocaleString()}원${taken?' [계약중]':''}</option>`;
+  }).join('');
+}
+function adStatus(a){
+  const today = new Date().toISOString().slice(0,10);
+  if(a.startDate > today) return 'pending';
+  if(a.endDate < today) return 'expired';
+  return 'active';
+}
+function renderAds(){
+  const today = new Date();
+  const soon = new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  const expSoon = adCache.filter(a=>adStatus(a)==='active' && a.endDate <= soon);
+  const badge = document.getElementById('badgeAds');
+  badge.textContent = expSoon.length;
+  badge.classList.toggle('hidden', expSoon.length===0);
+
+  const wrap = document.getElementById('adCards');
+  if(adCache.length===0){
+    wrap.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-10 text-center text-slate-400 text-[13px]">등록된 광고가 없습니다. [+ 광고 등록]으로 첫 광고를 추가하세요.</div>';
+    return;
+  }
+  wrap.innerHTML = adCache.map(a=>{
+    const st = adStatus(a);
+    const badge = st==='active' ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">게재 중</span>'
+      : st==='pending' ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">게재 예정</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">종료</span>';
+    const dLeft = Math.ceil((new Date(a.endDate) - new Date())/86400000);
+    const expiry = (st==='active' && dLeft<=7) ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold">만료 D-${dLeft}</span>` : '';
+    return `<div class="bg-white border border-slate-200 rounded-xl p-5 flex items-center gap-5">
+      <img src="${esc(a.imageUrl)}" alt="" class="w-24 h-14 object-cover rounded-lg border border-slate-100 bg-slate-50" onerror="this.style.visibility='hidden'">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-bold text-slate-800 text-[14px]">${esc(a.company || a.advertiser)}</span>${badge}${expiry}
+        </div>
+        <div class="text-[12px] text-slate-400 mt-0.5">${[a.advertiser, fmtPhone(a.contact), a.email].filter(Boolean).map(esc).join(' · ') || '담당자 정보 없음'}</div>
+        <div class="text-[12.5px] text-slate-500 mt-1">${slotLabel(a.slot)} · ${esc(a.startDate)} ~ ${esc(a.endDate)} (${a.months}개월) · <b class="text-slate-700">${comma(a.price)}원</b></div>
+        <a href="${esc(a.linkUrl)}" target="_blank" rel="noopener" class="text-[12px] text-indigo-500 hover:underline truncate block mt-0.5">${esc(a.linkUrl)}</a>
+        ${a.memo ? `<div class="text-[12px] text-slate-400 mt-1 bg-slate-50 rounded px-2 py-1">📝 ${esc(a.memo)}</div>` : ''}
+      </div>
+      <button onclick="deleteAd('${a.id}')" class="shrink-0 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+    </div>`;
+  }).join('');
+}
+
+window.openAdModal = () => {
+  fillSlotSelect();
+  document.getElementById('adCompany').value='';
+  document.getElementById('adAdvertiser').value='';
+  document.getElementById('adContact').value='';
+  document.getElementById('adEmail').value='';
+  document.getElementById('adMemo').value='';
+  document.getElementById('adImageUrl').value='';
+  document.getElementById('adLinkUrl').value='';
+  document.getElementById('adMobileImageUrl').value='';
+  document.getElementById('adMonths').value='3';
+  document.getElementById('adStart').value = new Date().toISOString().slice(0,10);
+  document.getElementById('adErr').classList.add('hidden');
+  calcAdPrice();
+  document.getElementById('adModal').classList.remove('hidden');
+};
+window.closeAdModal = () => document.getElementById('adModal').classList.add('hidden');
+
+window.calcAdPrice = () => {
+  const slot = SLOTS.find(s=>s.code===document.getElementById('adSlot').value) || SLOTS[0];
+  const m = parseInt(document.getElementById('adMonths').value);
+  const start = document.getElementById('adStart').value;
+  if(start){
+    const d = new Date(start); d.setMonth(d.getMonth()+m);
+    document.getElementById('adEnd').value = d.toISOString().slice(0,10);
+  }
+  let price = slot.base * m;
+  if(m===1) price = 0;            // 무료 체험
+  else if(m===6) price = Math.round(price*0.9);
+  else if(m===12) price = Math.round(price*0.8);
+  document.getElementById('adPrice').value = price.toLocaleString('ko-KR');
+};
+document.getElementById('adSlot')?.addEventListener('change', ()=>window.calcAdPrice());
+
+window.saveAd = async () => {
+  const slot = document.getElementById('adSlot').value;
+  const company = document.getElementById('adCompany').value.trim();
+  const advertiser = document.getElementById('adAdvertiser').value.trim();
+  const imageUrl = document.getElementById('adImageUrl').value.trim();
+  const linkUrl = document.getElementById('adLinkUrl').value.trim();
+  const err = document.getElementById('adErr');
+  err.classList.add('hidden');
+  if(!company || !imageUrl || !linkUrl){
+    err.textContent='광고회사명, 이미지 주소, 이동 주소는 필수입니다.'; err.classList.remove('hidden'); return;
+  }
+  const startDate = document.getElementById('adStart').value;
+  const endDate = document.getElementById('adEnd').value;
+  // 지면 독점 확인
+  const clash = adCache.some(a => a.slot===slot && !(endDate < a.startDate || startDate > a.endDate));
+  if(clash && !confirm('이 지면에 기간이 겹치는 광고가 이미 있습니다. 그래도 등록할까요?')) return;
+  const months = parseInt(document.getElementById('adMonths').value);
+  await addDoc(collection(db,'ads'), {
+    slot, company, advertiser,
+    contact: document.getElementById('adContact').value.trim(),
+    email: document.getElementById('adEmail').value.trim(),
+    memo: document.getElementById('adMemo').value.trim(),
+    imageUrl, linkUrl, months,
+    mobileImageUrl: document.getElementById('adMobileImageUrl').value.trim(),
+    price: uncomma(document.getElementById('adPrice').value),
+    freeTrialUsed: months===1,
+    startDate, endDate,
+    active: true,
+    createdAt: serverTimestamp()
+  });
+  closeAdModal();
+  // 실시간 구독으로 자동 반영
+};
+window.deleteAd = async id => {
+  if(!confirm('이 광고를 삭제할까요?')) return;
+  await deleteDoc(doc(db,'ads',id));
+  // 실시간 구독으로 자동 반영
+};
+
+// ── 대시보드 ──
+function renderDashboard(){
+  const now = Date.now();
+  const pending = signupCache.filter(s=>s.status==='pending').length;
+  const activeCompanies = companyCache.filter(c=>c.status==='approved').length;
+  const activeAds = adCache.filter(a=>adStatus(a)==='active').length;
+  const purge = companyCache.filter(c=>c.status==='withdrawn' && c.withdrawScheduledAt < now).length;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statCompanies').textContent = activeCompanies;
+  document.getElementById('statAds').textContent = activeAds;
+  document.getElementById('statPurge').textContent = purge;
+
+  const alerts = [];
+  if(pending>0) alerts.push(`<div class="border border-indigo-200 bg-indigo-50 rounded-lg px-4 py-3 text-[13px] text-indigo-700 font-semibold">📥 승인 대기 중인 가입 신청이 ${pending}건 있습니다.</div>`);
+  if(purge>0) alerts.push(`<div class="border border-rose-200 bg-rose-50 rounded-lg px-4 py-3 text-[13px] text-rose-700 font-semibold">🗑 30일 유예가 지난 파기 대상 회사가 ${purge}곳 있습니다.</div>`);
+  const soon = new Date(now+7*86400000).toISOString().slice(0,10);
+  const exp = adCache.filter(a=>adStatus(a)==='active' && a.endDate<=soon).length;
+  if(exp>0) alerts.push(`<div class="border border-amber-200 bg-amber-50 rounded-lg px-4 py-3 text-[13px] text-amber-700 font-semibold">⏰ 7일 이내 만료 예정 광고가 ${exp}건 있습니다.</div>`);
+  document.getElementById('dashAlerts').innerHTML = alerts.join('') ||
+    '<div class="border border-slate-200 bg-white rounded-lg px-4 py-3 text-[13px] text-slate-400">처리할 알림이 없습니다.</div>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오픈매니저 — 관리자</title>
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <meta name="theme-color" content="#4F46E5">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="phone-util.js"></script>
+<script src="mobile-util.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="ad-util.js"></script>
+<script src="excel-util.js"></script>
+<script src="footer-util.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  body{font-family:'Pretendard',-apple-system,sans-serif;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+  .nav-item.active{background:rgba(99,102,241,.16);color:#C7D2FE;}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<div id="guard" class="fixed inset-0 bg-slate-50 z-[100] flex items-center justify-center">
+  <div id="guardMsg" class="text-slate-400 text-sm font-medium">권한 확인 중...</div>
+</div>
+
+<!-- 최초 로그인 비밀번호 변경 -->
+<div id="pwGate" class="hidden fixed inset-0 bg-slate-50 z-[99] flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-6">
+      <img src="logo-horizontal.png" alt="오픈매니저 OpenManager"
+        class="h-14 sm:h-16 w-auto max-w-[88%] mx-auto object-contain">
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-8">
+      <h1 class="text-lg font-bold text-slate-900">비밀번호 변경</h1>
+      <p class="text-[13px] text-slate-500 mt-1.5 leading-relaxed">
+        보안을 위해 임시 비밀번호를 <b class="text-slate-700">새 비밀번호로 변경</b>해야 합니다.<br>
+        변경 후 바로 이용을 시작할 수 있습니다.
+      </p>
+      <div class="mt-5 space-y-3.5">
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">새 비밀번호 <span class="text-slate-400 font-normal">(8자 이상)</span></label>
+          <input id="newPw" type="password" placeholder="••••••••"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">새 비밀번호 확인</label>
+          <input id="newPw2" type="password" placeholder="••••••••"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+        </div>
+        <p id="pwErr" class="hidden text-[13px] text-rose-600 font-medium"></p>
+        <button id="pwBtn" onclick="changePassword()"
+          class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">변경하고 시작하기</button>
+      </div>
+      <button onclick="doLogout()" class="w-full mt-3 py-2 text-[12.5px] text-slate-400 font-semibold hover:text-slate-600 transition">로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모바일 헤더 -->
+<header class="md:hidden sticky top-0 z-40 bg-white border-b border-slate-200">
+  <div class="flex items-center justify-between px-4 py-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <img src="logo-symbol.png" alt="오픈매니저" class="w-8 h-6 object-contain shrink-0">
+      <div class="min-w-0">
+        <div class="text-[14px] font-extrabold text-slate-900 leading-none">오픈매니저</div>
+        <div id="mobSubtitle" class="text-[10.5px] text-slate-400 truncate mt-0.5">&nbsp;</div>
+      </div>
+    </div>
+    <button onclick="omDrawerToggle()" aria-label="메뉴 열기"
+      class="w-11 h-11 -mr-2 rounded-lg flex flex-col items-center justify-center gap-[5px] hover:bg-slate-50 transition">
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+      <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
+    </button>
+  </div>
+</header>
+
+<!-- 드로어 배경 -->
+<div id="omOverlay" onclick="omDrawerClose()"
+  class="hidden md:hidden fixed inset-0 bg-slate-900/50 z-40 opacity-0 transition-opacity duration-200"></div>
+
+<div class="flex min-h-screen">
+  <!-- 사이드바 -->
+  <aside id="omSidebar" class="w-60 shrink-0 bg-slate-900 flex flex-col fixed md:sticky top-0 left-0 h-screen z-50 overflow-y-auto -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out">
+    <div class="px-5 py-6 flex items-center gap-2.5 border-b border-slate-800">
+      <img src="logo-symbol-white.png" alt="오픈매니저 로고"
+        class="w-10 h-7 object-contain shrink-0">
+      <div class="min-w-0">
+        <div class="text-white font-bold text-[15px] leading-none">오픈매니저</div>
+        <div id="sideCompanyName" class="text-[10.5px] text-indigo-300/70 font-semibold mt-1 truncate">–</div>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <button data-view="home" onclick="switchView('home')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▦ 대시보드</button>
+      <button data-view="stores" onclick="switchView('stores')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▤ 매장 관리</button>
+      <button data-view="lead" onclick="switchView('lead')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">☏ 상담 관리</button>
+      <button data-view="open" onclick="switchView('open')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">✓ 오픈 관리</button>
+      <button data-view="partner" onclick="switchView('partner')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">⚒ 파트너사 매칭</button>
+      <button data-view="pos" onclick="switchView('pos')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▣ POS 관리</button>
+    </nav>
+    <div class="px-3 py-4 border-t border-slate-800">
+      <!-- 로그인 계정 -->
+      <div class="flex items-center gap-2 px-3 pb-3">
+        <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+          <span id="myInitial" class="text-[11px] font-bold text-indigo-300">·</span>
+        </div>
+        <div id="myEmail" class="text-[11.5px] text-slate-500 truncate min-w-0"></div>
+      </div>
+      <!-- 설정 · 로그아웃 -->
+      <div class="flex gap-1.5">
+        <button data-view="settings" onclick="switchView('settings')" class="nav-item flex-1 px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">설정</button>
+        <button onclick="doLogout()" class="flex-1 px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">로그아웃</button>
+      </div>
+      <div id="sideFooter" class="px-3 pt-3 mt-3 border-t border-slate-800"></div>
+    </div>
+  </aside>
+
+  <!-- 메인 -->
+  <main class="flex-1 min-w-0 px-4 sm:px-6 md:px-8 py-5 md:py-7 max-w-[1600px] flex gap-6 items-start">
+   <div class="flex-1 min-w-0">
+    <!-- A급 광고 · 메인 상단 -->
+    <div id="ad-main-top" class="mb-5"></div>
+
+    <!-- 대시보드 -->
+    <section id="view-home">
+      <h1 class="text-xl font-extrabold text-slate-900">대시보드</h1>
+      <p id="homeGreet" class="text-[13px] text-slate-500 mt-1"></p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
+        <button onclick="switchView('stores')" class="text-left bg-white border border-slate-200 rounded-xl p-4 sm:p-5 hover:border-indigo-300 transition">
+          <div class="text-[12px] font-semibold text-slate-500">전체 매장</div>
+          <div id="statStores" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </button>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">오픈 준비 중</div>
+          <div id="statPreparing" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">오픈 완료</div>
+          <div id="statOpened" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">이번 달 오픈 예정</div>
+          <div id="statThisMonth" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+      <div class="mt-8 border border-slate-200 bg-white rounded-xl p-5">
+        <div class="text-[13px] font-bold text-slate-700 mb-3">다가오는 오픈 일정</div>
+        <div id="upcomingList" class="space-y-2 text-[13px] text-slate-500">–</div>
+      </div>
+      <!-- B급 광고 · 통합 대시보드 하단 -->
+      <div id="ad-integrated-bottom" class="mt-6"></div>
+    </section>
+
+    <!-- 매장 관리 -->
+    <section id="view-stores" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">매장 관리</h1>
+          <p class="text-[13px] text-slate-500 mt-1">가입 매장 현황 및 점주 공유 링크 관리</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="xlsStore"></div>
+          <button onclick="openStoreModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 매장 등록</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전체 매장</div>
+          <div id="stTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">계약 완료</div>
+          <div id="stContract" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">가입비 완납</div>
+          <div id="stPaid" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">이번 달 신규</div>
+          <div id="stNew" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="storeSearch" oninput="renderStores()" type="text" placeholder="점주명·지점명·연락처 검색"
+          class="w-full sm:w-72 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="storeFilter" onchange="renderStores()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 상태</option>
+          <option>준비중</option><option>진행중</option><option>오픈완료</option><option>보류</option>
+        </select>
+        <button id="trashToggle" onclick="toggleTrash()" class="ml-auto px-3.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[13px] font-semibold hover:bg-slate-50 transition">🗑 삭제 보관함 <span id="trashCount">0</span></button>
+      </div>
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">지점명</th>
+              <th class="px-4 py-3 font-semibold">점주명</th>
+              <th class="px-4 py-3 font-semibold">연락처</th>
+              <th class="px-4 py-3 font-semibold">오픈일</th>
+              <th class="px-4 py-3 font-semibold">계약</th>
+              <th class="px-4 py-3 font-semibold">가입비</th>
+              <th class="px-4 py-3 font-semibold">진행 상태</th>
+              <th class="px-4 py-3 font-semibold">파트너사</th>
+              <th class="px-4 py-3 font-semibold">담당</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="storeRows"><tr><td colspan="10" class="px-4 py-10 text-center text-slate-400">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="storeCards" class="md:hidden mt-4 space-y-2.5"></div>
+          <!-- B급 광고 · 탭 대시보드 하단 -->
+      <div id="ad-tab-stores" class="mt-6"></div>
+    </section>
+
+    <!-- 준비 중 탭들 -->
+    <!-- 상담 관리 -->
+    <section id="view-lead" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">상담 관리</h1>
+          <p class="text-[13px] text-slate-500 mt-1">가맹 문의 접수부터 계약까지 진행 현황 관리</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="xlsLead"></div>
+          <button onclick="openLeadModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 상담 등록</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전체 상담</div>
+          <div id="leadTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">진행 중</div>
+          <div id="leadActive" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">가입 완료</div>
+          <div id="leadDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전환율</div>
+          <div id="leadRate" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div id="remindBox" class="hidden mt-5 border border-amber-200 bg-amber-50 rounded-xl p-4">
+        <div class="text-[13px] font-bold text-amber-700">⏰ 오늘까지 연락해야 할 상담</div>
+        <div id="remindRows" class="mt-2 space-y-2"></div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="leadSearch" oninput="renderLeads()" type="text" placeholder="이름·연락처·지역 검색"
+          class="w-full sm:w-64 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="leadStageFilter" onchange="renderLeads()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 단계</option>
+          <option>상담중</option><option>검토중</option><option>가입완료</option><option>취소</option>
+        </select>
+        <input id="leadMonthFilter" type="month" onchange="renderLeads()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+        <button onclick="document.getElementById('leadMonthFilter').value='';renderLeads()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-400 text-[12.5px] font-semibold hover:bg-slate-50 transition">월 필터 해제</button>
+        <button id="leadTrashToggle" onclick="toggleLeadTrash()" class="ml-auto px-3.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[13px] font-semibold hover:bg-slate-50 transition">🗑 삭제 보관함 <span id="leadTrashCount">0</span></button>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">상담일자</th>
+              <th class="px-4 py-3 font-semibold">이름</th>
+              <th class="px-4 py-3 font-semibold">연락처</th>
+              <th class="px-4 py-3 font-semibold">지역</th>
+              <th class="px-4 py-3 font-semibold">상담경로</th>
+              <th class="px-4 py-3 font-semibold">단계</th>
+              <th class="px-4 py-3 font-semibold">리마인드</th>
+              <th class="px-4 py-3 font-semibold">담당</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="leadRows"><tr><td colspan="9" class="px-4 py-10 text-center text-slate-400">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="leadCards" class="md:hidden mt-4 space-y-2.5"></div>
+          <!-- B급 광고 · 탭 대시보드 하단 -->
+      <div id="ad-tab-lead" class="mt-6"></div>
+    </section>
+    <!-- 오픈 관리 -->
+    <section id="view-open" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+       <div>
+      <h1 class="text-xl font-extrabold text-slate-900">오픈 관리</h1>
+      <p class="text-[13px] text-slate-500 mt-1">매장별 오픈 준비 단계 진행 관리 <span class="text-slate-400">(단계 변경은 점주 공유 페이지에 실시간 반영)</span></p>
+       </div>
+       <div id="xlsOpen"></div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">오픈 준비 중</div>
+          <div id="opPreparing" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">2주 내 오픈 예정</div>
+          <div id="opSoon" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">오픈일 경과</div>
+          <div id="opOverdue" class="text-2xl font-extrabold text-rose-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">오픈 완료</div>
+          <div id="opDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div id="opAlertBox" class="hidden mt-5 border border-rose-200 bg-rose-50 rounded-xl p-4">
+        <div class="text-[13px] font-bold text-rose-700">⚠️ 오픈 예정일이 지났는데 완료되지 않은 매장</div>
+        <div id="opAlertRows" class="mt-2 space-y-2"></div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="opSearch" oninput="renderOpenTab()" type="text" placeholder="지점명·점주명 검색"
+          class="w-full sm:w-64 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="opStatusFilter" onchange="renderOpenTab()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 상태</option>
+          <option>준비중</option><option>진행중</option><option>오픈완료</option><option>보류</option>
+        </select>
+        <label class="flex items-center gap-1.5 text-[13px] text-slate-500 cursor-pointer ml-1">
+          <input type="checkbox" id="opHideDone" onchange="renderOpenTab()" class="w-3.5 h-3.5 accent-indigo-600">
+          오픈완료 숨기기
+        </label>
+        <button id="opTrashToggle" onclick="toggleOpTrash()" class="ml-auto px-3.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[13px] font-semibold hover:bg-slate-50 transition">🗑 삭제 보관함 <span id="opTrashCount">0</span></button>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">지점명</th>
+              <th class="px-4 py-3 font-semibold">점주</th>
+              <th class="px-4 py-3 font-semibold">오픈예정일</th>
+              <th class="px-4 py-3 font-semibold">D-day</th>
+              <th class="px-4 py-3 font-semibold w-56">진행률</th>
+              <th class="px-4 py-3 font-semibold">현재 단계</th>
+              <th class="px-4 py-3 font-semibold">다음 단계</th>
+              <th class="px-4 py-3 font-semibold">담당</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="opRows"><tr><td colspan="9" class="px-4 py-10 text-center text-slate-400">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="opCards" class="md:hidden mt-4 space-y-2.5"></div>
+          <!-- B급 광고 · 탭 대시보드 하단 -->
+      <div id="ad-tab-open" class="mt-6"></div>
+    </section>
+    <!-- 파트너사 매칭 -->
+    <section id="view-partner" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">파트너사 매칭</h1>
+          <p class="text-[13px] text-slate-500 mt-1">매장별 협력업체 배정·진행 상태·금액 관리 <span class="text-slate-400">(등록하면 매장 관리에도 자동 반영)</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="xlsPartner"></div>
+          <button onclick="openPmModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 항목 추가</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전체 항목</div>
+          <div id="pmTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">진행 중</div>
+          <div id="pmActive" class="text-2xl font-extrabold text-indigo-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">완료</div>
+          <div id="pmDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">총 금액</div>
+          <div id="pmAmount" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="pmSearch" oninput="renderPartnerTab()" type="text" placeholder="매장·점주·업체명 검색"
+          class="w-full sm:w-64 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="pmTypeFilter" onchange="renderPartnerTab()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 항목</option>
+        </select>
+        <select id="pmStatusFilter" onchange="renderPartnerTab()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 상태</option>
+          <option>미진행</option><option>견적중</option><option>계약완료</option><option>진행중</option><option>완료</option>
+        </select>
+        <button id="pmTrashToggle" onclick="togglePmTrash()" class="ml-auto px-3.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[13px] font-semibold hover:bg-slate-50 transition">🗑 삭제 보관함 <span id="pmTrashCount">0</span></button>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">지점명</th>
+              <th class="px-4 py-3 font-semibold">점주</th>
+              <th class="px-4 py-3 font-semibold">항목</th>
+              <th class="px-4 py-3 font-semibold">협력업체</th>
+              <th class="px-4 py-3 font-semibold">상태</th>
+              <th class="px-4 py-3 font-semibold text-right">금액(만원)</th>
+              <th class="px-4 py-3 font-semibold">메모</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="pmRows"><tr><td colspan="8" class="px-4 py-10 text-center text-slate-400">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="pmCards" class="md:hidden mt-4 space-y-2.5"></div>
+          <!-- B급 광고 · 탭 대시보드 하단 -->
+      <div id="ad-tab-partner" class="mt-6"></div>
+    </section>
+    <!-- POS 관리 -->
+    <section id="view-pos" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900">POS 관리</h1>
+          <p class="text-[13px] text-slate-500 mt-1">매장별 POS 설치·계약·월요금 정산 관리</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="xlsPos"></div>
+          <button onclick="openPosModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">+ 연동 등록</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-5">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">연동 매장</div>
+          <div id="posTotal" class="text-2xl font-extrabold text-slate-900 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">설치 완료</div>
+          <div id="posDone" class="text-2xl font-extrabold text-emerald-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">CMS 미연동</div>
+          <div id="posCms" class="text-2xl font-extrabold text-rose-600 mt-1.5">–</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">월 정산 합계</div>
+          <div id="posAmount" class="text-2xl font-extrabold text-violet-600 mt-1.5">–</div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-2 flex-wrap">
+        <input id="posSearch" oninput="renderPosTab()" type="text" placeholder="지점명·점주명·프로그램 검색"
+          class="w-full sm:w-64 px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] placeholder-slate-300 bg-white transition">
+        <select id="posStatusFilter" onchange="renderPosTab()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">전체 상태</option>
+          <option>대기</option><option>계약완료</option><option>설치예정</option><option>설치완료</option><option>해지</option>
+        </select>
+        <select id="posCmsFilter" onchange="renderPosTab()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
+          <option value="">CMS 전체</option>
+          <option value="y">연동</option><option value="n">미연동</option>
+        </select>
+        <button id="posTrashToggle" onclick="togglePosTrash()" class="ml-auto px-3.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[13px] font-semibold hover:bg-slate-50 transition">🗑 삭제 보관함 <span id="posTrashCount">0</span></button>
+      </div>
+
+      <div class="hidden md:block mt-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
+        <table class="w-full text-[13px] whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-left">
+              <th class="px-4 py-3 font-semibold">지점명</th>
+              <th class="px-4 py-3 font-semibold">점주</th>
+              <th class="px-4 py-3 font-semibold">연락처</th>
+              <th class="px-4 py-3 font-semibold">계약서</th>
+              <th class="px-4 py-3 font-semibold">CMS</th>
+              <th class="px-4 py-3 font-semibold">설치일</th>
+              <th class="px-4 py-3 font-semibold">청구 프로그램</th>
+              <th class="px-4 py-3 font-semibold text-right">월요금</th>
+              <th class="px-4 py-3 font-semibold text-right">정산금액</th>
+              <th class="px-4 py-3 font-semibold text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="posRows"><tr><td colspan="10" class="px-4 py-10 text-center text-slate-400">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+      <div id="posCards" class="md:hidden mt-4 space-y-2.5"></div>
+      <!-- B급 광고 · 탭 대시보드 하단 -->
+      <div id="ad-tab-pos" class="mt-6"></div>
+    </section>
+
+    <!-- 설정 -->
+    <section id="view-settings" class="hidden">
+      <h1 class="text-xl font-extrabold text-slate-900">설정</h1>
+      <div class="mt-5 bg-white border border-slate-200 rounded-xl p-6 max-w-xl">
+        <div class="text-[13px] font-bold text-slate-700">회사 정보</div>
+        <div id="companyInfo" class="mt-2 text-[13px] text-slate-500 leading-relaxed">–</div>
+        <button onclick="openPwChange()" class="mt-4 px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">비밀번호 변경</button>
+      </div>
+      <div class="mt-4 bg-white border border-rose-200 rounded-xl p-6 max-w-xl">
+        <div class="text-[13px] font-bold text-rose-600">서비스 탈퇴</div>
+        <p class="text-[12.5px] text-slate-500 mt-1.5 leading-relaxed">
+          탈퇴 시 즉시 로그인과 데이터 접근이 차단되며, <b>30일 후 모든 데이터가 완전 삭제</b>됩니다.
+          그 전까지는 문의 시 복구가 가능합니다.
+        </p>
+        <div class="mt-3">
+          <input id="withdrawConfirmText" type="text" placeholder='탈퇴하려면 "오픈매니저 탈퇴" 를 입력'
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition" oninput="checkWithdrawText()">
+        </div>
+        <button id="withdrawBtn" onclick="doWithdraw()" disabled
+          class="mt-3 px-4 py-2.5 rounded-lg bg-rose-600 text-white text-[13px] font-bold transition disabled:bg-slate-200 disabled:text-slate-400 hover:enabled:bg-rose-700">탈퇴 확정</button>
+      </div>
+    </section>
+   </div>
+   <!-- A급 광고 · 메인 우측 -->
+   <aside id="ad-main-right" class="hidden xl:block w-[168px] shrink-0 sticky top-7"></aside>
+  </main>
+</div>
+
+<!-- 매장 등록/수정 모달 -->
+<div id="storeModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
+  <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+    <h3 id="storeModalTitle" class="font-bold text-slate-900 text-[15px]">매장 등록</h3>
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">지점명 <span class="text-rose-500">*</span></label>
+        <input id="f_branchName" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">점주명 <span class="text-rose-500">*</span></label>
+        <input id="f_ownerName" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">연락처</label>
+        <input id="f_phone" type="tel" placeholder="010-0000-0000" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">생년월일</label>
+        <input id="f_birth" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">가입일자</label>
+        <input id="f_signupDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">오픈일(예정)</label>
+        <input id="f_openDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div class="sm:col-span-2"><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">주소</label>
+        <input id="f_address" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">담당 실무자(성명)</label>
+        <input id="f_contactName" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">담당 SV</label>
+        <input id="f_managerSV" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">평수</label>
+        <input id="f_area" type="text" placeholder="예: 15평" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">계약 상태</label>
+        <select id="f_contractStatus" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">선택</option><option>상담중</option><option>계약대기</option><option>계약완료</option><option>해지</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">가입비 납입</label>
+        <select id="f_paymentStatus" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">선택</option><option>미납</option><option>일부납입</option><option>완납</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">가입비 상세 <b class="text-indigo-600">(만원)</b></label>
+        <input id="f_paymentDetail" type="text" placeholder="예: 300/500 (만원 단위)" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">오픈 진행 상태</label>
+        <select id="f_openStatus" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option>준비중</option><option>진행중</option><option>오픈완료</option><option>보류</option>
+        </select></div>
+      <input id="f_partnerStatus" type="hidden">
+      <div class="sm:col-span-2">
+        <label class="block text-[12.5px] font-semibold text-slate-600 mb-1.5">파트너사 매칭 항목 <span class="text-slate-400 font-normal">(진행하는 항목을 선택 — 업체·금액 등 상세는 [파트너사 매칭] 탭에서)</span></label>
+        <div id="partnerChecks" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2 border border-slate-200 rounded-lg px-3.5 py-3"></div>
+      </div>
+      <div class="sm:col-span-2"><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">메모</label>
+        <textarea id="f_memo" rows="2" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
+    </div>
+    <!-- C급 광고 · 신규등록 화면 하단 -->
+    <div id="ad-new-store" class="mt-4"></div>
+    <p id="storeErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closeStoreModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button id="storeSaveBtn" onclick="saveStore()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 공유 링크 모달 -->
+<div id="shareModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h3 class="font-bold text-slate-900 text-[15px]">점주 공유 링크</h3>
+        <p class="text-[12.5px] text-slate-500 mt-1.5">점주는 이 링크로 로그인 없이 진행 현황을 열람합니다.</p>
+      </div>
+      <button onclick="regenToken()" title="기존 링크를 즉시 무효화하고 새 링크를 발급합니다"
+        class="shrink-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[11.5px] font-bold hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50 transition whitespace-nowrap">↻ 링크 재발급</button>
+    </div>
+    <div class="mt-4 flex gap-2">
+      <input id="shareLinkInput" type="text" readonly class="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-[12px] bg-slate-50 text-slate-600">
+      <button onclick="copyShareLink()" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition shrink-0">복사</button>
+    </div>
+    <button onclick="document.getElementById('shareModal').classList.add('hidden')" class="mt-3 w-full py-2 rounded-lg text-slate-400 text-[12.5px] font-semibold hover:text-slate-600 transition">닫기</button>
+  </div>
+</div>
+
+<!-- 상담 등록/수정 모달 -->
+<div id="leadModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+    <h3 id="leadModalTitle" class="font-bold text-slate-900 text-[15px]">상담 등록</h3>
+    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">상담일자 <span class="text-rose-500">*</span></label>
+        <input id="l_consultDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">이름 <span class="text-rose-500">*</span></label>
+        <input id="l_name" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">연락처</label>
+        <input id="l_phone" type="tel" placeholder="010-0000-0000" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">담당자</label>
+        <input id="l_manager" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">지역</label>
+        <input id="l_region" type="text" placeholder="예: 서울 성북구" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">매장유형</label>
+        <input id="l_storeType" type="text" placeholder="예: 로드샵 / 상가 / 신축" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">상담경로</label>
+        <select id="l_channel" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">선택</option><option>홈페이지</option><option>전화문의</option><option>소개</option><option>박람회</option><option>온라인광고</option><option>SNS</option><option>기타</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">진행 단계 <span class="text-rose-500">*</span></label>
+        <select id="l_stage" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option>상담중</option><option>검토중</option><option>가입완료</option><option>취소</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">비교 경쟁사</label>
+        <input id="l_competitor" type="text" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">평수</label>
+        <input id="l_area" type="text" placeholder="예: 15평" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">성별</label>
+        <select id="l_gender" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">선택</option><option>남</option><option>여</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">연령대</label>
+        <select id="l_ageGroup" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">선택</option><option>20대</option><option>30대</option><option>40대</option><option>50대</option><option>60대 이상</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">리마인드 예정일</label>
+        <input id="l_remindDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">가입 이유 / 취소 사유</label>
+        <input id="l_reason" type="text" placeholder="단계에 따라 기입" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div class="sm:col-span-2"><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">상담 내용 메모 <span class="text-slate-400 font-normal">(니즈·특이사항 등)</span></label>
+        <textarea id="l_memo" rows="3" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
+    </div>
+    <!-- C급 광고 · 신규등록 화면 하단 -->
+    <div id="ad-new-lead" class="mt-4"></div>
+    <p id="leadErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closeLeadModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button id="leadSaveBtn" onclick="saveLead()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- POS 관리 등록/수정 모달 -->
+<div id="posModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+    <h3 id="posModalTitle" class="font-bold text-slate-900 text-[15px]">POS 연동 등록</h3>
+    <div id="posStoreWrap" class="mt-4">
+      <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">매장 <span class="text-rose-500">*</span></label>
+      <select id="pos_store" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition"></select>
+    </div>
+    <div id="posInfo" class="hidden mt-4 text-[13px] text-slate-500 bg-slate-50 rounded-lg px-3.5 py-2.5"></div>
+
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">가입일</label>
+        <input id="pos_signupDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">계약서 상태</label>
+        <select id="pos_status" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option>대기</option><option>계약완료</option><option>설치예정</option><option>설치완료</option><option>해지</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">CMS 연동</label>
+        <select id="pos_cms" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+          <option value="">미연동</option><option value="y">연동 완료</option>
+        </select></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">CMS 확인일자</label>
+        <input id="pos_cmsDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div class="sm:col-span-2"><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">설치 구성</label>
+        <input id="pos_config" type="text" placeholder="예: POS 1대 + 카드단말기 2대 + 주방프린터" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">설치일</label>
+        <input id="pos_installDate" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">청구 프로그램</label>
+        <input id="pos_program" type="text" placeholder="예: OO POS 프리미엄" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">월 요금 <b class="text-indigo-600">(원)</b></label>
+        <input id="pos_monthly" type="text" inputmode="numeric" oninput="commaInput(this)" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-right transition"></div>
+      <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">정산 금액 <b class="text-indigo-600">(원)</b></label>
+        <input id="pos_settle" type="text" inputmode="numeric" oninput="commaInput(this)" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-right transition"></div>
+      <div class="sm:col-span-2"><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">메모</label>
+        <textarea id="pos_memo" rows="2" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
+    </div>
+    <!-- C급 광고 · 신규등록 화면 하단 -->
+    <div id="ad-new-pos" class="mt-4"></div>
+    <p id="posErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closePosModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button id="posSaveBtn" onclick="savePos()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 파트너 항목 수정 모달 -->
+<div id="pmModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+    <h3 id="pmTitle" class="font-bold text-slate-900 text-[15px]">파트너사 정보</h3>
+    <div id="pmInfo" class="mt-2 text-[13px] text-slate-500 bg-slate-50 rounded-lg px-3.5 py-2.5"></div>
+    <div id="pmNewFields" class="hidden mt-4 grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">매장 <span class="text-rose-500">*</span></label>
+        <select id="pm_store" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition"></select>
+      </div>
+      <div>
+        <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">항목 <span class="text-rose-500">*</span></label>
+        <select id="pm_type" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition"></select>
+      </div>
+    </div>
+    <p id="pmErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    <div class="mt-4 space-y-3.5">
+      <div>
+        <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">협력업체명</label>
+        <input id="pm_vendor" type="text" placeholder="예: (주)OO디자인" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">진행 상태</label>
+          <select id="pm_status" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm bg-white transition">
+            <option>미진행</option><option>견적중</option><option>계약완료</option><option>진행중</option><option>완료</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">금액 (만원)</label>
+          <input id="pm_amount" type="text" inputmode="numeric" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-right transition">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">메모</label>
+        <textarea id="pm_memo" rows="3" placeholder="공기·일정·특이사항 등" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></textarea>
+      </div>
+    </div>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closePmModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button id="pmSaveBtn" onclick="savePmItem()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 오픈 진행 타임라인 모달 -->
+<div id="timelineModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto">
+    <h3 class="font-bold text-slate-900 text-[15px]"><span id="tlBranch"></span> — 오픈 진행 타임라인</h3>
+    <p class="text-[12.5px] text-slate-500 mt-1.5">단계 상태를 변경하면 <b class="text-indigo-600">점주 공유 페이지에 실시간 반영</b>됩니다. 단계명은 자유롭게 수정·추가할 수 있어요.</p>
+    <div class="mt-4 flex items-center gap-3">
+      <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+        <div id="tlBar" class="h-full bg-indigo-600 transition-all" style="width:0%"></div>
+      </div>
+      <span id="tlPct" class="text-[12.5px] font-bold text-indigo-600 shrink-0">0%</span>
+    </div>
+    <div class="mt-3 flex gap-2">
+      <button onclick="tlAdvance()" class="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-bold transition">✓ 현재 단계 완료 → 다음 단계 시작</button>
+      <button onclick="tlReset()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-400 text-[12.5px] font-semibold hover:bg-slate-50 transition">기본 단계로</button>
+    </div>
+    <div id="tlRows" class="mt-4 space-y-2"></div>
+    <button onclick="tlAddStep()" class="mt-3 w-full py-2 rounded-lg border border-dashed border-slate-300 text-slate-400 text-[12.5px] font-semibold hover:border-indigo-300 hover:text-indigo-500 transition">+ 단계 추가</button>
+    <div class="flex gap-2.5 mt-5">
+      <button onclick="closeTimeline()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
+      <button onclick="saveTimeline()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
+  authDomain: "openmanager-d6571.firebaseapp.com",
+  projectId: "openmanager-d6571",
+  storageBucket: "openmanager-d6571.firebasestorage.app",
+  messagingSenderId: "249141913323",
+  appId: "1:249141913323:web:f5f5fd678b895dc02400ae"
+});
+const auth = getAuth(app);
+auth.languageCode = 'ko';
+const db = getFirestore(app);
+
+let MY = { uid:null, companyId:null, company:null };
+let storeCache = [];
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ── 모바일 카드 렌더 헬퍼 ──
+// rows: [{title, sub, badges:[html], fields:[[label,value]], actions:html, dim:bool}]
+function renderCards(elId, rows, emptyMsg){
+  const box = document.getElementById(elId);
+  if(!box) return;
+  if(!rows.length){
+    box.innerHTML = `<div class="bg-white border border-slate-200 rounded-xl px-4 py-10 text-center text-slate-400 text-[13px]">${emptyMsg}</div>`;
+    return;
+  }
+  box.innerHTML = rows.map(r=>`
+    <div class="bg-white border ${r.dim?'border-rose-200 bg-rose-50/30':'border-slate-200'} rounded-xl p-4">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="font-bold text-slate-800 text-[14px] break-words ${r.dim?'line-through text-slate-500':''}">${r.title}</div>
+          ${r.sub?`<div class="text-[12.5px] text-slate-500 mt-0.5 break-words">${r.sub}</div>`:''}
+        </div>
+        <div class="flex flex-wrap gap-1 justify-end shrink-0">${(r.badges||[]).join('')}</div>
+      </div>
+      ${(r.fields||[]).length?`<div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-x-3 gap-y-2">
+        ${r.fields.filter(f=>f[1]).map(f=>`<div class="min-w-0">
+          <div class="text-[11px] text-slate-400 font-semibold">${f[0]}</div>
+          <div class="text-[12.5px] text-slate-700 break-words mt-0.5">${f[1]}</div></div>`).join('')}
+      </div>`:''}
+      ${r.actions?`<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">${r.actions}</div>`:''}
+    </div>`).join('');
+}
+const mBtn = (label, onclick, tone) => {
+  const c = tone==='primary' ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+    : tone==='danger' ? 'bg-rose-600 hover:bg-rose-700 text-white'
+    : tone==='ghost'  ? 'border border-slate-200 text-slate-400 hover:text-rose-600'
+    : 'border border-slate-200 text-slate-600 hover:bg-slate-50';
+  return `<button onclick="${onclick}" class="flex-1 min-w-[72px] py-2.5 rounded-lg ${c} text-[12.5px] font-bold transition">${label}</button>`;
+};
+
+// 천단위 콤마 입력
+window.commaInput = el => {
+  const v = Number(String(el.value||'').replace(/[^0-9]/g,'')) || 0;
+  el.value = v ? v.toLocaleString('ko-KR') : '';
+};
+const todayLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+const defaultSteps = () => ['계약 체결','인허가·행정 준비','인테리어·시공','집기·물품 준비','직원 교육','최종 점검','오픈']
+  .map(n => ({name:n, status:'대기'}));
+
+// ===== 가드 =====
+onAuthStateChanged(auth, async user => {
+  const gm = document.getElementById('guardMsg');
+  if(!user){ location.href='login.html'; return; }
+  try{
+    const uSnap = await getDoc(doc(db,'users',user.uid));
+    if(!uSnap.exists()){ gm.textContent='계정 정보가 없습니다.'; return; }
+    const u = uSnap.data();
+    if(u.role === 'super'){ location.href='admin.html'; return; }
+    if(u.role !== 'company'){ gm.textContent='접근 권한이 없습니다.'; return; }
+    MY.uid = user.uid; MY.companyId = u.companyId;
+    const cSnap = await getDoc(doc(db,'companies',u.companyId));
+    if(!cSnap.exists()){ gm.textContent='회사 정보를 찾을 수 없습니다.'; return; }
+    MY.company = cSnap.data();
+    if(MY.company.status === 'withdrawn'){
+      gm.innerHTML = '탈퇴 처리된 계정입니다.<br>복구가 필요하면 운영자에게 문의해 주세요.';
+      await signOut(auth); return;
+    }
+    if(MY.company.status !== 'approved'){
+      gm.textContent='승인 대기 중인 계정입니다. 승인 후 이용할 수 있습니다.'; return;
+    }
+    document.getElementById('sideCompanyName').textContent = MY.company.companyName;
+    const mob = document.getElementById('mobSubtitle');
+    if(mob) mob.textContent = MY.company.companyName;
+    document.getElementById('myEmail').textContent = user.email;
+    const ini = document.getElementById('myInitial');
+    if(ini) ini.textContent = (user.email||'?').charAt(0).toUpperCase();
+    document.getElementById('homeGreet').textContent = `${MY.company.companyName} · ${MY.company.managerName}님, 오늘도 좋은 하루 되세요.`;
+    document.getElementById('companyInfo').innerHTML =
+      `회사명: ${esc(MY.company.companyName)}<br>실무자: ${esc(MY.company.managerName)} · ${esc(fmtPhone(MY.company.managerPhone))}<br>이메일: ${esc(MY.company.email)}`;
+    document.getElementById('guard').remove();
+
+    // 최초 로그인 → 비밀번호 변경 강제
+    if(u.mustChangePassword){
+      document.getElementById('pwGate').classList.remove('hidden');
+      return;   // 변경 완료 전까지 본 화면 접근 차단
+    }
+    await loadStores(); await loadLeads();
+    initAdsAndFooter();
+    mountExcelButtons();
+  }catch(e){
+    gm.textContent = '정보를 불러오지 못했습니다: ' + (e.code||e.message);
+  }
+});
+
+window.doLogout = async () => { await signOut(auth); location.href='login.html'; };
+
+// 광고 지면 + 푸터 초기화
+async function initAdsAndFooter(){
+  renderFooter('sideFooter','dark');
+  await loadAdsOnce(db, getDocs, collection);
+  renderAdSlots([
+    ['ad-main-top','main_top'],
+    ['ad-main-right','main_right'],
+    ['ad-integrated-bottom','integrated_dashboard_bottom'],
+    ['ad-tab-stores','tab_dashboard_bottom'],
+    ['ad-tab-lead','tab_dashboard_bottom'],
+    ['ad-tab-open','tab_dashboard_bottom'],
+    ['ad-tab-partner','tab_dashboard_bottom'],
+    ['ad-tab-pos','tab_dashboard_bottom'],
+    ['ad-new-store','tab_new_bottom'],
+    ['ad-new-lead','tab_new_bottom']
+  ]);
+}
+
+window.changePassword = async () => {
+  const pw = document.getElementById('newPw').value;
+  const pw2 = document.getElementById('newPw2').value;
+  const err = document.getElementById('pwErr');
+  const btn = document.getElementById('pwBtn');
+  err.classList.add('hidden');
+  if(pw.length < 8){ err.textContent='비밀번호는 8자 이상이어야 합니다.'; err.classList.remove('hidden'); return; }
+  if(pw !== pw2){ err.textContent='두 비밀번호가 일치하지 않습니다.'; err.classList.remove('hidden'); return; }
+  btn.disabled = true; btn.textContent = '변경 중...';
+  try{
+    await updatePassword(auth.currentUser, pw);
+    await updateDoc(doc(db,'users',MY.uid), { mustChangePassword: false });
+    document.getElementById('pwGate').classList.add('hidden');
+    await loadStores(); await loadLeads();
+    initAdsAndFooter();
+    mountExcelButtons();
+  }catch(e){
+    const c = e.code || '';
+    if(c.includes('weak-password')) err.textContent='보안에 취약한 비밀번호입니다. 더 복잡하게 설정해 주세요.';
+    else if(c.includes('requires-recent-login')) err.textContent='보안을 위해 다시 로그인한 뒤 변경해 주세요.';
+    else err.textContent='변경 실패: ' + (e.message || c);
+    err.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = '변경하고 시작하기';
+  }
+};
+
+// 설정 화면에서 언제든 비밀번호 변경
+window.openPwChange = () => {
+  document.getElementById('newPw').value='';
+  document.getElementById('newPw2').value='';
+  document.getElementById('pwErr').classList.add('hidden');
+  document.getElementById('pwGate').classList.remove('hidden');
+};
+
+window.switchView = v => {
+  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('view-'+v).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+};
+
+// ===== 매장 =====
+let trashCache = [];
+let trashMode = false;
+let storeUnsub = null;
+async function loadStores(){
+  if(storeUnsub) return;   // 이미 구독 중이면 중복 방지
+  storeUnsub = onSnapshot(
+    query(collection(db,'stores'), where('companyId','==',MY.companyId)),
+    snap => {
+      const all = snap.docs.map(d=>({id:d.id, ...d.data()}))
+        .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      storeCache = all.filter(x=>!x.deleted);
+      trashCache = all.filter(x=>x.deleted);
+      document.getElementById('trashCount').textContent = trashCache.length;
+      renderStores(); renderStoreStats(); renderHome(); renderPartnerTab(); renderOpenTab(); renderPosTab();
+    },
+    e => console.warn('stores 구독 오류:', e)
+  );
+}
+
+window.toggleTrash = () => {
+  trashMode = !trashMode;
+  const btn = document.getElementById('trashToggle');
+  btn.classList.toggle('bg-rose-50', trashMode);
+  btn.classList.toggle('border-rose-200', trashMode);
+  btn.classList.toggle('text-rose-600', trashMode);
+  renderStores();
+};
+
+function partnerSummary(s){
+  const items = Array.isArray(s.partnerItems) ? s.partnerItems : [];
+  if(!items.length) return '<span class="text-slate-300">–</span>';
+  const norm = items.map(x => typeof x==='string' ? {name:x,status:'미진행'} : x);
+  const done = norm.filter(i=>i.status==='완료').length;
+  const cls = done===norm.length ? 'text-emerald-600' : 'text-slate-600';
+  const names = norm.slice(0,2).map(i=>esc(i.name)).join(', ') + (norm.length>2 ? ` 외 ${norm.length-2}` : '');
+  return `<span class="${cls} font-semibold">${done}/${norm.length}</span> <span class="text-[12px] text-slate-400">${names}</span>`;
+}
+
+window.renderStores = () => {
+  const rows = document.getElementById('storeRows');
+  // ── 삭제 보관함 모드 ──
+  if(trashMode){
+    if(trashCache.length===0){
+      rows.innerHTML = '<tr><td colspan="10" class="px-4 py-14 text-center text-slate-400 text-[13px]">삭제 보관함이 비어 있습니다.</td></tr>'; renderCards('storeCards', [], '삭제 보관함이 비어 있습니다.'); return;
+    }
+    rows.innerHTML = trashCache.map(s=>`<tr class="border-t border-slate-100 bg-rose-50/30 hover:bg-rose-50 transition">
+      <td class="px-4 py-3 font-semibold text-slate-500 line-through">${esc(s.branchName)}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(s.ownerName)}</td>
+      <td class="px-4 py-3 text-slate-400">${esc(fmtPhone(s.phone))}</td>
+      <td class="px-4 py-3 text-slate-400" colspan="5">삭제일: ${s.deletedAt ? new Date(s.deletedAt).toLocaleDateString('ko-KR') : '–'}</td>
+      <td class="px-4 py-3 text-slate-400"></td>
+      <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+        <button onclick="restoreStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">복원</button>
+        <button onclick="purgeStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">영구삭제</button>
+      </td>
+    </tr>`).join('');
+    renderCards('storeCards', trashCache.map(s=>({
+      dim:true, title: esc(s.branchName), sub: esc(s.ownerName),
+      fields: [['연락처', esc(fmtPhone(s.phone))], ['삭제일', s.deletedAt ? new Date(s.deletedAt).toLocaleDateString('ko-KR') : '']],
+      actions: mBtn('복원', `restoreStore('${s.id}')`, 'primary') + mBtn('영구삭제', `purgeStore('${s.id}')`, 'danger')
+    })), '삭제 보관함이 비어 있습니다.');
+    return;
+  }
+  // ── 일반 모드 ──
+  const kw = (document.getElementById('storeSearch').value||'').trim();
+  const ft = document.getElementById('storeFilter').value;
+  let list = storeCache;
+  if(kw) list = list.filter(s => [s.branchName,s.ownerName,s.phone].some(v => (v||'').includes(kw)));
+  if(ft) list = list.filter(s => s.openStatus === ft);
+  if(list.length===0){
+    rows.innerHTML = '<tr><td colspan="10" class="px-4 py-14 text-center text-slate-400 text-[13px]">'+(storeCache.length===0?'아직 등록된 매장이 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 매장 등록]으로 시작하세요.</span>':'검색 조건에 맞는 매장이 없습니다.')+'</td></tr>'; return;
+  }
+  const stBadge = s => s==='오픈완료' ? 'bg-emerald-50 text-emerald-600' : s==='진행중' ? 'bg-indigo-50 text-indigo-600' : s==='보류' ? 'bg-slate-100 text-slate-500' : 'bg-violet-50 text-violet-600';
+  rows.innerHTML = list.map(s=>`<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+    <td class="px-4 py-3 font-semibold text-slate-800">${esc(s.branchName)}</td>
+    <td class="px-4 py-3">${esc(s.ownerName)}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(fmtPhone(s.phone))}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(s.openDate)||'–'}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(s.contractStatus)||'–'}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(s.paymentStatus)||'–'}</td>
+    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${stBadge(s.openStatus)}">${esc(s.openStatus)||'–'}</span></td>
+    <td class="px-4 py-3 text-slate-500">${partnerSummary(s)}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(s.managerSV)||'–'}</td>
+    <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+      <button onclick="openShare('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">링크</button>
+      <button onclick="openStoreModal('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">수정</button>
+      <button onclick="deleteStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+    </td>
+  </tr>`).join('');
+};
+
+function renderStoreStats(){
+  const ym = todayLocal().slice(0,7);
+  document.getElementById('stTotal').textContent = storeCache.length;
+  document.getElementById('stContract').textContent = storeCache.filter(s=>s.contractStatus==='계약완료').length;
+  document.getElementById('stPaid').textContent = storeCache.filter(s=>s.paymentStatus==='완납').length;
+  document.getElementById('stNew').textContent = storeCache.filter(s=>(s.signupDate||'').startsWith(ym)).length;
+}
+
+function renderHome(){
+  const today = todayLocal();
+  document.getElementById('statStores').textContent = storeCache.length;
+  document.getElementById('statPreparing').textContent = storeCache.filter(s=>['준비중','진행중'].includes(s.openStatus)).length;
+  document.getElementById('statOpened').textContent = storeCache.filter(s=>s.openStatus==='오픈완료').length;
+  const ym = today.slice(0,7);
+  document.getElementById('statThisMonth').textContent = storeCache.filter(s=>(s.openDate||'').startsWith(ym) && s.openStatus!=='오픈완료').length;
+  // 예정: 오늘 이후 / 지연: 오픈일이 지났는데 아직 오픈완료가 아닌 매장
+  const upcoming = storeCache.filter(s=>s.openDate && s.openDate >= today && s.openStatus!=='오픈완료')
+    .sort((a,b)=>a.openDate.localeCompare(b.openDate)).slice(0,5);
+  const overdue = storeCache.filter(s=>s.openDate && s.openDate < today && s.openStatus!=='오픈완료')
+    .sort((a,b)=>a.openDate.localeCompare(b.openDate)).slice(0,5);
+  const upHtml = upcoming.map(s=>`<div class="flex items-center justify-between border border-slate-100 rounded-lg px-3.5 py-2.5">
+        <span><b class="text-slate-700">${esc(s.branchName)}</b> · ${esc(s.ownerName)}</span>
+        <span class="text-indigo-600 font-bold">${esc(s.openDate)}</span></div>`).join('');
+  const ovHtml = overdue.map(s=>`<div class="flex items-center justify-between border border-rose-100 bg-rose-50/40 rounded-lg px-3.5 py-2.5">
+        <span><b class="text-slate-700">${esc(s.branchName)}</b> · ${esc(s.ownerName)}
+          <span class="ml-1.5 px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 text-[11px] font-bold">오픈일 경과</span></span>
+        <span class="text-rose-600 font-bold">${esc(s.openDate)}</span></div>`).join('');
+  document.getElementById('upcomingList').innerHTML = (ovHtml + upHtml) ||
+    '<div class="text-slate-400">예정된 오픈 일정이 없습니다.</div>';
+}
+
+// 랜덤 토큰 (24자)
+function genToken(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  let t=''; const arr=new Uint32Array(24); crypto.getRandomValues(arr);
+  arr.forEach(n=>t+=chars[n%chars.length]); return t;
+}
+
+const FIELDS = ['branchName','ownerName','phone','birth','signupDate','openDate','address','contactName','managerSV','area','contractStatus','paymentStatus','paymentDetail','openStatus','partnerStatus','memo'];
+
+// ===== 파트너사 매칭 항목 =====
+const PARTNER_TYPES = ['인테리어','익스테리어·간판','설비(전기·냉난방)','집기·가구','초도물품','세무·법무','보험','물류·배송','IT·네트워크','기타'];
+const PARTNER_STATUS = ['미진행','견적중','계약완료','진행중','완료'];
+let pItems = [];
+
+// 구버전 데이터(문자열 배열) 호환
+function normalizePartnerItems(raw){
+  if(!Array.isArray(raw)) return [];
+  return raw.map(x => typeof x === 'string'
+    ? { name:x, vendor:'', status:'미진행', amount:'', memo:'' }
+    : { name:x.name||'', vendor:x.vendor||'', status:x.status||'미진행', amount:x.amount||'', memo:x.memo||'' });
+}
+
+// 전체 진행상태 자동 계산
+function calcPartnerStatus(items){
+  if(!items.length) return '';
+  if(items.every(i=>i.status==='완료')) return '완료';
+  if(items.some(i=>['진행중','계약완료'].includes(i.status))) return '진행중';
+  if(items.some(i=>i.status==='견적중')) return '견적중';
+  return '미진행';
+}
+
+function renderPartnerChecks(){
+  const wrap = document.getElementById('partnerChecks');
+  const badge = st => st==='완료' ? 'bg-emerald-50 text-emerald-600'
+    : st==='진행중' ? 'bg-indigo-50 text-indigo-600'
+    : st==='계약완료' ? 'bg-violet-50 text-violet-600'
+    : st==='견적중' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400';
+  wrap.innerHTML = PARTNER_TYPES.map(t=>{
+    const it = pItems.find(x=>x.name===t);
+    return `<label class="flex items-center gap-1.5 text-[12.5px] text-slate-600 cursor-pointer">
+      <input type="checkbox" ${it?'checked':''} onchange="togglePartner('${t}',this.checked)" class="w-3.5 h-3.5 accent-indigo-600 shrink-0">
+      <span class="truncate">${t}</span>
+      ${it ? `<span class="shrink-0 px-1.5 py-0.5 rounded text-[10.5px] font-bold ${badge(it.status)}">${esc(it.status)}</span>` : ''}
+      ${it && it.vendor ? `<span class="text-[11px] text-slate-400 truncate">${esc(it.vendor)}</span>` : ''}
+    </label>`;
+  }).join('');
+}
+window.togglePartner = (name, on) => {
+  if(on){
+    if(!pItems.find(x=>x.name===name)) pItems.push({name, vendor:'', status:'미진행', amount:'', memo:''});
+  }else{
+    const it = pItems.find(x=>x.name===name);
+    if(it && (it.vendor || it.amount || it.memo)){
+      if(!confirm(`"${name}" 항목에 입력된 업체·금액·메모가 함께 삭제됩니다. 계속할까요?`)){
+        renderPartnerChecks(); return;
+      }
+    }
+    pItems = pItems.filter(x=>x.name!==name);
+  }
+  renderPartnerChecks(); syncPartnerAuto();
+};
+// 전체 진행상태는 화면에 표시하지 않고 내부 계산만 (점주 페이지에서 사용)
+window.syncPartnerAuto = () => {
+  document.getElementById('f_partnerStatus').value = calcPartnerStatus(pItems);
+};
+let editingId = null;
+
+window.openStoreModal = id => {
+  editingId = id || null;
+  document.getElementById('storeModalTitle').textContent = id ? '매장 수정' : '매장 등록';
+  const s = id ? storeCache.find(x=>x.id===id) : {};
+  FIELDS.forEach(f => document.getElementById('f_'+f).value = s[f] ?? '');
+  pItems = normalizePartnerItems(s.partnerItems);
+  renderPartnerChecks(); syncPartnerAuto();
+  if(!id) document.getElementById('f_signupDate').value = todayLocal();
+  document.getElementById('storeErr').classList.add('hidden');
+  document.getElementById('storeModal').classList.remove('hidden');
+  normalizeTelInputs(document.getElementById('storeModal'));
+};
+window.closeStoreModal = () => document.getElementById('storeModal').classList.add('hidden');
+
+// 공개뷰(점주 열람용) — 민감정보(연락처·생년월일·가입비 상세·메모) 제외
+async function syncPublicStore(storeId, data){
+  await setDoc(doc(db,'public_stores', data.shareToken), {
+    companyId: MY.companyId,
+    storeId,
+    companyName: MY.company.companyName,
+    branchName: data.branchName, ownerName: data.ownerName,
+    openDate: data.openDate||'', openStatus: data.openStatus||'',
+    contractStatus: data.contractStatus||'', partnerStatus: data.partnerStatus||'',
+    partnerItems: data.partnerItems||[],
+    steps: data.steps||[],
+    updatedAt: serverTimestamp()
+  });
+}
+
+window.saveStore = async () => {
+  const err = document.getElementById('storeErr');
+  err.classList.add('hidden');
+  const data = {};
+  FIELDS.forEach(f => data[f] = document.getElementById('f_'+f).value.trim());
+  data.partnerItems = pItems.filter(i=>i.name).map(i=>({
+    name:i.name, vendor:(i.vendor||'').trim(), status:i.status||'미진행',
+    amount:(i.amount||'').toString().replace(/[^0-9]/g,''), memo:(i.memo||'').trim()
+  }));
+  data.partnerStatus = calcPartnerStatus(data.partnerItems);
+  if(!data.branchName || !data.ownerName){
+    err.textContent='지점명과 점주명은 필수입니다.'; err.classList.remove('hidden'); return;
+  }
+  const btn = document.getElementById('storeSaveBtn');
+  btn.disabled=true; btn.textContent='저장 중...';
+  try{
+    if(editingId){
+      const prev = storeCache.find(x=>x.id===editingId);
+      data.shareToken = prev.shareToken;
+      await updateDoc(doc(db,'stores',editingId), data);
+      await syncPublicStore(editingId, {...data, steps: prev.steps || []});
+    }else{
+      data.companyId = MY.companyId;
+      data.shareToken = genToken();
+      data.steps = defaultSteps();
+      data.createdAt = serverTimestamp();
+      const ref = await addDoc(collection(db,'stores'), data);
+      await syncPublicStore(ref.id, data);
+      await updateDoc(doc(db,'companies',MY.companyId), { storeCount: increment(1) });
+    }
+    closeStoreModal();
+    await loadStores();
+  }catch(e){
+    err.textContent='저장 실패: '+(e.code||e.message); err.classList.remove('hidden');
+  }
+  btn.disabled=false; btn.textContent='저장';
+};
+
+window.deleteStore = async id => {
+  const s = storeCache.find(x=>x.id===id);
+  if(!confirm(`"${s.branchName}" 매장을 삭제 보관함으로 이동할까요?\n(점주 공유 링크는 즉시 중단되며, 보관함에서 복원할 수 있습니다)`)) return;
+  await updateDoc(doc(db,'stores',id), { deleted:true, deletedAt: Date.now() });
+  try{ await deleteDoc(doc(db,'public_stores', s.shareToken)); }catch(e){}
+  await updateDoc(doc(db,'companies',MY.companyId), { storeCount: increment(-1) });
+  await loadStores();
+};
+
+window.restoreStore = async id => {
+  const s = trashCache.find(x=>x.id===id);
+  await updateDoc(doc(db,'stores',id), { deleted:false, deletedAt:null });
+  await syncPublicStore(id, s);   // 공유 링크도 다시 활성화
+  await updateDoc(doc(db,'companies',MY.companyId), { storeCount: increment(1) });
+  await loadStores();
+};
+
+window.purgeStore = async id => {
+  const s = trashCache.find(x=>x.id===id);
+  if(!confirm(`"${s.branchName}" 매장을 영구 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  await deleteDoc(doc(db,'stores',id));
+  await loadStores();
+};
+
+// ===== 오픈 진행 타임라인 =====
+let tlStoreId = null, tlSteps = [];
+window.openTimeline = id => {
+  tlStoreId = id;
+  const s = storeCache.find(x=>x.id===id);
+  tlSteps = (s.steps && s.steps.length ? s.steps : defaultSteps()).map(x=>({...x}));
+  document.getElementById('tlBranch').textContent = s.branchName;
+  renderTlRows();
+  document.getElementById('timelineModal').classList.remove('hidden');
+};
+window.closeTimeline = () => document.getElementById('timelineModal').classList.add('hidden');
+function renderTlRows(){
+  const total = tlSteps.length;
+  const done = tlSteps.filter(x=>x.status==='완료').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('tlBar').style.width = pct+'%';
+  document.getElementById('tlPct').textContent = pct+'%';
+  document.getElementById('tlRows').innerHTML = tlSteps.map((st,i)=>`
+    <div class="flex items-center gap-2">
+      <span class="w-6 text-center text-[12px] font-bold text-slate-400">${i+1}</span>
+      <input value="${esc(st.name)}" onchange="tlSteps[${i}].name=this.value"
+        class="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm transition">
+      <select onchange="tlSteps[${i}].status=this.value"
+        class="px-2.5 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition ${st.status==='완료'?'text-emerald-600 font-bold':st.status==='진행중'?'text-indigo-600 font-bold':'text-slate-500'}">
+        <option ${st.status==='대기'?'selected':''}>대기</option>
+        <option ${st.status==='진행중'?'selected':''}>진행중</option>
+        <option ${st.status==='완료'?'selected':''}>완료</option>
+      </select>
+      <button onclick="tlSteps.splice(${i},1);renderTlRows()" class="text-slate-300 hover:text-rose-500 text-lg leading-none px-1">&times;</button>
+    </div>`).join('');
+}
+window.renderTlRows = renderTlRows;
+window.tlAddStep = () => { tlSteps.push({name:'', status:'대기'}); renderTlRows(); };
+
+// 현재 진행중 단계를 완료 처리하고 다음 대기 단계를 진행중으로
+window.tlAdvance = () => {
+  const cur = tlSteps.findIndex(x=>x.status==='진행중');
+  if(cur >= 0) tlSteps[cur].status = '완료';
+  const next = tlSteps.findIndex(x=>x.status==='대기');
+  if(next >= 0) tlSteps[next].status = '진행중';
+  else if(cur < 0){
+    alert('모든 단계가 완료되었습니다.');
+  }
+  renderTlRows();
+};
+
+window.tlReset = () => {
+  if(!confirm('단계를 기본 7단계로 초기화할까요?\n현재 입력한 단계와 진행 상태가 모두 사라집니다.')) return;
+  tlSteps = defaultSteps();
+  renderTlRows();
+};
+window.saveTimeline = async () => {
+  const steps = tlSteps.filter(x=>x.name.trim()).map(x=>({name:x.name.trim(), status:x.status}));
+  const s = storeCache.find(x=>x.id===tlStoreId);
+  const patch = { steps };
+
+  const allDone = steps.length > 0 && steps.every(x=>x.status==='완료');
+  const started = steps.some(x=>['진행중','완료'].includes(x.status));
+  if(allDone && s.openStatus !== '오픈완료'){
+    if(confirm('모든 단계가 완료되었습니다.\n이 매장의 진행 상태를 "오픈완료"로 변경할까요?')) patch.openStatus = '오픈완료';
+  }else if(started && s.openStatus === '준비중'){
+    patch.openStatus = '진행중';
+  }
+
+  await updateDoc(doc(db,'stores',tlStoreId), patch);
+  await syncPublicStore(tlStoreId, {...s, ...patch});
+  closeTimeline();
+};
+
+// 공유 링크
+let shareStoreId = null;
+function shareUrl(token){
+  const base = location.href.replace(/[^/]*$/,'');
+  return base + 'store.html?t=' + token;
+}
+window.openShare = id => {
+  shareStoreId = id;
+  const s = storeCache.find(x=>x.id===id);
+  document.getElementById('shareLinkInput').value = shareUrl(s.shareToken);
+  document.getElementById('shareModal').classList.remove('hidden');
+};
+window.copyShareLink = () => {
+  const el = document.getElementById('shareLinkInput');
+  el.select(); navigator.clipboard.writeText(el.value);
+  alert('링크가 복사되었습니다.');
+};
+window.regenToken = async () => {
+  if(!confirm('링크를 재발급할까요? 기존 링크는 즉시 사용할 수 없게 됩니다.')) return;
+  const s = storeCache.find(x=>x.id===shareStoreId);
+  const oldToken = s.shareToken;
+  const newToken = genToken();
+  await updateDoc(doc(db,'stores',shareStoreId), { shareToken:newToken });
+  const updated = {...s, shareToken:newToken};
+  await syncPublicStore(shareStoreId, updated);
+  try{ await deleteDoc(doc(db,'public_stores', oldToken)); }catch(e){}
+  await loadStores();
+  document.getElementById('shareLinkInput').value = shareUrl(newToken);
+  alert('새 링크가 발급되었습니다.');
+};
+
+// ===== 엑셀 백업 / 가져오기 =====
+const XLS_STORE = [
+  {key:'branchName',label:'지점명',w:18},{key:'ownerName',label:'점주명',w:12},
+  {key:'phone',label:'연락처',w:15},{key:'birth',label:'생년월일',w:12},
+  {key:'signupDate',label:'가입일자',w:12},{key:'openDate',label:'오픈일',w:12},
+  {key:'address',label:'주소',w:26},{key:'contactName',label:'담당 실무자',w:12},
+  {key:'managerSV',label:'담당 SV',w:12},{key:'area',label:'평수',w:10},
+  {key:'contractStatus',label:'계약 상태',w:12},{key:'paymentStatus',label:'가입비 납입',w:12},
+  {key:'paymentDetail',label:'가입비 상세(만원)',w:16},{key:'openStatus',label:'오픈 진행 상태',w:14},
+  {key:'memo',label:'메모',w:30}
+];
+const XLS_LEAD = [
+  {key:'consultDate',label:'상담일자',w:12},{key:'name',label:'이름',w:12},
+  {key:'phone',label:'연락처',w:15},{key:'manager',label:'담당자',w:12},
+  {key:'region',label:'지역',w:16},{key:'storeType',label:'매장유형',w:14},
+  {key:'channel',label:'상담경로',w:12},{key:'stage',label:'진행 단계',w:12},
+  {key:'competitor',label:'비교 경쟁사',w:14},{key:'area',label:'평수',w:10},
+  {key:'gender',label:'성별',w:8},{key:'ageGroup',label:'연령대',w:10},
+  {key:'remindDate',label:'리마인드 예정일',w:14},{key:'reason',label:'가입/취소 사유',w:20},
+  {key:'memo',label:'메모',w:30}
+];
+const XLS_OPEN = [
+  {key:'branchName',label:'지점명',w:18},{key:'ownerName',label:'점주명',w:12},
+  {key:'openDate',label:'오픈예정일',w:12},{key:'openStatus',label:'진행 상태',w:12},
+  {key:'progress',label:'진행률',w:10},{key:'current',label:'현재 단계',w:16},
+  {key:'next',label:'다음 단계',w:16},{key:'stepsText',label:'전체 단계(단계명:상태)',w:50},
+  {key:'managerSV',label:'담당 SV',w:12}
+];
+const XLS_PARTNER = [
+  {key:'branchName',label:'지점명',w:18},{key:'ownerName',label:'점주명',w:12},
+  {key:'name',label:'항목',w:16},{key:'vendor',label:'협력업체',w:18},
+  {key:'status',label:'진행 상태',w:12},{key:'amount',label:'금액(만원)',w:12},
+  {key:'memo',label:'메모',w:30}
+];
+const XLS_POS = [
+  {key:'branchName',label:'지점명',w:18},{key:'ownerName',label:'점주명',w:12},
+  {key:'signupDate',label:'가입일',w:12},{key:'status',label:'계약서 상태',w:12},
+  {key:'cmsText',label:'CMS 연동',w:12},{key:'cmsDate',label:'CMS 확인일자',w:14},
+  {key:'config',label:'설치 구성',w:28},{key:'installDate',label:'설치일',w:12},
+  {key:'program',label:'청구 프로그램',w:18},{key:'monthly',label:'월요금(원)',w:12},
+  {key:'settle',label:'정산금액(원)',w:12},{key:'memo',label:'메모',w:30}
+];
+
+function mountExcelButtons(){
+  const set = (id, ex, im, tp) => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = excelButtons(ex, im, tp);
+  };
+  set('xlsStore',  'xStoreOut()',  'xStoreIn()',  'xStoreTpl()');
+  set('xlsLead',   'xLeadOut()',   'xLeadIn()',   'xLeadTpl()');
+  set('xlsOpen',   'xOpenOut()',   'xOpenIn()',   'xOpenTpl()');
+  set('xlsPartner','xPartnerOut()','xPartnerIn()','xPartnerTpl()');
+  set('xlsPos',    'xPosOut()',    'xPosIn()',    'xPosTpl()');
+}
+
+// ── 매장 ──
+window.xStoreOut = () => exportExcel('매장관리', XLS_STORE, storeCache, '매장관리');
+window.xStoreTpl = () => exportTemplate('매장관리', XLS_STORE, '매장관리');
+window.xStoreIn = () => pickAndPreview({
+  title:'매장', cols:XLS_STORE, existing:storeCache,
+  keyOf: r => `${(r.branchName||'').trim()}|${(r.ownerName||'').trim()}`,
+  validate: r => (!r.branchName || !r.ownerName) ? '지점명·점주명 누락' : null,
+  onConfirm: async (news, dups, mode) => {
+    let n = 0;
+    for(const r of news){
+      const data = {};
+      XLS_STORE.forEach(c => data[c.key] = r[c.key] || '');
+      data.phone = fmtPhone(data.phone);
+      data.companyId = MY.companyId;
+      data.shareToken = genToken();
+      data.steps = defaultSteps();
+      data.partnerItems = [];
+      data.openStatus = data.openStatus || '준비중';
+      data.createdAt = serverTimestamp();
+      const ref = await addDoc(collection(db,'stores'), data);
+      await syncPublicStore(ref.id, data);
+      n++;
+    }
+    if(n) await updateDoc(doc(db,'companies',MY.companyId), { storeCount: increment(n) });
+    if(mode==='overwrite'){
+      for(const r of dups){
+        const t = storeCache.find(x => x.branchName===r.branchName && x.ownerName===r.ownerName);
+        if(!t) continue;
+        const data = {};
+        XLS_STORE.forEach(c => { if(r[c.key] !== undefined) data[c.key] = r[c.key]; });
+        data.phone = fmtPhone(data.phone||t.phone);
+        await updateDoc(doc(db,'stores',t.id), data);
+        await syncPublicStore(t.id, { ...t, ...data });
+        n++;
+      }
+    }
+    return n;
+  }
+});
+
+// ── 상담 ──
+window.xLeadOut = () => exportExcel('상담관리', XLS_LEAD, leadCache, '상담관리');
+window.xLeadTpl = () => exportTemplate('상담관리', XLS_LEAD, '상담관리');
+window.xLeadIn = () => pickAndPreview({
+  title:'상담', cols:XLS_LEAD, existing:leadCache,
+  keyOf: r => `${(r.name||'').trim()}|${String(r.phone||'').replace(/\D/g,'')}|${(r.consultDate||'').trim()}`,
+  validate: r => (!r.consultDate || !r.name) ? '상담일자·이름 누락' : null,
+  onConfirm: async (news, dups, mode) => {
+    let n = 0;
+    for(const r of news){
+      const data = {};
+      XLS_LEAD.forEach(c => data[c.key] = r[c.key] || '');
+      data.phone = fmtPhone(data.phone);
+      data.stage = data.stage || '상담중';
+      data.companyId = MY.companyId;
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'leads'), data);
+      n++;
+    }
+    if(mode==='overwrite'){
+      for(const r of dups){
+        const t = leadCache.find(x => x.name===r.name && x.consultDate===r.consultDate);
+        if(!t) continue;
+        const data = {};
+        XLS_LEAD.forEach(c => { if(r[c.key] !== undefined) data[c.key] = r[c.key]; });
+        data.phone = fmtPhone(data.phone||t.phone);
+        await updateDoc(doc(db,'leads',t.id), data);
+        n++;
+      }
+    }
+    return n;
+  }
+});
+
+// ── 오픈 관리 ──
+window.xOpenOut = () => {
+  const rows = storeCache.map(s => {
+    const inf = stepInfo(s);
+    return { branchName:s.branchName, ownerName:s.ownerName, openDate:s.openDate||'',
+      openStatus:s.openStatus||'', progress: inf.total ? `${inf.done}/${inf.total}` : '',
+      current: inf.current, next: inf.next, managerSV: s.managerSV||'',
+      stepsText: (s.steps||[]).map(x=>`${x.name}:${x.status}`).join(' / ') };
+  });
+  exportExcel('오픈관리', XLS_OPEN, rows, '오픈관리');
+};
+window.xOpenTpl = () => exportTemplate('오픈관리', XLS_OPEN, '오픈관리');
+window.xOpenIn = () => pickAndPreview({
+  title:'오픈 관리', cols:XLS_OPEN,
+  existing: storeCache.map(s=>({branchName:s.branchName, ownerName:s.ownerName})),
+  keyOf: r => `${(r.branchName||'').trim()}|${(r.ownerName||'').trim()}`,
+  validate: r => (!r.branchName || !r.ownerName) ? '지점명·점주명 누락'
+                : (!storeCache.some(s=>s.branchName===r.branchName && s.ownerName===r.ownerName)
+                   ? '등록되지 않은 매장 (매장 관리에서 먼저 등록)' : null),
+  onConfirm: async (news, dups, mode) => {
+    // 오픈행정은 기존 매장의 단계·일정만 갱신 (신규 매장 생성 안 함)
+    const targets = mode==='overwrite' ? [...news, ...dups] : [...news, ...dups];
+    let n = 0;
+    for(const r of targets){
+      const t = storeCache.find(s=>s.branchName===r.branchName && s.ownerName===r.ownerName);
+      if(!t) continue;
+      const patch = {};
+      if(r.openDate)   patch.openDate = r.openDate;
+      if(r.openStatus) patch.openStatus = r.openStatus;
+      if(r.managerSV)  patch.managerSV = r.managerSV;
+      if(r.stepsText){
+        patch.steps = r.stepsText.split('/').map(x=>{
+          const [nm, st] = x.split(':').map(v=>(v||'').trim());
+          return nm ? { name:nm, status:['대기','진행중','완료'].includes(st)?st:'대기' } : null;
+        }).filter(Boolean);
+      }
+      if(!Object.keys(patch).length) continue;
+      await updateDoc(doc(db,'stores',t.id), patch);
+      await syncPublicStore(t.id, { ...t, ...patch });
+      n++;
+    }
+    return n;
+  }
+});
+
+// ── 파트너사 ──
+window.xPartnerOut = () => exportExcel('파트너사매칭', XLS_PARTNER, flatPartnerRows(), '파트너사매칭');
+window.xPartnerTpl = () => exportTemplate('파트너사매칭', XLS_PARTNER, '파트너사매칭');
+window.xPartnerIn = () => pickAndPreview({
+  title:'파트너사', cols:XLS_PARTNER, existing: flatPartnerRows(),
+  keyOf: r => `${(r.branchName||'').trim()}|${(r.ownerName||'').trim()}|${(r.name||'').trim()}`,
+  validate: r => (!r.branchName || !r.name) ? '지점명·항목 누락'
+                : (!storeCache.some(s=>s.branchName===r.branchName) ? '등록되지 않은 매장' : null),
+  onConfirm: async (news, dups, mode) => {
+    const list = mode==='overwrite' ? [...news, ...dups] : news;
+    // 매장별로 묶어서 한 번에 반영
+    const byStore = {};
+    list.forEach(r=>{
+      const st = storeCache.find(s=>s.branchName===r.branchName);
+      if(!st) return;
+      (byStore[st.id] = byStore[st.id] || []).push(r);
+    });
+    let n = 0;
+    for(const [sid, arr] of Object.entries(byStore)){
+      const st = storeCache.find(x=>x.id===sid);
+      const items = normalizePartnerItems(st.partnerItems);
+      arr.forEach(r=>{
+        const item = { name:r.name, vendor:r.vendor||'', status:r.status||'미진행',
+                       amount:String(r.amount||'').replace(/[^0-9]/g,''), memo:r.memo||'' };
+        const i = items.findIndex(x=>x.name===r.name);
+        if(i>=0) items[i] = item; else items.push(item);
+        n++;
+      });
+      const partnerStatus = calcPartnerStatus(items);
+      await updateDoc(doc(db,'stores',sid), { partnerItems: items, partnerStatus });
+      await syncPublicStore(sid, { ...st, partnerItems: items, partnerStatus });
+    }
+    return n;
+  }
+});
+
+// ── POS ──
+window.xPosOut = () => {
+  const rows = posRowsData().map(p => ({ ...p, cmsText: p.cms==='y' ? '연동' : '미연동' }));
+  exportExcel('POS관리', XLS_POS, rows, 'POS관리');
+};
+window.xPosTpl = () => exportTemplate('POS관리', XLS_POS, 'POS관리');
+window.xPosIn = () => pickAndPreview({
+  title:'POS 관리', cols:XLS_POS, existing: posRowsData(),
+  keyOf: r => `${(r.branchName||'').trim()}|${(r.ownerName||'').trim()}`,
+  validate: r => (!r.branchName) ? '지점명 누락'
+                : (!storeCache.some(s=>s.branchName===r.branchName) ? '등록되지 않은 매장' : null),
+  onConfirm: async (news, dups, mode) => {
+    const list = mode==='overwrite' ? [...news, ...dups] : news;
+    let n = 0;
+    for(const r of list){
+      const st = storeCache.find(s=>s.branchName===r.branchName);
+      if(!st) continue;
+      const pos = {
+        signupDate: r.signupDate||'', status: r.status||'대기',
+        cms: (r.cmsText||'').includes('연동') && !(r.cmsText||'').includes('미') ? 'y' : '',
+        cmsDate: r.cmsDate||'', config: r.config||'', installDate: r.installDate||'',
+        program: r.program||'',
+        monthly: String(r.monthly||'').replace(/[^0-9]/g,''),
+        settle: String(r.settle||'').replace(/[^0-9]/g,''),
+        memo: r.memo||'', deleted:false
+      };
+      await updateDoc(doc(db,'stores',st.id), { pos });
+      n++;
+    }
+    return n;
+  }
+});
+
+// ===== POS 관리 탭 =====
+const POS_FIELDS = ['signupDate','status','cms','cmsDate','config','installDate','program','monthly','settle','memo'];
+let posTrashMode = false;
+
+const posBadge = st => st==='설치완료' ? 'bg-emerald-50 text-emerald-600'
+  : st==='설치예정' ? 'bg-indigo-50 text-indigo-600'
+  : st==='계약완료' ? 'bg-violet-50 text-violet-600'
+  : st==='해지' ? 'bg-rose-50 text-rose-500' : 'bg-slate-100 text-slate-400';
+
+window.togglePosTrash = () => {
+  posTrashMode = !posTrashMode;
+  const b = document.getElementById('posTrashToggle');
+  b.classList.toggle('bg-rose-50', posTrashMode);
+  b.classList.toggle('border-rose-200', posTrashMode);
+  b.classList.toggle('text-rose-600', posTrashMode);
+  renderPosTab();
+};
+
+function posRowsData(){
+  return storeCache.filter(s=>s.pos && !s.pos.deleted)
+    .map(s=>({ storeId:s.id, branchName:s.branchName, ownerName:s.ownerName, phone:s.phone, ...s.pos }));
+}
+function posTrashData(){
+  return storeCache.filter(s=>s.pos && s.pos.deleted)
+    .map(s=>({ storeId:s.id, branchName:s.branchName, ownerName:s.ownerName, ...s.pos }));
+}
+
+window.renderPosTab = () => {
+  const all = posRowsData();
+  const trash = posTrashData();
+  document.getElementById('posTrashCount').textContent = trash.length;
+
+  document.getElementById('posTotal').textContent = all.length;
+  document.getElementById('posDone').textContent = all.filter(p=>p.status==='설치완료').length;
+  document.getElementById('posCms').textContent = all.filter(p=>p.cms!=='y' && p.status!=='해지').length;
+  const sum = all.reduce((a,p)=>a + (parseInt(p.settle)||0), 0);
+  document.getElementById('posAmount').textContent = sum ? sum.toLocaleString('ko-KR') : '–';
+
+  const rows = document.getElementById('posRows');
+  if(posTrashMode){
+    rows.innerHTML = trash.length===0
+      ? '<tr><td colspan="10" class="px-4 py-14 text-center text-slate-400 text-[13px]">삭제 보관함이 비어 있습니다.</td></tr>'
+      : trash.map(p=>`<tr class="border-t border-slate-100 bg-rose-50/30 hover:bg-rose-50 transition">
+          <td class="px-4 py-3 font-semibold text-slate-500 line-through">${esc(p.branchName)}</td>
+          <td class="px-4 py-3 text-slate-400">${esc(p.ownerName)}</td>
+          <td class="px-4 py-3 text-slate-400" colspan="6">삭제일: ${p.deletedAt ? new Date(p.deletedAt).toLocaleDateString('ko-KR') : '–'}</td>
+          <td class="px-4 py-3 text-right text-slate-400">${p.settle ? Number(p.settle).toLocaleString('ko-KR') : '–'}</td>
+          <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+            <button onclick="restorePos('${p.storeId}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">복원</button>
+            <button onclick="purgePos('${p.storeId}')" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">영구삭제</button>
+          </td></tr>`).join('');
+    renderCards('posCards', trash.map(p=>({
+      dim:true, title: esc(p.branchName), sub: esc(p.ownerName),
+      fields: [['삭제일', p.deletedAt ? new Date(p.deletedAt).toLocaleDateString('ko-KR') : '']],
+      actions: mBtn('복원', `restorePos('${p.storeId}')`, 'primary') + mBtn('영구삭제', `purgePos('${p.storeId}')`, 'danger')
+    })), '삭제 보관함이 비어 있습니다.');
+    return;
+  }
+
+  const kw = (document.getElementById('posSearch').value||'').trim();
+  const fs = document.getElementById('posStatusFilter').value;
+  const fc = document.getElementById('posCmsFilter').value;
+  let list = all;
+  if(kw) list = list.filter(p => [p.branchName,p.ownerName,p.program].some(v=>(v||'').includes(kw)));
+  if(fs) list = list.filter(p => p.status === fs);
+  if(fc==='y') list = list.filter(p => p.cms === 'y');
+  if(fc==='n') list = list.filter(p => p.cms !== 'y');
+
+  if(list.length===0){
+    rows.innerHTML = `<tr><td colspan="10" class="px-4 py-10 text-center text-slate-400">${
+      all.length===0 ? '아직 등록된 POS 정보가 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 연동 등록]으로 시작하세요.</span>' : '검색 조건에 맞는 항목이 없습니다.'
+    }</td></tr>`;
+    renderCards('posCards', [], all.length===0 ? '아직 등록된 POS 정보가 없습니다.' : '검색 조건에 맞는 항목이 없습니다.'); return;
+  }
+  rows.innerHTML = list.map(p=>`<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+    <td class="px-4 py-3 font-semibold text-slate-800">${esc(p.branchName)}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(p.ownerName)}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(fmtPhone(p.phone))}</td>
+    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${posBadge(p.status)}">${esc(p.status)||'–'}</span></td>
+    <td class="px-4 py-3">${p.cms==='y'
+      ? `<span class="text-emerald-600 font-bold">완료</span>${p.cmsDate?`<span class="text-slate-400 text-[11.5px] ml-1">${esc(p.cmsDate)}</span>`:''}`
+      : '<span class="text-slate-300">미연동</span>'}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(p.installDate)||'–'}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(p.program)||'–'}</td>
+    <td class="px-4 py-3 text-right text-slate-600">${p.monthly ? Number(p.monthly).toLocaleString('ko-KR') : '–'}</td>
+    <td class="px-4 py-3 text-right font-semibold text-slate-700">${p.settle ? Number(p.settle).toLocaleString('ko-KR') : '–'}</td>
+    <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+      <button onclick="openPosModal('${p.storeId}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">수정</button>
+      <button onclick="deletePos('${p.storeId}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+    </td></tr>`).join('');
+
+  renderCards('posCards', list.map(p=>({
+    title: esc(p.branchName),
+    sub: `${esc(p.ownerName)} · ${esc(fmtPhone(p.phone))||'연락처 없음'}`,
+    badges: [`<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${posBadge(p.status)}">${esc(p.status)||'–'}</span>`],
+    fields: [['CMS', p.cms==='y' ? '<span class="text-emerald-600 font-bold">연동</span>' : '<span class="text-slate-400">미연동</span>'],
+             ['설치일', esc(p.installDate)], ['프로그램', esc(p.program)],
+             ['월요금', p.monthly ? Number(p.monthly).toLocaleString('ko-KR')+'원' : ''],
+             ['정산금액', p.settle ? Number(p.settle).toLocaleString('ko-KR')+'원' : '']],
+    actions: mBtn('수정', `openPosModal('${p.storeId}')`, 'primary') + mBtn('삭제', `deletePos('${p.storeId}')`, 'ghost')
+  })), '');
+};
+
+let posTarget = null;
+window.openPosModal = (storeId) => {
+  const isNew = !storeId;
+  posTarget = storeId || null;
+  document.getElementById('posModalTitle').textContent = isNew ? 'POS 관리 등록' : 'POS 관리 수정';
+  document.getElementById('posStoreWrap').classList.toggle('hidden', !isNew);
+  document.getElementById('posInfo').classList.toggle('hidden', isNew);
+  document.getElementById('posErr').classList.add('hidden');
+
+  if(isNew){
+    const avail = storeCache.filter(s=>!s.pos || s.pos.deleted);
+    if(avail.length===0){ alert('모든 매장이 이미 등록되어 있거나 등록할 매장이 없습니다.'); return; }
+    document.getElementById('pos_store').innerHTML =
+      avail.map(s=>`<option value="${s.id}">${esc(s.branchName)} · ${esc(s.ownerName)}</option>`).join('');
+    POS_FIELDS.forEach(f=>document.getElementById('pos_'+f).value='');
+    document.getElementById('pos_signupDate').value = todayLocal();
+    document.getElementById('pos_status').value = '대기';
+  }else{
+    const st = storeCache.find(x=>x.id===storeId);
+    const p = st.pos || {};
+    document.getElementById('posInfo').innerHTML =
+      `<b class="text-slate-700">${esc(st.branchName)}</b> · ${esc(st.ownerName)} · ${esc(fmtPhone(st.phone))}`;
+    POS_FIELDS.forEach(f=>{
+      const el = document.getElementById('pos_'+f);
+      el.value = p[f] ?? '';
+      if((f==='monthly'||f==='settle') && el.value) commaInput(el);
+    });
+  }
+  document.getElementById('posModal').classList.remove('hidden');
+  if(window.renderAdSlot) renderAdSlot('ad-new-pos','tab_new_bottom');
+};
+window.closePosModal = () => document.getElementById('posModal').classList.add('hidden');
+
+window.savePos = async () => {
+  const err = document.getElementById('posErr');
+  err.classList.add('hidden');
+  const storeId = posTarget || document.getElementById('pos_store').value;
+  if(!storeId){ err.textContent='매장을 선택해 주세요.'; err.classList.remove('hidden'); return; }
+  const pos = {};
+  POS_FIELDS.forEach(f=>{
+    let v = document.getElementById('pos_'+f).value.trim();
+    if(f==='monthly'||f==='settle') v = v.replace(/[^0-9]/g,'');
+    pos[f] = v;
+  });
+  pos.deleted = false;
+  const btn = document.getElementById('posSaveBtn');
+  btn.disabled=true; btn.textContent='저장 중...';
+  try{
+    await updateDoc(doc(db,'stores',storeId), { pos });
+    closePosModal();
+  }catch(e){
+    err.textContent='저장 실패: '+(e.code||e.message); err.classList.remove('hidden');
+  }
+  btn.disabled=false; btn.textContent='저장';
+};
+
+window.deletePos = async storeId => {
+  const st = storeCache.find(x=>x.id===storeId);
+  if(!confirm(`"${st.branchName}"의 POS 정보를 삭제 보관함으로 옮길까요?`)) return;
+  await updateDoc(doc(db,'stores',storeId), { pos: { ...st.pos, deleted:true, deletedAt: Date.now() } });
+};
+window.restorePos = async storeId => {
+  const st = storeCache.find(x=>x.id===storeId);
+  const p = { ...st.pos }; p.deleted = false; delete p.deletedAt;
+  await updateDoc(doc(db,'stores',storeId), { pos: p });
+};
+window.purgePos = async storeId => {
+  const st = storeCache.find(x=>x.id===storeId);
+  if(!confirm(`"${st.branchName}"의 POS 정보를 영구 삭제할까요?`)) return;
+  await updateDoc(doc(db,'stores',storeId), { pos: null });
+};
+
+// ===== 오픈 관리 탭 =====
+function stepInfo(st){
+  const steps = (st.steps && st.steps.length) ? st.steps : [];
+  const total = steps.length;
+  const done = steps.filter(x=>x.status==='완료').length;
+  const cur = steps.find(x=>x.status==='진행중') || null;
+  const nextIdx = steps.findIndex(x=>x.status==='대기');
+  return {
+    steps, total, done,
+    pct: total ? Math.round(done/total*100) : 0,
+    current: cur ? cur.name : (total && done===total ? '전 단계 완료' : ''),
+    next: nextIdx >= 0 ? steps[nextIdx].name : ''
+  };
+}
+
+let opTrashMode = false;
+window.toggleOpTrash = () => {
+  opTrashMode = !opTrashMode;
+  const b = document.getElementById('opTrashToggle');
+  b.classList.toggle('bg-rose-50', opTrashMode);
+  b.classList.toggle('border-rose-200', opTrashMode);
+  b.classList.toggle('text-rose-600', opTrashMode);
+  renderOpenTab();
+};
+
+window.renderOpenTab = () => {
+  const today = todayLocal();
+  document.getElementById('opTrashCount').textContent = trashCache.length;
+
+  // ── 삭제 보관함 모드 (매장 관리와 동일한 보관함을 공유) ──
+  if(opTrashMode){
+    const rows = document.getElementById('opRows');
+    rows.innerHTML = trashCache.length===0
+      ? (renderCards('opCards', [], '삭제 보관함이 비어 있습니다.'), '<tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">삭제 보관함이 비어 있습니다.</td></tr>')
+      : trashCache.map(s=>{
+          const inf = stepInfo(s);
+          return `<tr class="border-t border-slate-100 bg-rose-50/30 hover:bg-rose-50 transition">
+            <td class="px-4 py-3 font-semibold text-slate-500 line-through">${esc(s.branchName)}</td>
+            <td class="px-4 py-3 text-slate-400">${esc(s.ownerName)}</td>
+            <td class="px-4 py-3 text-slate-400">${esc(s.openDate)||'–'}</td>
+            <td class="px-4 py-3 text-slate-300">–</td>
+            <td class="px-4 py-3 text-slate-400">${inf.total ? inf.done+'/'+inf.total : '–'}</td>
+            <td class="px-4 py-3 text-slate-400" colspan="2">삭제일: ${s.deletedAt ? new Date(s.deletedAt).toLocaleDateString('ko-KR') : '–'}</td>
+            <td class="px-4 py-3 text-slate-400">${esc(s.managerSV)||'–'}</td>
+            <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+              <button onclick="restoreStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">복원</button>
+              <button onclick="purgeStore('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">영구삭제</button>
+            </td></tr>`;
+        }).join('');
+    renderCards('opCards', trashCache.map(s=>({
+      dim:true, title: esc(s.branchName), sub: esc(s.ownerName),
+      fields: [['삭제일', s.deletedAt ? new Date(s.deletedAt).toLocaleDateString('ko-KR') : '']],
+      actions: mBtn('복원', `restoreStore('${s.id}')`, 'primary') + mBtn('영구삭제', `purgeStore('${s.id}')`, 'danger')
+    })), '삭제 보관함이 비어 있습니다.');
+    return;
+  }
+
+  const soonLimit = new Date(Date.now()+14*86400000).toISOString().slice(0,10);
+
+  // 통계
+  document.getElementById('opPreparing').textContent = storeCache.filter(s=>['준비중','진행중'].includes(s.openStatus)).length;
+  document.getElementById('opSoon').textContent = storeCache.filter(s=>s.openDate && s.openDate>=today && s.openDate<=soonLimit && s.openStatus!=='오픈완료').length;
+  const overdue = storeCache.filter(s=>s.openDate && s.openDate<today && s.openStatus!=='오픈완료');
+  document.getElementById('opOverdue').textContent = overdue.length;
+  document.getElementById('opDone').textContent = storeCache.filter(s=>s.openStatus==='오픈완료').length;
+
+  // 경고 박스
+  const box = document.getElementById('opAlertBox');
+  box.classList.toggle('hidden', overdue.length===0);
+  document.getElementById('opAlertRows').innerHTML = overdue
+    .sort((a,b)=>a.openDate.localeCompare(b.openDate))
+    .map(s=>{
+      const d = Math.round((new Date(today)-new Date(s.openDate))/86400000);
+      const inf = stepInfo(s);
+      return `<div class="flex items-center justify-between bg-white border border-rose-200 rounded-lg px-4 py-2.5">
+        <div class="text-[13px]"><b class="text-slate-800">${esc(s.branchName)}</b>
+          <span class="text-slate-500 ml-2">${esc(s.ownerName)} · 진행률 ${inf.pct}%</span></div>
+        <div class="flex items-center gap-2">
+          <span class="text-[12px] text-rose-600 font-bold">${esc(s.openDate)} (${d}일 경과)</span>
+          <button onclick="openTimeline('${s.id}')" class="px-2.5 py-1 rounded-lg border border-rose-300 text-rose-700 text-[12px] font-bold hover:bg-rose-100 transition">단계 관리</button>
+        </div></div>`;
+    }).join('');
+
+  // 목록
+  const kw = (document.getElementById('opSearch').value||'').trim();
+  const fs = document.getElementById('opStatusFilter').value;
+  const hideDone = document.getElementById('opHideDone').checked;
+  let list = storeCache;
+  if(kw) list = list.filter(s => [s.branchName,s.ownerName].some(v=>(v||'').includes(kw)));
+  if(fs) list = list.filter(s => s.openStatus === fs);
+  if(hideDone) list = list.filter(s => s.openStatus !== '오픈완료');
+  list = [...list].sort((a,b)=>{
+    if(!a.openDate) return 1;
+    if(!b.openDate) return -1;
+    return a.openDate.localeCompare(b.openDate);
+  });
+
+  const rows = document.getElementById('opRows');
+  if(list.length===0){
+    const em = storeCache.length===0 ? '아직 등록된 매장이 없습니다.<br><span class="text-[12px] text-slate-300">매장 관리에서 먼저 등록해 주세요.</span>' : '검색 조건에 맞는 매장이 없습니다.';
+    rows.innerHTML = `<tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">${em}</td></tr>`;
+    renderCards('opCards', [], em); return;
+  }
+
+  rows.innerHTML = list.map(s=>{
+    const inf = stepInfo(s);
+    let dday = '<span class="text-slate-300">–</span>';
+    if(s.openDate){
+      if(s.openStatus==='오픈완료') dday = '<span class="text-emerald-600 font-bold">오픈</span>';
+      else{
+        const d = Math.round((new Date(s.openDate)-new Date(today))/86400000);
+        dday = d < 0 ? `<span class="text-rose-600 font-bold">${-d}일 경과</span>`
+             : d === 0 ? '<span class="text-amber-600 font-bold">오늘</span>'
+             : d <= 14 ? `<span class="text-violet-600 font-bold">D-${d}</span>`
+             : `<span class="text-slate-500">D-${d}</span>`;
+      }
+    }
+    const barColor = inf.pct===100 ? 'bg-emerald-500' : inf.pct>=50 ? 'bg-indigo-500' : 'bg-violet-400';
+    const bar = inf.total
+      ? `<div class="flex items-center gap-2">
+           <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+             <div class="h-full ${barColor} transition-all" style="width:${inf.pct}%"></div>
+           </div>
+           <span class="text-[11.5px] text-slate-500 font-bold shrink-0">${inf.done}/${inf.total}</span>
+         </div>`
+      : '<span class="text-[12px] text-slate-300">단계 미설정</span>';
+    return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+      <td class="px-4 py-3 font-semibold text-slate-800">${esc(s.branchName)}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(s.ownerName)}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(s.openDate)||'<span class="text-slate-300">미정</span>'}</td>
+      <td class="px-4 py-3">${dday}</td>
+      <td class="px-4 py-3">${bar}</td>
+      <td class="px-4 py-3">${inf.current ? `<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">${esc(inf.current)}</span>` : '<span class="text-slate-300">–</span>'}</td>
+      <td class="px-4 py-3 text-slate-400">${esc(inf.next)||'–'}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(s.managerSV)||'–'}</td>
+      <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+        <button onclick="openTimeline('${s.id}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold transition">단계 관리</button>
+        <button onclick="openShare('${s.id}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">링크</button>
+      </td></tr>`;
+  }).join('');
+
+  renderCards('opCards', list.map(s=>{
+    const inf = stepInfo(s);
+    let dd = '';
+    if(s.openDate){
+      if(s.openStatus==='오픈완료') dd = '<span class="text-emerald-600 font-bold">오픈</span>';
+      else{
+        const d = Math.round((new Date(s.openDate)-new Date(today))/86400000);
+        dd = d < 0 ? `<span class="text-rose-600 font-bold">${-d}일 경과</span>`
+           : d === 0 ? '<span class="text-amber-600 font-bold">오늘</span>' : `D-${d}`;
+      }
+    }
+    const bar = inf.total
+      ? `<div class="w-full flex items-center gap-2 mb-2">
+           <div class="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+             <div class="h-full ${inf.pct===100?'bg-emerald-500':inf.pct>=50?'bg-indigo-500':'bg-violet-400'}" style="width:${inf.pct}%"></div></div>
+           <span class="text-[11px] text-slate-500 font-bold">${inf.done}/${inf.total}</span></div>`
+      : '';
+    return {
+      title: esc(s.branchName), sub: esc(s.ownerName),
+      badges: inf.current ? [`<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">${esc(inf.current)}</span>`] : [],
+      fields: [['오픈예정일', esc(s.openDate)], ['D-day', dd],
+               ['다음 단계', esc(inf.next)], ['담당', esc(s.managerSV)]],
+      actions: bar + mBtn('단계 관리', `openTimeline('${s.id}')`, 'primary') + mBtn('링크', `openShare('${s.id}')`)
+    };
+  }), '');
+};
+
+// ===== 파트너사 매칭 탭 =====
+const pmBadge = st => st==='완료' ? 'bg-emerald-50 text-emerald-600'
+  : st==='진행중' ? 'bg-indigo-50 text-indigo-600'
+  : st==='계약완료' ? 'bg-violet-50 text-violet-600'
+  : st==='견적중' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400';
+
+let pmTrashMode = false;
+function flatPartnerTrash(){
+  const out = [];
+  storeCache.forEach(st => {
+    normalizePartnerItems(st.partnerTrash).forEach((it, idx) => {
+      out.push({ storeId: st.id, branchName: st.branchName, ownerName: st.ownerName, idx,
+                 deletedAt: (st.partnerTrash||[])[idx]?.deletedAt, ...it });
+    });
+  });
+  return out;
+}
+
+function flatPartnerRows(){
+  const out = [];
+  storeCache.forEach(st => {
+    normalizePartnerItems(st.partnerItems).forEach((it, idx) => {
+      out.push({ storeId: st.id, branchName: st.branchName, ownerName: st.ownerName, idx, ...it });
+    });
+  });
+  return out;
+}
+
+window.renderPartnerTab = () => {
+  const all = flatPartnerRows();
+  const trash = flatPartnerTrash();
+  document.getElementById('pmTrashCount').textContent = trash.length;
+
+  if(pmTrashMode){
+    const rows = document.getElementById('pmRows');
+    rows.innerHTML = trash.length===0
+      ? '<tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">삭제 보관함이 비어 있습니다.</td></tr>'
+      : trash.map(r=>`<tr class="border-t border-slate-100 bg-rose-50/30 hover:bg-rose-50 transition">
+          <td class="px-4 py-3 text-slate-500">${esc(r.branchName)}</td>
+          <td class="px-4 py-3 text-slate-400">${esc(r.ownerName)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-500 line-through">${esc(r.name)}</td>
+          <td class="px-4 py-3 text-slate-400">${esc(r.vendor)||'–'}</td>
+          <td class="px-4 py-3 text-slate-400">${esc(r.status)}</td>
+          <td class="px-4 py-3 text-right text-slate-400">${r.amount ? Number(r.amount).toLocaleString('ko-KR') : '–'}</td>
+          <td class="px-4 py-3 text-slate-400">${r.deletedAt ? new Date(r.deletedAt).toLocaleDateString('ko-KR') : '–'}</td>
+          <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+            <button onclick="restorePmItem('${r.storeId}',${r.idx})" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">복원</button>
+            <button onclick="purgePmItem('${r.storeId}',${r.idx})" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">영구삭제</button>
+          </td></tr>`).join('');
+    renderCards('pmCards', trash.map(r=>({
+      dim:true, title: esc(r.name), sub: `${esc(r.branchName)} · ${esc(r.ownerName)}`,
+      fields: [['협력업체', esc(r.vendor)], ['삭제일', r.deletedAt ? new Date(r.deletedAt).toLocaleDateString('ko-KR') : '']],
+      actions: mBtn('복원', `restorePmItem('${r.storeId}',${r.idx})`, 'primary') + mBtn('영구삭제', `purgePmItem('${r.storeId}',${r.idx})`, 'danger')
+    })), '삭제 보관함이 비어 있습니다.');
+    return;
+  }
+
+  // 항목 필터 옵션 채우기 (최초 1회성 갱신)
+  const sel = document.getElementById('pmTypeFilter');
+  const cur = sel.value;
+  const types = [...new Set(all.map(r=>r.name))];
+  sel.innerHTML = '<option value="">전체 항목</option>' + types.map(t=>`<option ${cur===t?'selected':''}>${esc(t)}</option>`).join('');
+
+  // 통계
+  document.getElementById('pmTotal').textContent = all.length;
+  document.getElementById('pmActive').textContent = all.filter(r=>['견적중','계약완료','진행중'].includes(r.status)).length;
+  document.getElementById('pmDone').textContent = all.filter(r=>r.status==='완료').length;
+  const sum = all.reduce((a,r)=>a + (parseInt(r.amount)||0), 0);
+  document.getElementById('pmAmount').textContent = sum ? sum.toLocaleString('ko-KR') : '–';
+
+  // 필터
+  const kw = (document.getElementById('pmSearch').value||'').trim();
+  const ft = document.getElementById('pmTypeFilter').value;
+  const fs = document.getElementById('pmStatusFilter').value;
+  let list = all;
+  if(kw) list = list.filter(r => [r.branchName,r.ownerName,r.vendor].some(v=>(v||'').includes(kw)));
+  if(ft) list = list.filter(r => r.name === ft);
+  if(fs) list = list.filter(r => r.status === fs);
+
+  const rows = document.getElementById('pmRows');
+  if(list.length===0){
+    rows.innerHTML = `<tr><td colspan="8" class="px-4 py-10 text-center text-slate-400">${
+      all.length===0 ? '아직 등록된 파트너사 항목이 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 항목 추가]로 등록하거나, 매장 관리에서 항목을 체크해 주세요.</span>' : '검색 조건에 맞는 항목이 없습니다.'
+    }</td></tr>`;
+    renderCards('pmCards', [], all.length===0 ? '아직 등록된 파트너사 항목이 없습니다.' : '검색 조건에 맞는 항목이 없습니다.'); return;
+  }
+  rows.innerHTML = list.map(r=>`<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+    <td class="px-4 py-3 font-semibold text-slate-800">${esc(r.branchName)}</td>
+    <td class="px-4 py-3 text-slate-500">${esc(r.ownerName)}</td>
+    <td class="px-4 py-3 font-semibold text-slate-700">${esc(r.name)}</td>
+    <td class="px-4 py-3 text-slate-600">${esc(r.vendor) || '<span class="text-slate-300">미지정</span>'}</td>
+    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${pmBadge(r.status)}">${esc(r.status)}</span></td>
+    <td class="px-4 py-3 text-right text-slate-600">${r.amount ? Number(r.amount).toLocaleString('ko-KR') : '–'}</td>
+    <td class="px-4 py-3 text-slate-400 max-w-[200px] truncate">${esc(r.memo)||'–'}</td>
+    <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+      <button onclick="openPmModal('${r.storeId}',${r.idx})" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">수정</button>
+      <button onclick="deletePmItem('${r.storeId}',${r.idx})" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+    </td></tr>`).join('');
+
+  renderCards('pmCards', list.map(r=>({
+    title: esc(r.name),
+    sub: `${esc(r.branchName)} · ${esc(r.ownerName)}`,
+    badges: [`<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${pmBadge(r.status)}">${esc(r.status)}</span>`],
+    fields: [['협력업체', esc(r.vendor)], ['금액(만원)', r.amount ? Number(r.amount).toLocaleString('ko-KR') : ''],
+             ['메모', esc(r.memo)]],
+    actions: mBtn('수정', `openPmModal('${r.storeId}',${r.idx})`, 'primary') + mBtn('삭제', `deletePmItem('${r.storeId}',${r.idx})`, 'ghost')
+  })), '');
+};
+
+let pmTarget = null;
+window.openPmModal = (storeId, idx) => {
+  const isNew = (storeId === undefined);
+  document.getElementById('pmErr').classList.add('hidden');
+  document.getElementById('pmTitle').textContent = isNew ? '파트너사 항목 추가' : '파트너사 정보';
+  document.getElementById('pmNewFields').classList.toggle('hidden', !isNew);
+  document.getElementById('pmInfo').classList.toggle('hidden', isNew);
+
+  if(isNew){
+    if(storeCache.length===0){
+      alert('먼저 매장을 등록해 주세요.'); return;
+    }
+    pmTarget = null;
+    document.getElementById('pm_store').innerHTML =
+      storeCache.map(st=>`<option value="${st.id}">${esc(st.branchName)} · ${esc(st.ownerName)}</option>`).join('');
+    document.getElementById('pm_type').innerHTML =
+      PARTNER_TYPES.map(t=>`<option>${t}</option>`).join('');
+    document.getElementById('pm_vendor').value = '';
+    document.getElementById('pm_status').value = '미진행';
+    document.getElementById('pm_amount').value = '';
+    document.getElementById('pm_memo').value = '';
+  }else{
+    const st = storeCache.find(x=>x.id===storeId);
+    const items = normalizePartnerItems(st.partnerItems);
+    const it = items[idx];
+    pmTarget = { storeId, idx };
+    document.getElementById('pmInfo').innerHTML = `<b class="text-slate-700">${esc(st.branchName)}</b> · ${esc(st.ownerName)} — <b class="text-indigo-600">${esc(it.name)}</b>`;
+    document.getElementById('pm_vendor').value = it.vendor || '';
+    document.getElementById('pm_status').value = it.status || '미진행';
+    document.getElementById('pm_amount').value = it.amount || '';
+    document.getElementById('pm_memo').value = it.memo || '';
+  }
+  document.getElementById('pmModal').classList.remove('hidden');
+};
+window.closePmModal = () => document.getElementById('pmModal').classList.add('hidden');
+
+window.savePmItem = async () => {
+  const err = document.getElementById('pmErr');
+  err.classList.add('hidden');
+  const btn = document.getElementById('pmSaveBtn');
+
+  const payload = {
+    vendor: document.getElementById('pm_vendor').value.trim(),
+    status: document.getElementById('pm_status').value,
+    amount: document.getElementById('pm_amount').value.replace(/[^0-9]/g,''),
+    memo: document.getElementById('pm_memo').value.trim()
+  };
+
+  let storeId, items;
+  if(pmTarget){                       // 수정
+    storeId = pmTarget.storeId;
+    const st = storeCache.find(x=>x.id===storeId);
+    items = normalizePartnerItems(st.partnerItems);
+    items[pmTarget.idx] = { name: items[pmTarget.idx].name, ...payload };
+  }else{                              // 신규 — 매장 관리에도 자동 반영됨
+    storeId = document.getElementById('pm_store').value;
+    const type = document.getElementById('pm_type').value;
+    const st = storeCache.find(x=>x.id===storeId);
+    items = normalizePartnerItems(st.partnerItems);
+    const exist = items.findIndex(i=>i.name===type);
+    if(exist >= 0){
+      if(!confirm(`"${st.branchName}"에 이미 "${type}" 항목이 있습니다.\n기존 내용을 이 내용으로 덮어쓸까요?`)) return;
+      items[exist] = { name: type, ...payload };
+    }else{
+      items.push({ name: type, ...payload });
+    }
+  }
+
+  btn.disabled = true; btn.textContent = '저장 중...';
+  try{
+    const st = storeCache.find(x=>x.id===storeId);
+    const partnerStatus = calcPartnerStatus(items);
+    await updateDoc(doc(db,'stores',storeId), { partnerItems: items, partnerStatus });
+    await syncPublicStore(storeId, { ...st, partnerItems: items, partnerStatus });
+    closePmModal();
+  }catch(e){
+    err.textContent = '저장 실패: ' + (e.code||e.message);
+    err.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = '저장';
+};
+
+// 파트너 항목 삭제 (매장 관리 체크도 자동 해제됨)
+// 삭제 → 보관함으로 이동 (soft delete)
+window.deletePmItem = async (storeId, idx) => {
+  const st = storeCache.find(x=>x.id===storeId);
+  const items = normalizePartnerItems(st.partnerItems);
+  const it = items[idx];
+  if(!confirm(`"${st.branchName}"의 "${it.name}" 항목을 삭제 보관함으로 옮길까요?\n매장 관리의 체크도 함께 해제되며, 보관함에서 복원할 수 있습니다.`)) return;
+  const removed = items.splice(idx,1)[0];
+  const trash = normalizePartnerItems(st.partnerTrash);
+  trash.push({ ...removed, deletedAt: Date.now() });
+  const partnerStatus = calcPartnerStatus(items);
+  await updateDoc(doc(db,'stores',storeId), { partnerItems: items, partnerTrash: trash, partnerStatus });
+  await syncPublicStore(storeId, { ...st, partnerItems: items, partnerStatus });
+};
+
+window.restorePmItem = async (storeId, idx) => {
+  const st = storeCache.find(x=>x.id===storeId);
+  const trash = normalizePartnerItems(st.partnerTrash);
+  const items = normalizePartnerItems(st.partnerItems);
+  const it = trash[idx];
+  if(items.some(x=>x.name===it.name)){
+    alert(`"${it.name}" 항목이 이미 존재합니다. 기존 항목을 먼저 정리해 주세요.`); return;
+  }
+  trash.splice(idx,1);
+  delete it.deletedAt;
+  items.push(it);
+  const partnerStatus = calcPartnerStatus(items);
+  await updateDoc(doc(db,'stores',storeId), { partnerItems: items, partnerTrash: trash, partnerStatus });
+  await syncPublicStore(storeId, { ...st, partnerItems: items, partnerStatus });
+};
+
+window.purgePmItem = async (storeId, idx) => {
+  const st = storeCache.find(x=>x.id===storeId);
+  const trash = normalizePartnerItems(st.partnerTrash);
+  if(!confirm(`"${st.branchName}"의 "${trash[idx].name}" 항목을 영구 삭제할까요?\n되돌릴 수 없습니다.`)) return;
+  trash.splice(idx,1);
+  await updateDoc(doc(db,'stores',storeId), { partnerTrash: trash });
+};
+
+window.togglePmTrash = () => {
+  pmTrashMode = !pmTrashMode;
+  const b = document.getElementById('pmTrashToggle');
+  b.classList.toggle('bg-rose-50', pmTrashMode);
+  b.classList.toggle('border-rose-200', pmTrashMode);
+  b.classList.toggle('text-rose-600', pmTrashMode);
+  renderPartnerTab();
+};
+
+// ===== 상담 관리 =====
+const LEAD_FIELDS = ['consultDate','name','phone','manager','region','storeType','channel','stage','competitor','area','gender','ageGroup','remindDate','reason','memo'];
+let leadCache = [], leadTrash = [], leadUnsub = null, leadTrashMode = false, editingLeadId = null;
+
+async function loadLeads(){
+  if(leadUnsub) return;
+  leadUnsub = onSnapshot(
+    query(collection(db,'leads'), where('companyId','==',MY.companyId)),
+    snap => {
+      const all = snap.docs.map(d=>({id:d.id, ...d.data()}))
+        .sort((a,b)=>(b.consultDate||'').localeCompare(a.consultDate||''));
+      leadCache = all.filter(x=>!x.deleted);
+      leadTrash = all.filter(x=>x.deleted);
+      document.getElementById('leadTrashCount').textContent = leadTrash.length;
+      renderLeads(); renderLeadStats();
+    },
+    e => console.warn('leads 구독 오류:', e)
+  );
+}
+
+window.toggleLeadTrash = () => {
+  leadTrashMode = !leadTrashMode;
+  const b = document.getElementById('leadTrashToggle');
+  b.classList.toggle('bg-rose-50', leadTrashMode);
+  b.classList.toggle('border-rose-200', leadTrashMode);
+  b.classList.toggle('text-rose-600', leadTrashMode);
+  renderLeads();
+};
+
+const stageBadge = st => st==='가입완료' ? 'bg-emerald-50 text-emerald-600'
+  : st==='검토중' ? 'bg-indigo-50 text-indigo-600'
+  : st==='취소' ? 'bg-slate-100 text-slate-400' : 'bg-violet-50 text-violet-600';
+
+window.renderLeads = () => {
+  const rows = document.getElementById('leadRows');
+  if(leadTrashMode){
+    rows.innerHTML = leadTrash.length===0
+      ? '<tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">삭제 보관함이 비어 있습니다.</td></tr>'
+      : leadTrash.map(l=>`<tr class="border-t border-slate-100 bg-rose-50/30 hover:bg-rose-50 transition">
+          <td class="px-4 py-3 text-slate-400">${esc(l.consultDate)}</td>
+          <td class="px-4 py-3 text-slate-500 line-through">${esc(l.name)}</td>
+          <td class="px-4 py-3 text-slate-400">${esc(fmtPhone(l.phone))}</td>
+          <td class="px-4 py-3 text-slate-400" colspan="5">삭제일: ${l.deletedAt ? new Date(l.deletedAt).toLocaleDateString('ko-KR') : '–'}</td>
+          <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+            <button onclick="restoreLead('${l.id}')" class="px-2.5 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">복원</button>
+            <button onclick="purgeLead('${l.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold transition">영구삭제</button>
+          </td></tr>`).join('');
+    renderCards('leadCards', leadTrash.map(l=>({
+      dim:true, title: esc(l.name), sub: esc(fmtPhone(l.phone)),
+      fields: [['상담일자', esc(l.consultDate)], ['삭제일', l.deletedAt ? new Date(l.deletedAt).toLocaleDateString('ko-KR') : '']],
+      actions: mBtn('복원', `restoreLead('${l.id}')`, 'primary') + mBtn('영구삭제', `purgeLead('${l.id}')`, 'danger')
+    })), '삭제 보관함이 비어 있습니다.');
+    return;
+  }
+  const kw = (document.getElementById('leadSearch').value||'').trim();
+  const st = document.getElementById('leadStageFilter').value;
+  const ym = document.getElementById('leadMonthFilter').value;
+  let list = leadCache;
+  if(kw) list = list.filter(l => [l.name,l.phone,l.region].some(v=>(v||'').includes(kw)));
+  if(st) list = list.filter(l => l.stage === st);
+  if(ym) list = list.filter(l => (l.consultDate||'').startsWith(ym));
+  if(list.length===0){
+    const em = leadCache.length===0?'아직 등록된 상담이 없습니다.<br><span class="text-[12px] text-slate-300">우측 상단 [+ 상담 등록]으로 시작하세요.</span>':'검색 조건에 맞는 상담이 없습니다.';
+    rows.innerHTML = '<tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">'+em+'</td></tr>';
+    renderCards('leadCards', [], em); return;
+  }
+  const today = todayLocal();
+  rows.innerHTML = list.map(l=>{
+    let remind = '–';
+    const closed = ['가입완료','취소'].includes(l.stage);
+    if(l.remindDate && !closed){
+      const d = Math.round((new Date(l.remindDate) - new Date(today))/86400000);
+      remind = d < 0 ? `<span class="text-rose-500 font-bold">${d*-1}일 지남</span>`
+             : d === 0 ? '<span class="text-amber-600 font-bold">오늘</span>'
+             : `<span class="text-slate-500">D-${d}</span>`;
+    } else if(closed){
+      remind = '<span class="text-slate-300">종료</span>';
+    }
+    const convertBtn = (l.stage==='가입완료' && !l.convertedStoreId)
+      ? `<button onclick="convertLead('${l.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-bold transition">매장전환</button>` : '';
+    const convertedTag = l.convertedStoreId ? '<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[11px] font-bold">전환완료</span>' : '';
+    return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
+      <td class="px-4 py-3 text-slate-500">${esc(l.consultDate)}</td>
+      <td class="px-4 py-3 font-semibold text-slate-800">${esc(l.name)} ${convertedTag}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(fmtPhone(l.phone))}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(l.region)||'–'}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(l.channel)||'–'}</td>
+      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${stageBadge(l.stage)}">${esc(l.stage)}</span></td>
+      <td class="px-4 py-3">${remind}</td>
+      <td class="px-4 py-3 text-slate-500">${esc(l.manager)||'–'}</td>
+      <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+        ${convertBtn}
+        <button onclick="openLeadModal('${l.id}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">수정</button>
+        <button onclick="deleteLead('${l.id}')" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+      </td></tr>`;
+  }).join('');
+
+  renderCards('leadCards', list.map(l=>{
+    let rm = '';
+    const closed = ['가입완료','취소'].includes(l.stage);
+    if(l.remindDate && !closed){
+      const d = Math.round((new Date(l.remindDate) - new Date(today))/86400000);
+      rm = d < 0 ? `<span class="text-rose-500 font-bold">${d*-1}일 지남</span>`
+         : d === 0 ? '<span class="text-amber-600 font-bold">오늘</span>' : `D-${d}`;
+    }
+    const cv = (l.stage==='가입완료' && !l.convertedStoreId) ? mBtn('매장전환', `convertLead('${l.id}')`, 'primary') : '';
+    return {
+      title: esc(l.name) + (l.convertedStoreId ? ' <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 text-[10px] font-bold">전환완료</span>' : ''),
+      sub: `${esc(fmtPhone(l.phone))||'연락처 없음'} · ${esc(l.region)||'지역 미입력'}`,
+      badges: [`<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${stageBadge(l.stage)}">${esc(l.stage)}</span>`],
+      fields: [['상담일자', esc(l.consultDate)], ['상담경로', esc(l.channel)],
+               ['리마인드', rm], ['담당', esc(l.manager)]],
+      actions: cv + mBtn('수정', `openLeadModal('${l.id}')`) + mBtn('삭제', `deleteLead('${l.id}')`, 'ghost')
+    };
+  }), '');
+};
+
+function renderLeadStats(){
+  const total = leadCache.length;
+  const done = leadCache.filter(l=>l.stage==='가입완료').length;
+  const active = leadCache.filter(l=>['상담중','검토중'].includes(l.stage)).length;
+  document.getElementById('leadTotal').textContent = total;
+  document.getElementById('leadActive').textContent = active;
+  document.getElementById('leadDone').textContent = done;
+  document.getElementById('leadRate').textContent = total ? Math.round(done/total*100)+'%' : '–';
+
+  const today = todayLocal();
+  const due = leadCache.filter(l=>l.remindDate && l.remindDate <= today && !['가입완료','취소'].includes(l.stage))
+    .sort((a,b)=>a.remindDate.localeCompare(b.remindDate));
+  const box = document.getElementById('remindBox');
+  box.classList.toggle('hidden', due.length===0);
+  document.getElementById('remindRows').innerHTML = due.map(l=>`
+    <div class="flex items-center justify-between bg-white border border-amber-200 rounded-lg px-4 py-2.5">
+      <div class="text-[13px]"><b class="text-slate-800">${esc(l.name)}</b>
+        <span class="text-slate-500 ml-2">${esc(fmtPhone(l.phone))} · ${esc(l.region)||''}</span></div>
+      <div class="flex items-center gap-2">
+        <span class="text-[12px] text-amber-700 font-bold">${esc(l.remindDate)}</span>
+        <button onclick="doneRemind('${l.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-bold transition">✓ 연락 완료</button>
+        <button onclick="openLeadModal('${l.id}')" class="px-2.5 py-1 rounded-lg border border-amber-300 text-amber-700 text-[12px] font-bold hover:bg-amber-100 transition">열기</button>
+      </div></div>`).join('');
+}
+
+window.openLeadModal = id => {
+  editingLeadId = id || null;
+  document.getElementById('leadModalTitle').textContent = id ? '상담 수정' : '상담 등록';
+  const l = id ? leadCache.find(x=>x.id===id) : {};
+  LEAD_FIELDS.forEach(f => document.getElementById('l_'+f).value = l[f] ?? '');
+  if(!id){
+    document.getElementById('l_consultDate').value = todayLocal();
+    document.getElementById('l_stage').value = '상담중';
+  }
+  document.getElementById('leadErr').classList.add('hidden');
+  document.getElementById('leadModal').classList.remove('hidden');
+  normalizeTelInputs(document.getElementById('leadModal'));
+};
+window.closeLeadModal = () => document.getElementById('leadModal').classList.add('hidden');
+
+window.saveLead = async () => {
+  const err = document.getElementById('leadErr');
+  err.classList.add('hidden');
+  const data = {};
+  LEAD_FIELDS.forEach(f => data[f] = document.getElementById('l_'+f).value.trim());
+  if(!data.consultDate || !data.name){
+    err.textContent='상담일자와 이름은 필수입니다.'; err.classList.remove('hidden'); return;
+  }
+  const btn = document.getElementById('leadSaveBtn');
+  btn.disabled=true; btn.textContent='저장 중...';
+  try{
+    if(editingLeadId){
+      await updateDoc(doc(db,'leads',editingLeadId), data);
+    }else{
+      data.companyId = MY.companyId;
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'leads'), data);
+    }
+    closeLeadModal();
+  }catch(e){
+    err.textContent='저장 실패: '+(e.code||e.message); err.classList.remove('hidden');
+  }
+  btn.disabled=false; btn.textContent='저장';
+};
+
+// 리마인드 처리 — 연락 완료 시 다음 예정일 지정 또는 해제
+window.doneRemind = async id => {
+  const l = leadCache.find(x=>x.id===id);
+  const next = prompt(
+    `"${l.name}" 연락 완료 처리합니다.\n\n다음 리마인드 날짜를 입력하세요 (YYYY-MM-DD).\n비워두고 확인하면 리마인드가 해제됩니다.`,
+    ''
+  );
+  if(next === null) return;   // 취소
+  const v = next.trim();
+  if(v && !/^\d{4}-\d{2}-\d{2}$/.test(v)){ alert('날짜 형식이 올바르지 않습니다. 예: 2026-08-15'); return; }
+  await updateDoc(doc(db,'leads',id), { remindDate: v });
+};
+
+window.deleteLead = async id => {
+  const l = leadCache.find(x=>x.id===id);
+  if(!confirm(`"${l.name}" 상담을 삭제 보관함으로 이동할까요?`)) return;
+  await updateDoc(doc(db,'leads',id), { deleted:true, deletedAt: Date.now() });
+};
+window.restoreLead = async id => {
+  await updateDoc(doc(db,'leads',id), { deleted:false, deletedAt:null });
+};
+window.purgeLead = async id => {
+  const l = leadTrash.find(x=>x.id===id);
+  if(!confirm(`"${l.name}" 상담을 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  await deleteDoc(doc(db,'leads',id));
+};
+
+// 가입완료 리드 → 매장으로 전환
+window.convertLead = async id => {
+  const l = leadCache.find(x=>x.id===id);
+  const branch = prompt(
+    `"${l.name}" 상담을 매장으로 전환합니다.\n\n지점명을 입력해 주세요. (예: 종암동점, 강남2호점)`,
+    l.region ? l.region.split(' ').pop() + '점' : ''
+  );
+  if(branch === null) return;                 // 취소
+  if(!branch.trim()){ alert('지점명을 입력해야 전환할 수 있습니다.'); return; }
+  try{
+    const data = {
+      companyId: MY.companyId,
+      branchName: branch.trim(),
+      ownerName: l.name,
+      phone: l.phone || '',
+      address: l.region || '',
+      area: l.area || '',
+      signupDate: todayLocal(),
+      openDate: '', birth: '', contactName: '', managerSV: l.manager || '',
+      contractStatus: '계약완료', paymentStatus: '', paymentDetail: '',
+      openStatus: '준비중', partnerStatus: '', partnerItems: [], partnerVendors: '',
+      memo: '상담 전환 — ' + (l.memo || ''),
+      shareToken: genToken(),
+      steps: defaultSteps(),
+      createdAt: serverTimestamp()
+    };
+    const ref = await addDoc(collection(db,'stores'), data);
+    await syncPublicStore(ref.id, data);
+    await updateDoc(doc(db,'companies',MY.companyId), { storeCount: increment(1) });
+    await updateDoc(doc(db,'leads',id), { convertedStoreId: ref.id });
+    alert('매장으로 전환되었습니다.\n매장 관리 탭에서 지점명·오픈일 등을 보완해 주세요.');
+    switchView('stores');
+  }catch(e){
+    alert('전환 실패: ' + (e.code||e.message));
+  }
+};
+
+// ===== 탈퇴 =====
+window.checkWithdrawText = () => {
+  document.getElementById('withdrawBtn').disabled =
+    document.getElementById('withdrawConfirmText').value.trim() !== '오픈매니저 탈퇴';
+};
+window.doWithdraw = async () => {
+  if(!confirm('정말 탈퇴하시겠습니까?\n즉시 접근이 차단되고 30일 후 모든 데이터가 완전 삭제됩니다.')) return;
+  await updateDoc(doc(db,'companies',MY.companyId), {
+    status:'withdrawn',
+    withdrawScheduledAt: Date.now() + 30*86400000
+  });
+  alert('탈퇴 처리되었습니다. 30일 내 복구를 원하시면 운영자에게 문의해 주세요.');
+  await signOut(auth); location.href='login.html';
+};
+</script>
+</body>
+</html>

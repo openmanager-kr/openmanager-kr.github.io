@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오픈 진행 현황 — 오픈매니저</title>
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <meta name="theme-color" content="#4F46E5">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="phone-util.js"></script>
+<script src="mobile-util.js"></script>
+<script src="ad-util.js"></script>
+<script src="footer-util.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>body{font-family:'Pretendard',-apple-system,sans-serif;}</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- 상단 광고 (S급 store_view_top) -->
+<div id="ad-top" class="max-w-5xl mx-auto px-4 pt-4"></div>
+
+<div class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex gap-5 items-start">
+  <!-- 좌측 광고 (S급 store_view_left) -->
+  <div id="ad-left" class="hidden lg:block w-[168px] shrink-0 sticky top-6"></div>
+
+  <div class="flex-1 min-w-0 max-w-2xl mx-auto">
+    <div id="loading" class="text-center text-slate-400 text-sm py-20">불러오는 중...</div>
+
+    <div id="content" class="hidden">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center gap-2">
+          <img src="logo-symbol.png" alt="오픈매니저 로고" class="w-10 h-7 object-contain shrink-0">
+          <span id="companyName" class="text-[13px] font-bold text-slate-500"></span>
+        </div>
+        <h1 class="text-[18px] sm:text-xl font-extrabold text-slate-900 mt-3 break-keep px-2"><span id="branchName"></span> 오픈 진행 현황</h1>
+        <p class="text-[13px] text-slate-500 mt-1"><span id="ownerName"></span> 점주님 전용 페이지입니다</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <span class="text-[13px] font-semibold text-slate-500">오픈 예정일</span>
+          <span id="openDate" class="text-[15px] font-extrabold text-indigo-600"></span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+          <div class="border border-slate-100 rounded-xl py-3 sm:py-4 px-1">
+            <div class="text-[11.5px] text-slate-400 font-semibold">계약</div>
+            <div id="contractStatus" class="text-[12px] sm:text-[13.5px] font-bold text-slate-700 mt-1 break-keep"></div>
+          </div>
+          <div class="border border-slate-100 rounded-xl py-3 sm:py-4 px-1">
+            <div class="text-[11.5px] text-slate-400 font-semibold">진행 상태</div>
+            <div id="openStatus" class="text-[12px] sm:text-[13.5px] font-bold text-indigo-600 mt-1 break-keep"></div>
+          </div>
+          <div class="border border-slate-100 rounded-xl py-3 sm:py-4 px-1">
+            <div class="text-[11.5px] text-slate-400 font-semibold">파트너사</div>
+            <div id="partnerStatus" class="text-[12px] sm:text-[13.5px] font-bold text-slate-700 mt-1 break-keep"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 진행 타임라인 -->
+      <div id="timelineBox" class="hidden bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 mt-4">
+        <div class="flex items-end justify-between mb-1">
+          <h2 class="text-[14px] font-extrabold text-slate-900">오픈 준비 단계</h2>
+          <span id="progressLabel" class="text-[12px] font-bold text-indigo-600"></span>
+        </div>
+        <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden mb-5">
+          <div id="progressBar" class="h-full bg-indigo-600 transition-all" style="width:0%"></div>
+        </div>
+        <div id="timeline" class="space-y-0"></div>
+      </div>
+
+      <!-- 파트너사 매칭 항목 -->
+      <div id="partnerBox" class="hidden bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 mt-4">
+        <h2 class="text-[14px] font-extrabold text-slate-900 mb-3">파트너사 매칭 항목</h2>
+        <div id="partnerItems" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- 모바일 전용 광고 (PC 사이드 광고 대체) -->
+      <div id="ad-mobile-mid" class="lg:hidden mt-4"></div>
+
+      <p class="text-[12px] text-slate-400 text-center pt-5">궁금한 점은 담당자에게 문의해 주세요. 이 페이지는 실시간으로 갱신됩니다.</p>
+      <div id="pageFooter" class="mt-8 pt-5 border-t border-slate-200"></div>
+    </div>
+
+    <div id="notFound" class="hidden text-center py-20">
+      <div class="text-slate-700 font-bold">페이지를 찾을 수 없습니다</div>
+      <p class="text-[13px] text-slate-400 mt-2">링크가 만료되었거나 잘못된 주소입니다.<br>담당자에게 새 링크를 요청해 주세요.</p>
+    </div>
+  </div>
+
+  <!-- 우측 광고 (S급 store_view_right) -->
+  <div id="ad-right" class="hidden lg:block w-[168px] shrink-0 sticky top-6"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
+  authDomain: "openmanager-d6571.firebaseapp.com",
+  projectId: "openmanager-d6571",
+  storageBucket: "openmanager-d6571.firebasestorage.app",
+  messagingSenderId: "249141913323",
+  appId: "1:249141913323:web:f5f5fd678b895dc02400ae"
+});
+const db = getFirestore(app);
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const token = new URLSearchParams(location.search).get('t');
+if(!token){
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('notFound').classList.remove('hidden');
+}else{
+  // 실시간 구독 — 회사가 수정하면 점주 화면도 바로 갱신
+  onSnapshot(doc(db,'public_stores',token), snap => {
+    document.getElementById('loading').classList.add('hidden');
+    if(!snap.exists()){
+      document.getElementById('content').classList.add('hidden');
+      document.getElementById('notFound').classList.remove('hidden');
+      return;
+    }
+    const d = snap.data();
+    document.getElementById('notFound').classList.add('hidden');
+    document.getElementById('content').classList.remove('hidden');
+    document.getElementById('companyName').textContent = d.companyName||'';
+    document.getElementById('branchName').textContent = d.branchName||'';
+    document.getElementById('ownerName').textContent = d.ownerName||'';
+    document.getElementById('openDate').textContent = d.openDate||'미정';
+    document.getElementById('contractStatus').textContent = d.contractStatus||'–';
+    document.getElementById('openStatus').textContent = d.openStatus||'–';
+    document.getElementById('partnerStatus').textContent = d.partnerStatus||'–';
+
+    // 진행 타임라인
+    const steps = d.steps || [];
+    const tlBox = document.getElementById('timelineBox');
+    if(steps.length){
+      tlBox.classList.remove('hidden');
+      const done = steps.filter(s=>s.status==='완료').length;
+      const pct = Math.round(done/steps.length*100);
+      document.getElementById('progressBar').style.width = pct+'%';
+      document.getElementById('progressLabel').textContent = `${done} / ${steps.length} 완료 (${pct}%)`;
+      document.getElementById('timeline').innerHTML = steps.map((st,i)=>{
+        const last = i===steps.length-1;
+        const dot = st.status==='완료'
+          ? '<div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>'
+          : st.status==='진행중'
+          ? '<div class="w-7 h-7 rounded-full border-[3px] border-indigo-500 bg-white flex items-center justify-center shrink-0"><div class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div></div>'
+          : '<div class="w-7 h-7 rounded-full border-2 border-slate-200 bg-white shrink-0"></div>';
+        const nameCls = st.status==='완료' ? 'text-slate-400' : st.status==='진행중' ? 'text-slate-900 font-extrabold' : 'text-slate-400';
+        const badge = st.status==='진행중'
+          ? '<span class="ml-2 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">진행 중</span>'
+          : st.status==='완료' ? '<span class="ml-2 text-[11px] text-emerald-600 font-bold">완료</span>' : '';
+        return `<div class="flex gap-3">
+          <div class="flex flex-col items-center">${dot}${last?'':'<div class="w-0.5 flex-1 '+(st.status==='완료'?'bg-indigo-200':'bg-slate-100')+' min-h-[18px]"></div>'}</div>
+          <div class="pb-4 pt-1"><span class="text-[13.5px] ${nameCls}">${esc(st.name)}</span>${badge}</div>
+        </div>`;
+      }).join('');
+    } else { tlBox.classList.add('hidden'); }
+
+    // 파트너 항목
+    const raw = d.partnerItems || [];
+    const items = raw.map(x => typeof x==='string' ? {name:x, vendor:'', status:''} : x);
+    const pBox = document.getElementById('partnerBox');
+    if(items.length){
+      pBox.classList.remove('hidden');
+      const badge = st => st==='완료' ? 'bg-emerald-50 text-emerald-600'
+        : st==='진행중' ? 'bg-indigo-50 text-indigo-600'
+        : st==='계약완료' ? 'bg-violet-50 text-violet-600'
+        : st==='견적중' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400';
+      document.getElementById('partnerItems').innerHTML =
+        '<div class="w-full space-y-2">' + items.map(x=>`
+          <div class="flex items-center justify-between border border-slate-100 rounded-lg px-3.5 py-2.5">
+            <div class="min-w-0">
+              <span class="text-[13px] font-bold text-slate-700">${esc(x.name)}</span>
+              ${x.vendor ? `<span class="text-[12px] text-slate-400 ml-2">${esc(x.vendor)}</span>` : ''}
+            </div>
+            <span class="shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold ${badge(x.status)}">${esc(x.status)||'–'}</span>
+          </div>`).join('') + '</div>';
+    } else { pBox.classList.add('hidden'); }
+  }, () => {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('notFound').classList.remove('hidden');
+  });
+}
+
+// 광고 로드 (S급 3지면) — 공통 유틸 사용, 빈 지면은 문의 안내로 표시
+(async () => {
+  await loadAdsOnce(db, getDocs, collection);
+  renderAdSlots([
+    ['ad-top','store_view_top'],
+    ['ad-left','store_view_left'],
+    ['ad-right','store_view_right'],
+    ['ad-mobile-mid','store_view_top']
+  ]);
+  renderFooter('pageFooter','light');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>광고 지면 안내 — 오픈매니저 OpenManager</title>
+<meta name="description" content="프랜차이즈 본부와 매장 점주에게 직접 도달하는 광고 지면. 지면당 1개 독점 게재, 최초 1개월 무료 체험.">
+<link rel="icon" type="image/png" href="favicon.png?v=1">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+<meta name="theme-color" content="#4F46E5">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="footer-util.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>body{font-family:'Pretendard',-apple-system,sans-serif;}</style>
+</head>
+<body class="bg-slate-50">
+
+<!-- 헤더 -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+    <a href="index.html"><img src="logo-horizontal.png" alt="오픈매니저 OpenManager" class="h-7 sm:h-8 w-auto object-contain"></a>
+    <nav class="flex items-center gap-1.5">
+      <a href="index.html" class="px-3 py-2 text-[13px] font-semibold text-slate-500 hover:text-indigo-600 transition">서비스 소개</a>
+      <a href="login.html" class="px-3.5 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">로그인</a>
+      <button onclick="openContact('ad')" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">광고 문의</button>
+    </nav>
+  </div>
+</header>
+
+<!-- 히어로 -->
+<section class="bg-white border-b border-slate-200">
+  <div class="max-w-5xl mx-auto px-5 py-14 text-center">
+    <div class="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[12px] font-bold">광고 지면 안내</div>
+    <h1 class="text-[28px] sm:text-[34px] font-extrabold text-slate-900 mt-4 leading-tight">
+      프랜차이즈 본부와 점주에게<br class="hidden sm:block"> 직접 닿는 광고
+    </h1>
+    <p class="text-[15px] text-slate-500 mt-4 leading-relaxed">
+      오픈매니저는 프랜차이즈 매장 오픈 과정을 관리하는 서비스입니다.<br class="hidden sm:block">
+      <b class="text-slate-700">매장을 새로 여는 순간</b>에 필요한 업종이라면, 가장 정확한 타이밍에 노출됩니다.
+    </p>
+    <div class="flex flex-wrap gap-2 justify-center mt-7">
+      <button onclick="openContact('ad')" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-bold transition">광고 문의하기</button>
+      <a href="#slots" class="px-6 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-[14px] font-bold hover:bg-slate-50 transition">지면 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- 왜 여기인가 -->
+<section class="max-w-5xl mx-auto px-5 py-12">
+  <h2 class="text-[20px] font-extrabold text-slate-900 text-center">왜 오픈매니저인가요</h2>
+  <div class="grid sm:grid-cols-3 gap-4 mt-7">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+      <div class="text-[13px] font-extrabold text-indigo-600">타이밍</div>
+      <div class="text-[15px] font-bold text-slate-900 mt-2">매장을 여는 그 시점</div>
+      <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
+        인테리어·간판·집기·POS·보험처럼 <b class="text-slate-700">개점 시점에만 발생하는 수요</b>가 이곳에 모입니다.
+        광고를 찾아 나서지 않아도, 필요한 순간에 눈에 띕니다.
+      </p>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+      <div class="text-[13px] font-extrabold text-indigo-600">대상</div>
+      <div class="text-[15px] font-bold text-slate-900 mt-2">결정권자에게 직접</div>
+      <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
+        보는 사람은 둘뿐입니다. 협력업체를 고르는 <b class="text-slate-700">본부 담당자</b>,
+        그리고 실제 비용을 쓰는 <b class="text-slate-700">신규 매장 점주</b>. 불특정 다수가 아닙니다.
+      </p>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+      <div class="text-[13px] font-extrabold text-indigo-600">독점</div>
+      <div class="text-[15px] font-bold text-slate-900 mt-2">지면당 광고 1개</div>
+      <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
+        한 지면에는 <b class="text-slate-700">한 광고주만</b> 게재됩니다.
+        경쟁사와 나란히 놓이거나, 여러 배너에 묻히는 일이 없습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 지면 안내 -->
+<section id="slots" class="max-w-5xl mx-auto px-5 py-8">
+  <h2 class="text-[20px] font-extrabold text-slate-900 text-center">지면 안내</h2>
+  <p class="text-[13.5px] text-slate-500 text-center mt-2">등급은 노출량(보는 사람 수 × 빈도) 기준입니다.</p>
+
+  <!-- S급 -->
+  <div class="mt-8 bg-white border-2 border-indigo-200 rounded-2xl overflow-hidden">
+    <div class="bg-indigo-600 px-6 py-3 flex items-center justify-between">
+      <div class="text-white font-extrabold text-[15px]">S급 · 점주 열람 페이지</div>
+      <div class="text-indigo-100 text-[13px] font-bold">월 100,000원</div>
+    </div>
+    <div class="p-6">
+      <p class="text-[13.5px] text-slate-600 leading-relaxed">
+        신규 매장 <b class="text-slate-900">점주가 직접 보는 화면</b>입니다. 본부가 점주에게 링크를 보내면,
+        점주는 자기 매장의 오픈 진행 상황을 확인하려고 <b class="text-slate-900">오픈 준비 기간 내내 반복해서</b> 들어옵니다.
+        로그인이 필요 없어 접근 장벽도 없습니다.
+      </p>
+      <div class="mt-3 inline-block px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 text-[12.5px] font-bold">
+        ★ 노출 최다 지면 — 인테리어·간판·집기·초도물품 업종에 가장 적합
+      </div>
+      <div class="grid sm:grid-cols-3 gap-3 mt-5">
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="text-[13px] font-bold text-slate-800">상단 배너</div>
+          <div class="text-[12px] text-slate-400 mt-1">페이지 최상단 가로 배너</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 1200 × 200 px</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="text-[13px] font-bold text-slate-800">좌측 세로형</div>
+          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="text-[13px] font-bold text-slate-800">우측 세로형</div>
+          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A급 -->
+  <div class="mt-5 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+    <div class="bg-slate-800 px-6 py-3 flex items-center justify-between">
+      <div class="text-white font-extrabold text-[15px]">A급 · 본부 관리자 메인</div>
+      <div class="text-slate-300 text-[13px] font-bold">월 80,000원</div>
+    </div>
+    <div class="p-6">
+      <p class="text-[13.5px] text-slate-600 leading-relaxed">
+        프랜차이즈 <b class="text-slate-900">본부 담당자가 매일 업무 중 보는 화면</b>입니다.
+        협력업체 선정, 계약, 발주를 실제로 결정하는 사람에게 노출됩니다.
+      </p>
+      <div class="mt-3 inline-block px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-[12.5px] font-bold">
+        B2B 제휴 · POS · 세무 · 물류 · 프랜차이즈 솔루션 업종에 적합
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3 mt-5">
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="text-[13px] font-bold text-slate-800">메인 상단 배너</div>
+          <div class="text-[12px] text-slate-400 mt-1">모든 화면 최상단 고정</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 1200 × 200 px</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="text-[13px] font-bold text-slate-800">우측 세로형</div>
+          <div class="text-[12px] text-slate-400 mt-1">스크롤을 따라 계속 보임</div>
+          <div class="text-[12px] text-indigo-600 font-bold mt-2">권장 300 × 1050 px</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B·C급 -->
+  <div class="grid sm:grid-cols-2 gap-5 mt-5">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+      <div class="bg-slate-600 px-6 py-3 flex items-center justify-between">
+        <div class="text-white font-extrabold text-[15px]">B급 · 대시보드 하단</div>
+        <div class="text-slate-300 text-[13px] font-bold">월 60,000원</div>
+      </div>
+      <div class="p-6">
+        <p class="text-[13.5px] text-slate-600 leading-relaxed">
+          통합 대시보드와 각 업무 탭(매장·상담·오픈행정·파트너사) 하단.
+          업무를 마치고 화면을 훑을 때 자연스럽게 시야에 들어옵니다.
+        </p>
+        <div class="text-[12px] text-indigo-600 font-bold mt-3">권장 1200 × 200 px</div>
+      </div>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+      <div class="bg-slate-500 px-6 py-3 flex items-center justify-between">
+        <div class="text-white font-extrabold text-[15px]">C급 · 신규등록 화면</div>
+        <div class="text-slate-200 text-[13px] font-bold">월 50,000원</div>
+      </div>
+      <div class="p-6">
+        <p class="text-[13.5px] text-slate-600 leading-relaxed">
+          새 매장·상담을 등록하는 입력 화면 하단.
+          <b class="text-slate-900">신규 건이 발생하는 바로 그 순간</b>에 노출되는 지면입니다.
+        </p>
+        <div class="text-[12px] text-indigo-600 font-bold mt-3">권장 1200 × 200 px</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 계약 조건 -->
+<section class="max-w-5xl mx-auto px-5 py-12">
+  <h2 class="text-[20px] font-extrabold text-slate-900 text-center">계약 조건</h2>
+  <div class="mt-7 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+    <table class="w-full text-[13.5px]">
+      <tbody>
+        <tr class="border-b border-slate-100">
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600 w-40">계약 기간</td>
+          <td class="px-6 py-4 text-slate-700">3개월 · 6개월 · 12개월 중 선택</td>
+        </tr>
+        <tr class="border-b border-slate-100">
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">기간 할인</td>
+          <td class="px-6 py-4 text-slate-700">
+            3개월 정가 · <b class="text-indigo-600">6개월 10% 할인</b> · <b class="text-indigo-600">12개월 20% 할인</b>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-100">
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">무료 체험</td>
+          <td class="px-6 py-4 text-slate-700">
+            <b class="text-emerald-600">최초 1회, 1개월 무료</b>
+            <span class="text-slate-400">(광고주당 1회에 한함)</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-100">
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">게재 방식</td>
+          <td class="px-6 py-4 text-slate-700">지면당 1개 독점 · 계약 기간 중 다른 광고 게재 없음</td>
+        </tr>
+        <tr class="border-b border-slate-100">
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">소재 제출</td>
+          <td class="px-6 py-4 text-slate-700">
+            이미지 파일(JPG·PNG) + 클릭 시 이동할 주소<br>
+            <span class="text-slate-400 text-[12.5px]">규격이 달라도 비율에 맞춰 조정해 드립니다.</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 bg-slate-50 font-bold text-slate-600">신청 절차</td>
+          <td class="px-6 py-4 text-slate-700">
+            이메일 문의 → 지면·기간 확정 → 소재 전달 → 게재 시작
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-5 border border-amber-200 bg-amber-50 rounded-2xl p-5 text-[12.5px] text-amber-800 leading-relaxed">
+    <b>사전 안내</b><br>
+    · 오픈매니저는 성장 중인 서비스로, <b>노출 횟수를 보장하지 않습니다.</b> 지면 독점 게재를 제공하는 방식입니다.<br>
+    · 광고 내용의 적법성(표시광고법 등)에 대한 책임은 광고주에게 있으며, 법령 위반이 확인되면 게재를 중단할 수 있습니다.<br>
+    · 현재 노출 규모는 문의 시 솔직하게 안내해 드립니다.
+  </div>
+</section>
+
+<!-- 문의 -->
+<section class="bg-white border-t border-slate-200">
+  <div class="max-w-5xl mx-auto px-5 py-14 text-center">
+    <h2 class="text-[22px] font-extrabold text-slate-900">먼저 1개월 무료로 확인해 보세요</h2>
+    <p class="text-[14px] text-slate-500 mt-3 leading-relaxed">
+      지면 종류와 희망 기간을 알려주시면 안내해 드립니다.<br>
+      현재 판매 가능한 지면과 실제 노출 규모도 함께 알려드립니다.
+    </p>
+    <button onclick="openContact('ad')" class="mt-7 px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[15px] font-bold transition">광고 문의하기</button>
+    <div class="mt-4 text-[13px] text-slate-400">문의 : <span class="select-all font-semibold text-slate-600" id="adMail">–</span></div>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer class="bg-slate-50 border-t border-slate-200">
+  <div class="max-w-5xl mx-auto px-5 py-8">
+    <div id="pageFooter"></div>
+  </div>
+</footer>
+
+<script>
+  renderFooter('pageFooter','light');
+  document.getElementById('adMail').textContent = OM_COMPANY.adEmail;
+</script>
+</body>
+</html>

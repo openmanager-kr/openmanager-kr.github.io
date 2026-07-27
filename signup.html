@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오픈매니저 — 서비스 이용 신청</title>
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <meta name="theme-color" content="#4F46E5">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="phone-util.js"></script>
+<script src="footer-util.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="mail-config.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  body{font-family:'Pretendard',-apple-system,sans-serif;}
+  .card{border:1px solid #E2E8F0;}
+  input:focus{outline:none;border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+</style>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+
+<div class="w-full max-w-lg">
+  <div class="text-center mb-8">
+    <a href="index.html"><img src="logo-horizontal.png" alt="오픈매니저 OpenManager"
+      class="h-14 sm:h-16 w-auto max-w-[88%] mx-auto object-contain"></a>
+  </div>
+
+  <div class="card bg-white rounded-2xl p-8">
+    <h1 class="text-lg font-bold text-slate-900">서비스 이용 신청</h1>
+    <p class="text-[13px] text-slate-500 mt-1.5 mb-6 leading-relaxed">
+      신청 내용을 확인한 뒤 승인해 드립니다. 승인이 완료되면<br>
+      입력하신 이메일로 <b class="text-slate-700">비밀번호 설정 메일</b>이 발송됩니다.
+    </p>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">회사명 <span class="text-rose-500">*</span></label>
+        <input id="companyName" type="text" maxlength="50" placeholder="(주)우리프랜차이즈"
+          class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">실무자 성함 <span class="text-rose-500">*</span></label>
+          <input id="managerName" type="text" maxlength="20" placeholder="홍길동"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">실무자 연락처 <span class="text-rose-500">*</span></label>
+          <input id="managerPhone" type="tel" maxlength="13" placeholder="010-0000-0000"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">회사 이메일 (로그인 계정) <span class="text-rose-500">*</span></label>
+        <input id="email" type="email" placeholder="admin@company.com"
+          class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition">
+      </div>
+
+      <!-- 약관 동의 -->
+      <div class="border-t border-slate-100 pt-4 space-y-2.5">
+        <label class="flex items-start gap-2.5 cursor-pointer">
+          <input type="checkbox" id="agreeAll" class="mt-0.5 w-4 h-4 accent-indigo-600" onchange="toggleAll(this)">
+          <span class="text-sm font-bold text-slate-800">전체 동의</span>
+        </label>
+        <div class="pl-1 space-y-2">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" class="agree required-term mt-0.5 w-4 h-4 accent-indigo-600">
+            <span class="text-[13px] text-slate-600">[필수] 서비스 이용약관 동의
+              <button type="button" onclick="showTerms('service')" class="text-slate-400 underline ml-1">보기</button></span>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" class="agree required-term mt-0.5 w-4 h-4 accent-indigo-600">
+            <span class="text-[13px] text-slate-600">[필수] 개인정보 수집·이용 동의
+              <button type="button" onclick="showTerms('privacy')" class="text-slate-400 underline ml-1">보기</button></span>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" class="agree required-term mt-0.5 w-4 h-4 accent-indigo-600">
+            <span class="text-[13px] text-slate-600">[필수] 점주·관계자 개인정보 입력 권한 및 책임 확인
+              <button type="button" onclick="showTerms('responsibility')" class="text-slate-400 underline ml-1">보기</button></span>
+          </label>
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" id="agreeMarketing" class="agree mt-0.5 w-4 h-4 accent-indigo-600">
+            <span class="text-[13px] text-slate-600">[선택] B2B 제휴·광고성 정보 수신 동의
+              <button type="button" onclick="showTerms('marketing')" class="text-slate-400 underline ml-1">보기</button></span>
+          </label>
+        </div>
+      </div>
+
+      <p id="errMsg" class="hidden text-[13px] text-rose-600 font-medium"></p>
+      <button id="submitBtn" onclick="submitSignup()" disabled
+        class="w-full py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-bold transition disabled:bg-slate-200 disabled:text-slate-400 hover:enabled:bg-indigo-700">
+        이용 신청하기
+      </button>
+    </div>
+    <div class="text-center mt-5">
+      <a href="login.html" class="text-[13px] text-slate-400 hover:text-indigo-600">← 로그인으로 돌아가기</a>
+    </div>
+  </div>
+  <div id="pageFooter" class="mt-8 pt-5 border-t border-slate-200"></div>
+</div>
+
+<!-- 완료 화면 -->
+<div id="doneOverlay" class="hidden fixed inset-0 bg-slate-50 flex items-center justify-center px-4">
+  <div class="card bg-white rounded-2xl p-10 max-w-md w-full text-center">
+    <div class="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-5">
+      <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h2 class="text-lg font-bold text-slate-900">신청이 접수되었습니다</h2>
+    <p class="text-[13px] text-slate-500 mt-2 leading-relaxed">
+      담당자 확인 후 영업일 기준 1~2일 내 처리됩니다.<br>
+      승인이 완료되면 입력하신 이메일로<br>비밀번호 설정 안내가 발송됩니다.
+    </p>
+    <a href="login.html" class="inline-block mt-6 px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">확인</a>
+  </div>
+</div>
+
+<!-- 약관 모달 -->
+<div id="termsModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <h3 id="termsTitle" class="font-bold text-slate-900"></h3>
+      <button onclick="document.getElementById('termsModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+    </div>
+    <div id="termsBody" class="px-6 py-5 overflow-y-auto text-[13px] text-slate-600 leading-relaxed whitespace-pre-line"></div>
+  </div>
+</div>
+
+<script>
+const TERMS = {
+  service: { title: '서비스 이용약관', body:
+`제1조 (목적)
+본 약관은 오픈매니저(이하 "서비스")의 이용 조건 및 절차, 이용자와 운영자의 권리·의무를 규정함을 목적으로 합니다.
+
+제2조 (서비스의 성격)
+① 본 서비스는 무상으로 제공됩니다.
+② 운영자는 서비스의 내용을 사전 고지 후 변경하거나 중단할 수 있습니다.
+
+제3조 (책임의 제한)
+① 무상으로 제공되는 서비스의 특성상, 운영자는 시스템 장애·데이터 유실·서비스 중단으로 인해 발생한 손해에 대하여 고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다.
+② 이용자는 중요한 데이터를 자체적으로 백업할 책임이 있습니다.
+
+제4조 (이용의 제한)
+운영자는 이용자가 관계 법령 또는 본 약관을 위반하는 경우 사전 통지 후 이용을 제한하거나 계약을 해지할 수 있습니다.
+
+※ 본 약관은 초안이며, 최종 문구는 확정 후 갱신됩니다.` },
+  privacy: { title: '개인정보 수집·이용 동의', body:
+`1. 수집 항목
+회사명, 실무 담당자 성명, 연락처, 이메일 주소
+
+2. 수집·이용 목적
+서비스 이용 신청 확인, 계정 발급 및 관리, 서비스 운영 관련 연락
+
+3. 보유·이용 기간
+서비스 탈퇴(계약 종료) 시 즉시 접근 차단 후 30일 이내 파기
+
+4. 동의 거부 권리
+귀하는 동의를 거부할 권리가 있으나, 거부 시 서비스 이용 신청이 제한됩니다.
+
+※ 본 문구는 초안이며, 최종 문구는 확정 후 갱신됩니다.` },
+  responsibility: { title: '점주·관계자 개인정보 입력 권한 및 책임 확인', body:
+`① 이용 회사(가맹본부)는 본 서비스에 점주 및 관계자의 개인정보를 입력함에 있어, 해당 정보주체로부터 개인정보 수집·이용에 대한 적법한 동의를 확보하였음을 확인합니다.
+
+② 정보주체 동의 확보, 입력 정보의 정확성 유지, 관련 법령(개인정보 보호법 등) 준수에 대한 책임은 이용 회사에 있습니다.
+
+③ 운영자는 이용 회사가 입력한 개인정보의 내용을 열람하지 않으며, 시스템 관리 목적 외로 이용하지 않습니다.
+
+※ 본 문구는 초안이며, 최종 문구는 확정 후 갱신됩니다.` },
+  marketing: { title: 'B2B 제휴·광고성 정보 수신 동의 (선택)', body:
+`POS·인테리어·세무 등 프랜차이즈 운영에 도움이 되는 제휴 혜택 및 프로모션 정보를 이메일 또는 문자로 받아보실 수 있습니다.
+
+수신 동의는 선택 사항이며, 동의하지 않아도 서비스 이용에 제한이 없습니다. 동의 후에도 언제든지 수신을 거부할 수 있습니다.` }
+};
+
+function showTerms(key){
+  document.getElementById('termsTitle').textContent = TERMS[key].title;
+  document.getElementById('termsBody').textContent = TERMS[key].body;
+  document.getElementById('termsModal').classList.remove('hidden');
+}
+function toggleAll(el){
+  document.querySelectorAll('.agree').forEach(c => c.checked = el.checked);
+  checkRequired();
+}
+function checkRequired(){
+  const ok = [...document.querySelectorAll('.required-term')].every(c => c.checked);
+  document.getElementById('submitBtn').disabled = !ok;
+  const all = [...document.querySelectorAll('.agree')].every(c => c.checked);
+  document.getElementById('agreeAll').checked = all;
+}
+document.querySelectorAll('.agree').forEach(c => c.addEventListener('change', checkRequired));
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
+  authDomain: "openmanager-d6571.firebaseapp.com",
+  projectId: "openmanager-d6571",
+  storageBucket: "openmanager-d6571.firebasestorage.app",
+  messagingSenderId: "249141913323",
+  appId: "1:249141913323:web:f5f5fd678b895dc02400ae"
+});
+const db = getFirestore(app);
+
+window.submitSignup = async function(){
+  const companyName = document.getElementById('companyName').value.trim();
+  const managerName = document.getElementById('managerName').value.trim();
+  const managerPhone = document.getElementById('managerPhone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const err = document.getElementById('errMsg');
+  err.classList.add('hidden');
+
+  if(!companyName || !managerName || !managerPhone || !email){
+    err.textContent = '모든 필수 항목을 입력해 주세요.'; err.classList.remove('hidden'); return;
+  }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    err.textContent = '올바른 이메일 형식이 아닙니다.'; err.classList.remove('hidden'); return;
+  }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '접수 중...';
+  try{
+    await addDoc(collection(db,'signups'), {
+      companyName, managerName, managerPhone, email,
+      status: 'pending',
+      termsAgreed: {
+        serviceTerms: true,
+        privacyPolicy: true,
+        companyResponsibility: true,
+        marketingAd: document.getElementById('agreeMarketing').checked,
+        agreedAt: new Date().toISOString(),
+        termsVersion: 'v1.0-draft'
+      },
+      createdAt: serverTimestamp()
+    });
+    // 관리자에게 신청 알림 메일 (실패해도 접수는 정상 처리)
+    try{
+      if(window.OM_MAIL && !OM_MAIL.publicKey.startsWith('YOUR_')){
+        emailjs.init({ publicKey: OM_MAIL.publicKey });
+        await emailjs.send(OM_MAIL.serviceId, OM_MAIL.tplSignup, {
+          to_email: OM_MAIL.adminEmail,
+          company_name: companyName,
+          manager_name: managerName,
+          manager_phone: managerPhone,
+          company_email: email,
+          applied_at: new Date().toLocaleString('ko-KR'),
+          admin_url: location.href.replace(/[^/]*$/,'') + 'admin.html'
+        });
+      }
+    }catch(mailErr){ console.warn('알림 메일 발송 실패:', mailErr); }
+
+    document.getElementById('doneOverlay').classList.remove('hidden');
+  }catch(e){
+    err.textContent = '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+    err.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = '이용 신청하기';
+  }
+};
+</script>
+<script>renderFooter("pageFooter","light");</script>
+</body>
+</html>
