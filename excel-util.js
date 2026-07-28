@@ -36,6 +36,22 @@
     XLSX.writeFile(wb, `오픈매니저_${fileBase}_${stamp()}.xlsx`);
   };
 
+  /**
+   * 표 형태가 아닌 '보고서' 형태로 내보내기
+   * @param {string} sheetName
+   * @param {Array<Array>} aoa  행 배열 (문자열/숫자 자유 배치)
+   * @param {Array<number>} widths  열 너비
+   * @param {string} fileName  확장자 제외
+   */
+  window.exportReport = function(sheetName, aoa, widths, fileName){
+    if(typeof XLSX === 'undefined'){ alert('엑셀 모듈을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); return; }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = (widths || []).map(w => ({ wch: w }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, `${fileName}.xlsx`);
+  };
+
   /** 빈 양식(헤더만) 내려받기 — 가져오기용 템플릿 */
   window.exportTemplate = function(sheetName, cols, fileBase){
     const ws = XLSX.utils.json_to_sheet([], { header: cols.map(c=>c.label) });

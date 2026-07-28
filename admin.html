@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607280609"></script>
-<script src="excel-util.js?v=202607280609"></script>
-<script src="mobile-util.js?v=202607280609"></script>
-<script src="footer-util.js?v=202607280609"></script>
+<script src="phone-util.js?v=202607280614"></script>
+<script src="excel-util.js?v=202607280614"></script>
+<script src="mobile-util.js?v=202607280614"></script>
+<script src="footer-util.js?v=202607280614"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607280609"></script>
+<script src="mail-config.js?v=202607280614"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -284,14 +284,16 @@
 
         <div class="mt-5 flex items-center gap-2 flex-wrap">
           <select id="saPeriod" onchange="renderAdStats()" class="px-3 py-2 rounded-lg border border-slate-200 text-[13px] bg-white transition">
-            <option value="7">최근 7일</option>
-            <option value="30" selected>최근 30일</option>
-            <option value="90">최근 90일</option>
-            <option value="0">전체 기간</option>
+            <option value="d7">최근 7일</option>
+            <option value="d30" selected>최근 30일</option>
+            <option value="m0">이번 달</option>
+            <option value="m1">지난 달</option>
+            <option value="d90">최근 90일</option>
+            <option value="all">전체 기간</option>
           </select>
           <button id="saReload" onclick="reloadAdStats()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-500 text-[12.5px] font-semibold hover:bg-slate-50 transition">↻ 새로고침</button>
           <span id="saMsg" class="text-[12px] text-slate-400"></span>
-          <button onclick="exportAdStats()" class="ml-auto px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-[12.5px] font-bold hover:bg-emerald-50 transition whitespace-nowrap">⬇ 보고서 내보내기</button>
+          <button onclick="exportAdStats()" class="ml-auto px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-[12.5px] font-bold hover:bg-emerald-50 transition whitespace-nowrap">⬇ 전체 내보내기</button>
         </div>
 
         <div class="hidden md:block mt-3 bg-white border border-slate-200 rounded-xl overflow-x-auto">
@@ -306,9 +308,10 @@
                 <th class="px-4 py-3 font-semibold text-right">클릭률</th>
                 <th class="px-4 py-3 font-semibold">PC / 모바일</th>
                 <th class="px-4 py-3 font-semibold">상태</th>
+                <th class="px-4 py-3 font-semibold text-right">보고서</th>
               </tr>
             </thead>
-            <tbody id="saRows"><tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">불러오는 중...</td></tr></tbody>
+            <tbody id="saRows"><tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">불러오는 중...</td></tr></tbody>
           </table>
         </div>
         <div id="saCards" class="md:hidden mt-3 space-y-2.5"></div>
@@ -1087,9 +1090,30 @@ window.reloadAdStats = async () => {
   renderAdStats();
 };
 
-function adTotals(adId, days){
-  const cut = days > 0 ? new Date(Date.now() - days*86400000).toISOString().slice(0,10) : '0000-00-00';
-  const rows = (adStatCache||[]).filter(r => r.adId===adId && r.date >= cut);
+/** 선택한 기간을 {from, to, label} 로 변환 */
+function statPeriod(){
+  const v = document.getElementById('saPeriod').value;
+  const now = new Date();
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  if(v === 'all') return { from:'0000-00-00', to:'9999-99-99', label:'전체 기간' };
+  if(v === 'm0'){
+    const s = new Date(now.getFullYear(), now.getMonth(), 1);
+    const e = new Date(now.getFullYear(), now.getMonth()+1, 0);
+    return { from:fmt(s), to:fmt(e), label:`${s.getFullYear()}년 ${s.getMonth()+1}월` };
+  }
+  if(v === 'm1'){
+    const s = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const e = new Date(now.getFullYear(), now.getMonth(), 0);
+    return { from:fmt(s), to:fmt(e), label:`${s.getFullYear()}년 ${s.getMonth()+1}월` };
+  }
+  const days = parseInt(v.slice(1));
+  const s = new Date(Date.now() - days*86400000);
+  return { from:fmt(s), to:fmt(now), label:`최근 ${days}일` };
+}
+
+function adTotals(adId, p){
+  p = p || statPeriod();
+  const rows = (adStatCache||[]).filter(r => r.adId===adId && r.date >= p.from && r.date <= p.to);
   const t = { di:0, mi:0, dc:0, mc:0 };
   rows.forEach(r=>{
     t.di += r.desktopImpressions||0; t.mi += r.mobileImpressions||0;
@@ -1102,8 +1126,8 @@ function adTotals(adId, days){
 
 window.renderAdStats = () => {
   if(!adStatCache) return;
-  const days = parseInt(document.getElementById('saPeriod').value);
-  const list = adCache.map(a => ({ ...adFull(a), t: adTotals(a.id, days) }));
+  const p = statPeriod();
+  const list = adCache.map(a => ({ ...adFull(a), t: adTotals(a.id, p) }));
 
   const sum = list.reduce((s,a)=>({ imp:s.imp+a.t.imp, clk:s.clk+a.t.clk }), {imp:0, clk:0});
   document.getElementById('saActive').textContent = adCache.filter(a=>adStatus(a)==='active').length;
@@ -1113,7 +1137,7 @@ window.renderAdStats = () => {
 
   const rows = document.getElementById('saRows');
   if(list.length===0){
-    rows.innerHTML = '<tr><td colspan="8" class="px-4 py-14 text-center text-slate-400 text-[13px]">등록된 광고가 없습니다.</td></tr>';
+    rows.innerHTML = '<tr><td colspan="9" class="px-4 py-14 text-center text-slate-400 text-[13px]">등록된 광고가 없습니다.</td></tr>';
     renderCards('saCards', [], '등록된 광고가 없습니다.'); return;
   }
   const stBadge = a => {
@@ -1133,6 +1157,10 @@ window.renderAdStats = () => {
       <td class="px-4 py-3 text-right font-bold text-violet-600">${a.t.imp>0 ? a.t.ctr.toFixed(1)+'%' : '–'}</td>
       <td class="px-4 py-3 text-slate-500 text-[12px]">${a.t.di.toLocaleString('ko-KR')} / ${a.t.mi.toLocaleString('ko-KR')}</td>
       <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${cls}">${lb}</span></td>
+      <td class="px-4 py-3 text-right">
+        <button onclick="exportAdReport('${esc(a.company || a.advertiser).replace(/'/g, "\\'")}')"
+          class="px-2.5 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-[12px] font-bold hover:bg-emerald-50 transition whitespace-nowrap">⬇ 내보내기</button>
+      </td>
     </tr>`;
   }).join('');
 
@@ -1144,7 +1172,8 @@ window.renderAdStats = () => {
       fields: [['노출', a.t.imp.toLocaleString('ko-KR')], ['클릭', a.t.clk.toLocaleString('ko-KR')],
                ['클릭률', a.t.imp>0 ? a.t.ctr.toFixed(1)+'%' : '–'],
                ['PC / 모바일', `${a.t.di.toLocaleString('ko-KR')} / ${a.t.mi.toLocaleString('ko-KR')}`],
-               ['게재 기간', `${esc(a.startDate)} ~ ${esc(a.endDate)}`]]
+               ['게재 기간', `${esc(a.startDate)} ~ ${esc(a.endDate)}`]],
+      actions: mBtn('⬇ 이 광고주 보고서', `exportAdReport('${esc(a.company || a.advertiser).replace(/'/g, "\\'")}')`)
     };
   }), '등록된 광고가 없습니다.');
 };
@@ -1173,12 +1202,70 @@ window.exportUseStats = () => {
   ], rows, '이용현황');
 };
 
+/** 광고주 한 곳의 성과 보고서 (그대로 보낼 수 있는 형태) */
+window.exportAdReport = (companyName) => {
+  const p = statPeriod();
+  const mine = adCache.map(adFull).filter(a => (a.company || a.advertiser) === companyName);
+  if(!mine.length){ alert('해당 광고주의 광고를 찾을 수 없습니다.'); return; }
+
+  const num = n => Number(n||0);
+  const rows = [];
+  rows.push([`${companyName} 광고 성과 보고서`]);
+  rows.push([]);
+  rows.push(['광고주', companyName]);
+  if(mine[0].advertiser) rows.push(['담당자', mine[0].advertiser]);
+  rows.push(['보고 기간', p.label + (p.from!=='0000-00-00' ? `  (${p.from} ~ ${p.to})` : '')]);
+  rows.push(['발행일', new Date().toLocaleDateString('ko-KR')]);
+  rows.push([]);
+
+  // ── 요약 ──
+  rows.push(['■ 지면별 요약']);
+  rows.push(['광고 지면','게재 기간','노출','클릭','클릭률','PC 노출','모바일 노출']);
+  let T = {imp:0, clk:0, di:0, mi:0};
+  mine.forEach(a => {
+    const t = adTotals(a.id, p);
+    T.imp+=t.imp; T.clk+=t.clk; T.di+=t.di; T.mi+=t.mi;
+    rows.push([ slotLabel(a.slot), `${a.startDate} ~ ${a.endDate}`,
+                t.imp, t.clk, t.imp ? (t.clk/t.imp*100).toFixed(2)+'%' : '0%', t.di, t.mi ]);
+  });
+  rows.push(['합계','', T.imp, T.clk, T.imp ? (T.clk/T.imp*100).toFixed(2)+'%' : '0%', T.di, T.mi]);
+  rows.push([]);
+
+  // ── 일별 추이 ──
+  rows.push(['■ 일별 추이']);
+  rows.push(['날짜','광고 지면','노출','클릭','PC 노출','모바일 노출','PC 클릭','모바일 클릭']);
+  const daily = [];
+  mine.forEach(a => {
+    (adStatCache||[]).filter(r => r.adId===a.id && r.date>=p.from && r.date<=p.to)
+      .forEach(r => daily.push({ ...r, slot: slotLabel(a.slot) }));
+  });
+  daily.sort((x,y)=> x.date.localeCompare(y.date));
+  if(daily.length){
+    daily.forEach(r => rows.push([
+      r.date, r.slot,
+      num(r.desktopImpressions)+num(r.mobileImpressions),
+      num(r.desktopClicks)+num(r.mobileClicks),
+      num(r.desktopImpressions), num(r.mobileImpressions),
+      num(r.desktopClicks), num(r.mobileClicks)
+    ]));
+  }else{
+    rows.push(['해당 기간에 집계된 기록이 없습니다.']);
+  }
+  rows.push([]);
+  rows.push(['※ 노출은 광고가 화면에 실제로 표시된 경우만 집계하며, 같은 기기에서 하루 1회만 인정합니다.']);
+  rows.push(['※ 클릭도 같은 기기에서 하루 1회만 집계되므로 실제 이용자 수에 가까운 수치입니다.']);
+
+  const safe = companyName.replace(/[\\/:*?"<>|]/g, '');
+  exportReport('광고성과', rows, [22,24,10,10,10,12,12,12],
+               `오픈매니저_광고보고서_${safe}_${p.label.replace(/\s/g,'')}`);
+};
+
 window.exportAdStats = () => {
-  const days = parseInt(document.getElementById('saPeriod').value);
-  const label = days ? `최근${days}일` : '전체기간';
+  const p = statPeriod();
+  const label = p.label.replace(/\s/g,'');
   const rows = adCache.map(raw=>{
     const a = adFull(raw);
-    const t = adTotals(a.id, days);
+    const t = adTotals(a.id, p);
     return {
       company: a.company || a.advertiser, advertiser: a.advertiser,
       slot: slotLabel(a.slot), period: `${a.startDate} ~ ${a.endDate}`,
