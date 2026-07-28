@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607280232"></script>
-<script src="excel-util.js?v=202607280232"></script>
-<script src="mobile-util.js?v=202607280232"></script>
-<script src="footer-util.js?v=202607280232"></script>
+<script src="phone-util.js?v=202607280609"></script>
+<script src="excel-util.js?v=202607280609"></script>
+<script src="mobile-util.js?v=202607280609"></script>
+<script src="footer-util.js?v=202607280609"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607280232"></script>
+<script src="mail-config.js?v=202607280609"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -64,28 +64,38 @@
         <div class="text-[10px] text-indigo-300/70 font-semibold tracking-widest mt-1">SUPER ADMIN</div>
       </div>
     </div>
-    <nav class="flex-1 px-3 py-4 space-y-1">
+    <nav class="flex-1 px-3 py-4">
       <button data-view="dashboard" onclick="switchView('dashboard')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
         <span class="nav-ico text-slate-500">▦</span> 대시보드
       </button>
-      <button data-view="signups" onclick="switchView('signups')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
-        <span class="nav-ico text-slate-500">✓</span> 가입 승인
-        <span id="badgeSignups" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-indigo-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
-      </button>
-      <button data-view="companies" onclick="switchView('companies')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
-        <span class="nav-ico text-slate-500">▤</span> 회사 관리
-        <span id="badgePurge" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
-      </button>
-      <button data-view="stats" onclick="switchView('stats')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
-        <span class="nav-ico text-slate-500">◈</span> 서비스 통계
-      </button>
-      <button data-view="consent" onclick="switchView('consent')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
-        <span class="nav-ico text-slate-500">✎</span> 약관·수신 동의
-      </button>
-      <button data-view="ads" onclick="switchView('ads')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
-        <span class="nav-ico text-slate-500">▣</span> 광고 관리
-        <span id="badgeAds" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
-      </button>
+
+      <!-- 회사 -->
+      <div class="px-3 pt-4 pb-1.5 text-[10.5px] font-bold text-slate-600 tracking-wider">회사</div>
+      <div class="space-y-1">
+        <button data-view="signups" onclick="switchView('signups')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+          <span class="nav-ico text-slate-500">✓</span> 가입 승인
+          <span id="badgeSignups" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-indigo-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+        </button>
+        <button data-view="companies" onclick="switchView('companies')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+          <span class="nav-ico text-slate-500">▤</span> 회사 관리
+          <span id="badgePurge" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+        </button>
+        <button data-view="consent" onclick="switchView('consent')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+          <span class="nav-ico text-slate-500">✎</span> 약관·수신 동의
+        </button>
+      </div>
+
+      <!-- 광고 -->
+      <div class="px-3 pt-4 pb-1.5 text-[10.5px] font-bold text-slate-600 tracking-wider">광고</div>
+      <div class="space-y-1">
+        <button data-view="ads" onclick="switchView('ads')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+          <span class="nav-ico text-slate-500">▣</span> 광고 관리
+          <span id="badgeAds" class="hidden ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center"></span>
+        </button>
+        <button data-view="stats" onclick="switchView('stats')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">
+          <span class="nav-ico text-slate-500">◈</span> 서비스 통계
+        </button>
+      </div>
     </nav>
     <div class="px-3 py-4 border-t border-slate-800">
       <div class="flex items-center gap-2 px-3 pb-3">
