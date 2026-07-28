@@ -32,13 +32,79 @@
       const snap = await getDocs(collection(db,'ads'));
       const today = new Date();
       const t = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-      adCache = snap.docs.map(d=>d.data())
+      adCache = snap.docs.map(d=>({ id:d.id, ...d.data() }))
         .filter(a => a.active !== false && (a.startDate||'') <= t && (a.endDate||'') >= t);
     }catch(e){
       console.warn('광고 로드 실패:', e);
       adCache = [];
     }
     return adCache;
+  };
+
+  // ===== 광고 성과 집계 =====
+  // 원칙 ① 같은 기기에서 하루 1회만 카운트 (중복 방지)
+  //      ② 화면에 50% 이상 1초 넘게 보여야 노출 인정
+  //      ③ 개별 로그를 남기지 않고 날짜별 합계에만 +1 (쓰기 최소화)
+  let _db = null, _fs = null;
+  window.initAdStats = function(db, fsApi){ _db = db; _fs = fsApi; };
+
+  function today(){
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function seen(key){
+    try{
+      const k = 'omAd:' + key + ':' + today();
+      if(localStorage.getItem(k)) return true;
+      localStorage.setItem(k, '1');
+      // 오래된 기록 정리 (7일 지난 것)
+      const cut = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+      Object.keys(localStorage).forEach(x=>{
+        if(x.startsWith('omAd:')){
+          const d = x.split(':').pop();
+          if(d < cut) localStorage.removeItem(x);
+        }
+      });
+      return false;
+    }catch(e){ return false; }   // 저장 불가 환경이면 그냥 집계
+  }
+
+  async function bump(adId, field){
+    if(!_db || !_fs || !adId) return;
+    const { doc, setDoc, increment } = _fs;
+    const id = `${adId}_${today()}`;
+    try{
+      await setDoc(doc(_db,'ad_daily_stats',id), {
+        adId, date: today(), [field]: increment(1)
+      }, { merge:true });
+    }catch(e){ /* 통계 실패가 화면에 영향 주지 않도록 무시 */ }
+  }
+
+  /** 노출 집계 — 화면에 실제로 보였을 때만 */
+  function watchImpression(el, ad){
+    if(!('IntersectionObserver' in window)) return;
+    const dev = window.matchMedia('(max-width: 767px)').matches ? 'mobile' : 'desktop';
+    let timer = null;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if(en.isIntersecting && en.intersectionRatio >= 0.5){
+          if(timer) return;
+          timer = setTimeout(() => {                    // 1초 이상 노출
+            io.disconnect();
+            if(!seen('imp:' + ad.id)) bump(ad.id, dev + 'Impressions');
+          }, 1000);
+        }else{
+          clearTimeout(timer); timer = null;
+        }
+      });
+    }, { threshold:[0, 0.5, 1] });
+    io.observe(el);
+  }
+
+  /** 클릭 집계 — 이동 전에 기록 */
+  window.omAdClick = function(adId){
+    const dev = window.matchMedia('(max-width: 767px)').matches ? 'mobile' : 'desktop';
+    if(!seen('clk:' + adId)) bump(adId, dev + 'Clicks');
   };
 
   /** 지면 렌더링 — 광고 있으면 배너, 없으면 문의 플레이스홀더 */
@@ -51,20 +117,25 @@
     if(ad){
       const isMobile = window.matchMedia('(max-width: 767px)').matches;
       // 모바일 소재가 있으면 우선 사용, 없으면 PC 소재를 잘라내지 않고 contain 으로 표시
-      const src  = (isMobile && ad.mobileImageUrl) ? ad.mobileImageUrl : (ad.imageUrl || ad.desktopImageUrl);
+      // 업로드한 이미지(imageData)가 있으면 우선 사용, 없으면 주소 방식
+      const mobileSrc  = ad.mobileImageData || ad.mobileImageUrl;
+      const desktopSrc = ad.imageData || ad.imageUrl || ad.desktopImageUrl;
+      const src  = (isMobile && mobileSrc) ? mobileSrc : desktopSrc;
       const link = (isMobile && ad.mobileLinkUrl)  ? ad.mobileLinkUrl  : ad.linkUrl;
-      const fit  = (isMobile && !ad.mobileImageUrl) ? 'object-contain bg-slate-50' : 'object-cover';
+      const fit  = (isMobile && !mobileSrc) ? 'object-contain bg-slate-50' : 'object-cover';
       const imgCls = meta.size === 'tower'
         ? 'w-full rounded-xl border border-slate-200'
         : `w-full max-h-24 ${fit} rounded-xl border border-slate-200`;
       // 로딩 중 높이 변동 방지
       const ratio = meta.size === 'tower' ? '' : 'style="aspect-ratio:6/1"';
       el.innerHTML =
-        `<a href="${esc(link)}" target="_blank" rel="noopener sponsored" class="block">
+        `<a href="${esc(link)}" target="_blank" rel="noopener sponsored" class="block"
+            onclick="omAdClick('${esc(ad.id)}')">
            <img src="${esc(src)}" alt="${esc(ad.company||ad.advertiser||'광고')}" class="${imgCls}" ${ratio}
                 onerror="this.parentElement.parentElement.innerHTML=''">
          </a>
          <div class="text-[10px] text-slate-300 text-center mt-0.5">광고 · AD</div>`;
+      watchImpression(el, ad);
       return;
     }
 

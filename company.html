@@ -885,6 +885,7 @@ onAuthStateChanged(auth, async user => {
     }
     await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
+    markCompanyActive();  // 회사 접속 기록 (하루 1회만)
     mountExcelButtons();
   }catch(e){
     gm.textContent = '정보를 불러오지 못했습니다: ' + (e.code||e.message);
@@ -893,9 +894,27 @@ onAuthStateChanged(auth, async user => {
 
 window.doLogout = async () => { await signOut(auth); location.href='login.html'; };
 
+// 회사 접속 기록 — 하루 1회만 기록해 쓰기 최소화
+async function markCompanyActive(){
+  try{
+    const key = 'omActive:' + MY.companyId + ':' + todayLocal();
+    if(localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    await setDoc(doc(db,'company_activity', MY.companyId), {
+      companyId: MY.companyId,
+      companyName: MY.company.companyName,
+      lastSeen: todayLocal(),
+      lastSeenAt: serverTimestamp(),
+      visits: increment(1),
+      device: omDevice()
+    }, { merge:true });
+  }catch(e){ /* 통계 실패는 무시 */ }
+}
+
 // 광고 지면 + 푸터 초기화
 async function initAdsAndFooter(){
   renderFooter('sideFooter','dark');
+  initAdStats(db, { doc, setDoc, increment });   // 광고 노출·클릭 집계
   await loadAdsOnce(db, getDocs, collection);
   renderAdSlots([
     ['ad-main-top','main_top'],
@@ -926,6 +945,7 @@ window.changePassword = async () => {
     document.getElementById('pwGate').classList.add('hidden');
     await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
+    markCompanyActive();  // 회사 접속 기록 (하루 1회만)
     mountExcelButtons();
   }catch(e){
     const c = e.code || '';
