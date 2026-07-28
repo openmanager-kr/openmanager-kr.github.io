@@ -656,6 +656,7 @@ function loadAll(){
   }, e => console.warn('companies 구독 오류:', e));
 
   subscribeActivity();
+  reloadAdPrivate();
 
   onSnapshot(collection(db,'ads'), snap => {
     adCache = snap.docs.map(d=>({id:d.id, ...d.data()}))
@@ -1092,7 +1093,7 @@ function adTotals(adId, days){
 window.renderAdStats = () => {
   if(!adStatCache) return;
   const days = parseInt(document.getElementById('saPeriod').value);
-  const list = adCache.map(a => ({ ...a, t: adTotals(a.id, days) }));
+  const list = adCache.map(a => ({ ...adFull(a), t: adTotals(a.id, days) }));
 
   const sum = list.reduce((s,a)=>({ imp:s.imp+a.t.imp, clk:s.clk+a.t.clk }), {imp:0, clk:0});
   document.getElementById('saActive').textContent = adCache.filter(a=>adStatus(a)==='active').length;
@@ -1165,7 +1166,8 @@ window.exportUseStats = () => {
 window.exportAdStats = () => {
   const days = parseInt(document.getElementById('saPeriod').value);
   const label = days ? `최근${days}일` : '전체기간';
-  const rows = adCache.map(a=>{
+  const rows = adCache.map(raw=>{
+    const a = adFull(raw);
     const t = adTotals(a.id, days);
     return {
       company: a.company || a.advertiser, advertiser: a.advertiser,
@@ -1283,6 +1285,31 @@ function adStatus(a){
   if(a.endDate < today) return 'expired';
   return 'active';
 }
+// 광고 계약 정보(비공개) 로드 — 슈퍼어드민만 읽을 수 있음
+let adPrivCache = {};
+window.reloadAdPrivate = async () => {
+  try{
+    const snap = await getDocs(collection(db,'ad_private'));
+    adPrivCache = {};
+    snap.docs.forEach(d => adPrivCache[d.id] = d.data());
+  }catch(e){ console.warn('광고 계약정보 로드 실패:', e); }
+  renderAds();
+};
+/** 공개 문서 + 비공개 문서를 합쳐 관리자 화면용 데이터로 */
+function adFull(a){
+  const p = adPrivCache[a.id] || {};
+  return {
+    ...a,
+    advertiser: p.advertiser || a.advertiser || '',
+    contact:    p.contact    || a.contact    || '',
+    email:      p.email      || a.email      || '',
+    memo:       p.memo       || a.memo       || '',
+    price:      (p.price !== undefined ? p.price : a.price) || 0,
+    months:     (p.months || a.months) || 3,
+    freeTrialUsed: p.freeTrialUsed !== undefined ? p.freeTrialUsed : a.freeTrialUsed
+  };
+}
+
 function renderAds(){
   const today = new Date();
   const soon = new Date(Date.now()+7*86400000).toISOString().slice(0,10);
@@ -1296,7 +1323,8 @@ function renderAds(){
     wrap.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-10 text-center text-slate-400 text-[13px]">등록된 광고가 없습니다. [+ 광고 등록]으로 첫 광고를 추가하세요.</div>';
     return;
   }
-  wrap.innerHTML = adCache.map(a=>{
+  wrap.innerHTML = adCache.map(raw=>{
+    const a = adFull(raw);
     const st = adStatus(a);
     const badge = st==='active' ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">게재 중</span>'
       : st==='pending' ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">게재 예정</span>'
@@ -1430,8 +1458,9 @@ window.openAdModal = (adId) => {
 
   const g = id => document.getElementById(id);
   if(adId){
-    const a = adCache.find(x=>x.id===adId);
-    if(!a){ alert('광고 정보를 찾을 수 없습니다.'); return; }
+    const raw = adCache.find(x=>x.id===adId);
+    if(!raw){ alert('광고 정보를 찾을 수 없습니다.'); return; }
+    const a = adFull(raw);
     g('adSlot').value = a.slot || '';
     g('adCompany').value = a.company || '';
     g('adAdvertiser').value = a.advertiser || '';
@@ -1497,27 +1526,40 @@ window.saveAd = async () => {
   const btn = document.getElementById('adSaveBtn');
   if(btn){ btn.disabled = true; btn.textContent = '저장 중...'; }
   try{
-    const data = {
-      slot, company, advertiser,
-      contact: document.getElementById('adContact').value.trim(),
-      email: document.getElementById('adEmail').value.trim(),
-      memo: document.getElementById('adMemo').value.trim(),
-      linkUrl, months,
+    // ★ 광고 문서(ads)는 점주 페이지에서 로그인 없이 읽히므로 공개해도 되는 값만 저장하고,
+    //   담당자 연락처·이메일·계약금액·메모는 비공개 컬렉션(ad_private)에 따로 저장한다.
+    const pub = {
+      slot, company, linkUrl,
       imageData: adImgData.desktop || '',
       imageUrl: adImgData.desktop ? '' : imageUrl,
       mobileImageData: adImgData.mobile || '',
       mobileImageUrl: adImgData.mobile ? '' : document.getElementById('adMobileImageUrl').value.trim(),
-      price: uncomma(document.getElementById('adPrice').value),
-      freeTrialUsed: months===1,
       startDate, endDate,
-      active: true
+      active: true,
+      // 아래 필드는 더 이상 공개 문서에 두지 않으므로 비워서 덮어쓴다 (기존 데이터 정리)
+      advertiser: '', contact: '', email: '', memo: '', price: 0, months: 0
     };
-    if(editingAdId){
-      await updateDoc(doc(db,'ads',editingAdId), data);
+    const priv = {
+      advertiser,
+      contact: document.getElementById('adContact').value.trim(),
+      email: document.getElementById('adEmail').value.trim(),
+      memo: document.getElementById('adMemo').value.trim(),
+      price: uncomma(document.getElementById('adPrice').value),
+      months,
+      freeTrialUsed: months===1,
+      updatedAt: serverTimestamp()
+    };
+
+    let adId = editingAdId;
+    if(adId){
+      await updateDoc(doc(db,'ads',adId), pub);
     }else{
-      data.createdAt = serverTimestamp();
-      await addDoc(collection(db,'ads'), data);
+      pub.createdAt = serverTimestamp();
+      const ref = await addDoc(collection(db,'ads'), pub);
+      adId = ref.id;
     }
+    await setDoc(doc(db,'ad_private',adId), priv, { merge:true });
+    await reloadAdPrivate();
     closeAdModal();
   }catch(e){
     err.textContent = '저장 실패: ' + (e.message||e.code||'알 수 없는 오류');
@@ -1534,6 +1576,7 @@ window.saveAd = async () => {
 window.deleteAd = async id => {
   if(!confirm('이 광고를 삭제할까요?')) return;
   await deleteDoc(doc(db,'ads',id));
+  try{ await deleteDoc(doc(db,'ad_private',id)); }catch(e){}
   // 실시간 구독으로 자동 반영
 };
 
