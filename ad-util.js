@@ -73,11 +73,18 @@
     if(!_db || !_fs || !adId) return;
     const { doc, setDoc, increment } = _fs;
     const id = `${adId}_${today()}`;
+    // 보안규칙이 4개 카운터의 존재와 증가폭을 검사하므로 항상 전부 포함해서 보낸다
+    // (해당 항목만 +1, 나머지는 +0 → 최초 생성 시 0으로 초기화됨)
+    const n = f => increment(field === f ? 1 : 0);
     try{
       await setDoc(doc(_db,'ad_daily_stats',id), {
-        adId, date: today(), [field]: increment(1)
+        adId, date: today(),
+        desktopImpressions: n('desktopImpressions'),
+        mobileImpressions:  n('mobileImpressions'),
+        desktopClicks:      n('desktopClicks'),
+        mobileClicks:       n('mobileClicks')
       }, { merge:true });
-    }catch(e){ /* 통계 실패가 화면에 영향 주지 않도록 무시 */ }
+    }catch(e){ console.warn('광고 통계 기록 실패:', e); }
   }
 
   /** 노출 집계 — 화면에 실제로 보였을 때만 */
@@ -122,12 +129,11 @@
       const desktopSrc = ad.imageData || ad.imageUrl || ad.desktopImageUrl;
       const src  = (isMobile && mobileSrc) ? mobileSrc : desktopSrc;
       const link = (isMobile && ad.mobileLinkUrl)  ? ad.mobileLinkUrl  : ad.linkUrl;
-      const fit  = (isMobile && !mobileSrc) ? 'object-contain bg-slate-50' : 'object-cover';
+      // 배너는 잘라내지 않고 전체가 보이도록 (규격이 달라도 문구가 안 잘림)
       const imgCls = meta.size === 'tower'
-        ? 'w-full rounded-xl border border-slate-200'
-        : `w-full max-h-24 ${fit} rounded-xl border border-slate-200`;
-      // 로딩 중 높이 변동 방지
-      const ratio = meta.size === 'tower' ? '' : 'style="aspect-ratio:6/1"';
+        ? 'w-full max-h-[1050px] object-contain rounded-xl border border-slate-200 bg-white'
+        : 'w-full max-h-[170px] object-contain rounded-xl border border-slate-200 bg-white';
+      const ratio = '';
       el.innerHTML =
         `<a href="${esc(link)}" target="_blank" rel="noopener sponsored" class="block"
             onclick="omAdClick('${esc(ad.id)}')">

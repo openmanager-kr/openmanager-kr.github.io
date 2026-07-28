@@ -279,7 +279,8 @@
             <option value="90">최근 90일</option>
             <option value="0">전체 기간</option>
           </select>
-          <button onclick="reloadAdStats()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-500 text-[12.5px] font-semibold hover:bg-slate-50 transition">↻ 새로고침</button>
+          <button id="saReload" onclick="reloadAdStats()" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-500 text-[12.5px] font-semibold hover:bg-slate-50 transition">↻ 새로고침</button>
+          <span id="saMsg" class="text-[12px] text-slate-400"></span>
           <button onclick="exportAdStats()" class="ml-auto px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-[12.5px] font-bold hover:bg-emerald-50 transition whitespace-nowrap">⬇ 보고서 내보내기</button>
         </div>
 
@@ -1051,13 +1052,27 @@ window.renderUseStats = () => {
 
 // ── 광고 성과 ──
 window.reloadAdStats = async () => {
+  const btn = document.getElementById('saReload');
+  const msg = document.getElementById('saMsg');
+  if(btn){ btn.disabled = true; btn.textContent = '불러오는 중...'; }
+  if(msg){ msg.textContent = ''; msg.className = 'text-[12px] text-slate-400'; }
   try{
     const snap = await getDocs(collection(db,'ad_daily_stats'));
     adStatCache = snap.docs.map(d=>d.data());
+    if(msg){
+      msg.textContent = adStatCache.length
+        ? `기록 ${adStatCache.length}건 · ${new Date().toLocaleTimeString('ko-KR')} 기준`
+        : '아직 집계된 기록이 없습니다.';
+    }
   }catch(e){
     adStatCache = [];
-    console.warn('광고 통계 로드 실패:', e);
+    if(msg){
+      msg.textContent = '불러오기 실패: ' + (e.code || e.message);
+      msg.className = 'text-[12px] text-rose-600 font-semibold';
+    }
+    console.error('광고 통계 로드 실패:', e);
   }
+  if(btn){ btn.disabled = false; btn.textContent = '↻ 새로고침'; }
   renderAdStats();
 };
 
