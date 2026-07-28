@@ -52,21 +52,21 @@
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
-  function seen(key){
+  // 'omAdV2:' 접두사 — 이전 버전에서 잘못 남은 표시는 자동으로 무시됨
+  const KEY = 'omAdV2:';
+  function alreadyCounted(key){
+    try{ return !!localStorage.getItem(KEY + key + ':' + today()); }
+    catch(e){ return false; }   // 저장 불가 환경이면 매번 집계 시도
+  }
+  function markCounted(key){
     try{
-      const k = 'omAd:' + key + ':' + today();
-      if(localStorage.getItem(k)) return true;
-      localStorage.setItem(k, '1');
-      // 오래된 기록 정리 (7일 지난 것)
+      localStorage.setItem(KEY + key + ':' + today(), '1');
+      // 7일 지난 표시 정리
       const cut = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
       Object.keys(localStorage).forEach(x=>{
-        if(x.startsWith('omAd:')){
-          const d = x.split(':').pop();
-          if(d < cut) localStorage.removeItem(x);
-        }
+        if(x.startsWith(KEY) && x.split(':').pop() < cut) localStorage.removeItem(x);
       });
-      return false;
-    }catch(e){ return false; }   // 저장 불가 환경이면 그냥 집계
+    }catch(e){}
   }
 
   async function bump(adId, field){
@@ -84,7 +84,21 @@
         desktopClicks:      n('desktopClicks'),
         mobileClicks:       n('mobileClicks')
       }, { merge:true });
-    }catch(e){ console.warn('광고 통계 기록 실패:', e); }
+      return true;
+    }catch(e){
+      console.warn('[오픈매니저] 광고 통계 기록 실패:', e.code || e.message, e);
+      return false;
+    }
+  }
+
+  /** 집계 시도 — 성공한 경우에만 "오늘 셌음" 표시 */
+  async function countOnce(key, adId, field){
+    if(alreadyCounted(key)) return;
+    const ok = await bump(adId, field);
+    if(ok){
+      markCounted(key);
+      console.info('[오픈매니저] 집계 기록:', field, adId);
+    }
   }
 
   /** 노출 집계 — 화면에 실제로 보였을 때만 */
@@ -98,7 +112,7 @@
           if(timer) return;
           timer = setTimeout(() => {                    // 1초 이상 노출
             io.disconnect();
-            if(!seen('imp:' + ad.id)) bump(ad.id, dev + 'Impressions');
+            countOnce('imp:' + ad.id, ad.id, dev + 'Impressions');
           }, 1000);
         }else{
           clearTimeout(timer); timer = null;
@@ -111,7 +125,20 @@
   /** 클릭 집계 — 이동 전에 기록 */
   window.omAdClick = function(adId){
     const dev = window.matchMedia('(max-width: 767px)').matches ? 'mobile' : 'desktop';
-    if(!seen('clk:' + adId)) bump(adId, dev + 'Clicks');
+    countOnce('clk:' + adId, adId, dev + 'Clicks');
+  };
+
+  /** 진단용 — 브라우저 콘솔에서 omAdDebug() 실행하면 상태 확인 */
+  window.omAdDebug = function(){
+    console.log('DB 연결:', !!_db, '| Firestore API:', !!_fs);
+    console.log('오늘 날짜:', today());
+    const marks = Object.keys(localStorage).filter(k=>k.startsWith(KEY));
+    console.log('오늘 집계 표시:', marks);
+    console.log('표시 지우기: omAdReset()');
+  };
+  window.omAdReset = function(){
+    Object.keys(localStorage).filter(k=>k.startsWith(KEY)).forEach(k=>localStorage.removeItem(k));
+    console.log('집계 표시를 지웠습니다. 새로고침 후 다시 시도하세요.');
   };
 
   /** 지면 렌더링 — 광고 있으면 배너, 없으면 문의 플레이스홀더 */
@@ -130,9 +157,11 @@
       const src  = (isMobile && mobileSrc) ? mobileSrc : desktopSrc;
       const link = (isMobile && ad.mobileLinkUrl)  ? ad.mobileLinkUrl  : ad.linkUrl;
       // 배너는 잘라내지 않고 전체가 보이도록 (규격이 달라도 문구가 안 잘림)
+      // 규격대로(가로 6:1, 세로 2:7) 보내면 여백 없이 꽉 차고,
+      // 규격이 달라도 잘리지 않도록 object-contain + 넉넉한 상한
       const imgCls = meta.size === 'tower'
-        ? 'w-full max-h-[1050px] object-contain rounded-xl border border-slate-200 bg-white'
-        : 'w-full max-h-[170px] object-contain rounded-xl border border-slate-200 bg-white';
+        ? 'w-full h-auto max-h-[800px] object-contain rounded-xl border border-slate-200 bg-white'
+        : 'w-full h-auto max-h-[200px] object-contain rounded-xl border border-slate-200 bg-white';
       const ratio = '';
       el.innerHTML =
         `<a href="${esc(link)}" target="_blank" rel="noopener sponsored" class="block"
