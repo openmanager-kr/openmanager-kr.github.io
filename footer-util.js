@@ -52,6 +52,11 @@
             <span class="${tCls}">|</span>
             <button type="button" onclick="openContact('ad')" class="${lCls} font-semibold transition">광고 문의</button>
           </div>
+          <div class="text-[10.5px] mt-1 space-x-2">
+            <a href="terms.html" class="${lCls} transition">이용약관</a>
+            <span class="${tCls}">|</span>
+            <a href="privacy.html" class="${lCls} font-semibold transition">개인정보 처리방침</a>
+          </div>
           <div class="text-[10px] ${tCls} mt-1.5">© ${new Date().getFullYear()} ${esc(c.serviceName)}</div>
         </div>
       </div>`;

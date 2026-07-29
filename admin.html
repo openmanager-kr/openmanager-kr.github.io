@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607290205"></script>
-<script src="excel-util.js?v=202607290205"></script>
-<script src="mobile-util.js?v=202607290205"></script>
-<script src="footer-util.js?v=202607290205"></script>
+<script src="phone-util.js?v=202607290823"></script>
+<script src="excel-util.js?v=202607290823"></script>
+<script src="mobile-util.js?v=202607290823"></script>
+<script src="footer-util.js?v=202607290823"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607290205"></script>
+<script src="mail-config.js?v=202607290823"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -812,6 +812,7 @@ window.confirmApprove = async () => {
       managerName: s.managerName, managerPhone: s.managerPhone,
       status:'approved', plan:'free',
       features:{ lead:true, store:true, open:true, partner:true, pos:true },
+      consents: s.consents || null,
       termsAgreed: s.termsAgreed || null,
       storeCount: 0,
       createdAt: s.createdAt || serverTimestamp(),
@@ -1295,9 +1296,31 @@ window.exportAdStats = () => {
 };
 
 // ── 약관·수신 동의 ──
+/** 신·구 동의 구조를 하나로 정규화 */
+function consentOf(c){
+  const n = c.consents || {};
+  const o = c.termsAgreed || {};
+  const mk = (n.marketingConsentVersion != null)
+    ? !n.marketingWithdrawnAt
+    : (o.marketingAd === true);
+  const req = n.serviceTermsVersion
+    ? !!(n.serviceTermsVersion && n.privacyConsentVersion && n.companyResponsibilityVersion)
+    : !!(o.serviceTerms && o.privacyPolicy && o.companyResponsibility);
+  const at = n.agreedAt
+    ? (n.agreedAt.toDate ? n.agreedAt.toDate() : new Date(n.agreedAt))
+    : (o.agreedAt ? new Date(o.agreedAt) : null);
+  return {
+    marketing: mk,
+    required: req,
+    agreedAt: at,
+    version: n.serviceTermsVersion || o.termsVersion || '',
+    isNew: !!n.serviceTermsVersion
+  };
+}
+
 window.renderConsent = () => {
   const list0 = companyCache.filter(c=>c.status!=='withdrawn');
-  const agree = list0.filter(c=>c.termsAgreed?.marketingAd === true);
+  const agree = list0.filter(c=>consentOf(c).marketing);
   document.getElementById('csTotal').textContent = list0.length;
   document.getElementById('csAgree').textContent = agree.length;
   document.getElementById('csDeny').textContent = list0.length - agree.length;
@@ -1307,8 +1330,8 @@ window.renderConsent = () => {
   const ft = document.getElementById('csFilter')?.value || '';
   let list = list0;
   if(kw) list = list.filter(c => [c.companyName,c.managerName,c.email].some(v=>(v||'').includes(kw)));
-  if(ft==='y') list = list.filter(c => c.termsAgreed?.marketingAd === true);
-  if(ft==='n') list = list.filter(c => c.termsAgreed?.marketingAd !== true);
+  if(ft==='y') list = list.filter(c => consentOf(c).marketing);
+  if(ft==='n') list = list.filter(c => !consentOf(c).marketing);
 
   const rows = document.getElementById('csRows');
   if(list.length===0){
@@ -1316,16 +1339,16 @@ window.renderConsent = () => {
     renderCards('csCards', [], '해당하는 회사가 없습니다.'); return;
   }
   rows.innerHTML = list.map(c=>{
-    const t = c.termsAgreed || {};
-    const req = (t.serviceTerms && t.privacyPolicy && t.companyResponsibility);
-    const reqBadge = req
+    const k = consentOf(c);
+    const reqBadge = k.required
       ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">동의 완료</span>'
       : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">기록 없음</span>';
-    const mk = t.marketingAd === true;
+    const mk = k.marketing;
     const mkBadge = mk
       ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">동의</span>'
       : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">거부</span>';
-    const at = t.agreedAt ? new Date(t.agreedAt).toLocaleString('ko-KR') : '–';
+    const at = k.agreedAt ? k.agreedAt.toLocaleString('ko-KR') : '–';
+    const t = { termsVersion: k.version + (k.isNew ? '' : ' (구)') };
     return `<tr class="border-t border-slate-100 hover:bg-slate-50/70 transition">
       <td class="px-4 py-3 font-semibold text-slate-800">${esc(c.companyName)}</td>
       <td class="px-4 py-3">${esc(c.managerName)}</td>
@@ -1340,17 +1363,16 @@ window.renderConsent = () => {
   }).join('');
 
   renderCards('csCards', list.map(c=>{
-    const t = c.termsAgreed || {};
-    const req = (t.serviceTerms && t.privacyPolicy && t.companyResponsibility);
-    const mk = t.marketingAd === true;
+    const k = consentOf(c);
+    const mk = k.marketing;
     return {
       title: esc(c.companyName), sub: esc(c.email),
       badges: [ mk ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">수신 동의</span>'
                    : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">수신 거부</span>' ],
       fields: [['실무자', esc(c.managerName)],
-               ['필수 3종', req ? '<span class="text-emerald-600 font-bold">동의 완료</span>' : '<span class="text-slate-400">기록 없음</span>'],
-               ['동의 일시', t.agreedAt ? new Date(t.agreedAt).toLocaleString('ko-KR') : ''],
-               ['약관 버전', esc(t.termsVersion)]],
+               ['필수 3종', k.required ? '<span class="text-emerald-600 font-bold">동의 완료</span>' : '<span class="text-slate-400">기록 없음</span>'],
+               ['동의 일시', k.agreedAt ? k.agreedAt.toLocaleString('ko-KR') : ''],
+               ['약관 버전', esc(k.version) + (k.isNew ? '' : ' (구)')]],
       actions: mBtn(mk?'수신거부 처리':'수신동의 처리', `toggleMarketing('${c.id}',${mk})`)
     };
   }), '해당하는 회사가 없습니다.');
@@ -1363,8 +1385,15 @@ window.toggleMarketing = async (id, cur) => {
     ? `"${c.companyName}"을(를) 광고성 정보 수신 동의 상태로 변경할까요?\n\n※ 반드시 회사로부터 동의를 받은 경우에만 변경하세요.`
     : `"${c.companyName}"을(를) 수신 거부 상태로 변경할까요?\n(수신거부 요청을 받은 경우)`;
   if(!confirm(msg)) return;
-  const t = { ...(c.termsAgreed||{}), marketingAd: next, marketingUpdatedAt: new Date().toISOString() };
-  await updateDoc(doc(db,'companies',id), { termsAgreed: t });
+  const patch = {
+    // 신 구조
+    'consents.marketingConsentVersion': next ? '1.0' : (c.consents?.marketingConsentVersion || '1.0'),
+    'consents.marketingAgreedAt':       next ? serverTimestamp() : (c.consents?.marketingAgreedAt || null),
+    'consents.marketingWithdrawnAt':    next ? null : serverTimestamp(),
+    // 구 구조 (호환)
+    termsAgreed: { ...(c.termsAgreed||{}), marketingAd: next, marketingUpdatedAt: new Date().toISOString() }
+  };
+  await updateDoc(doc(db,'companies',id), patch);
 };
 
 window.copyMarketingEmails = () => {
