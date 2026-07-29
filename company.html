@@ -8,12 +8,12 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290942"></script>
-<script src="mobile-util.js?v=202607290942"></script>
+<script src="phone-util.js?v=202607290950"></script>
+<script src="mobile-util.js?v=202607290950"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202607290942"></script>
-<script src="excel-util.js?v=202607290942"></script>
-<script src="footer-util.js?v=202607290942"></script>
+<script src="ad-util.js?v=202607290950"></script>
+<script src="excel-util.js?v=202607290950"></script>
+<script src="footer-util.js?v=202607290950"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -665,6 +665,30 @@
   </div>
 </div>
 
+<!-- 약관 재동의 -->
+<div id="reconsentModal" class="hidden fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center px-4 py-8">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+    <div class="px-6 py-5 border-b border-slate-100 shrink-0">
+      <h3 class="font-extrabold text-slate-900 text-[16px]">약관이 개정되었습니다</h3>
+      <p class="text-[13px] text-slate-500 mt-1.5 leading-relaxed break-keep">
+        서비스를 계속 이용하시려면 개정된 약관에 동의해 주세요.
+      </p>
+    </div>
+    <div class="px-6 py-5 overflow-y-auto overscroll-contain">
+      <div id="reconsentList" class="space-y-2.5"></div>
+      <p class="text-[12px] text-slate-400 mt-4 leading-relaxed break-keep">
+        전문은 <a href="terms.html" target="_blank" class="text-indigo-500 font-semibold hover:underline">이용약관</a> ·
+        <a href="privacy.html" target="_blank" class="text-indigo-500 font-semibold hover:underline">개인정보 처리방침</a> 에서 확인하실 수 있습니다.
+      </p>
+      <p id="reconsentErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
+    </div>
+    <div class="flex gap-2.5 px-6 py-4 border-t border-slate-100 shrink-0">
+      <button onclick="doLogout()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">나중에 (로그아웃)</button>
+      <button id="reconsentBtn" onclick="saveReconsent()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">동의하고 계속</button>
+    </div>
+  </div>
+</div>
+
 <!-- POS 관리 등록/수정 모달 -->
 <div id="posModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
   <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
@@ -894,8 +918,12 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('pwGate').classList.remove('hidden');
       return;   // 변경 완료 전까지 본 화면 접근 차단
     }
+    checkReconsent();     // 약관이 개정되었으면 재동의 요청
     await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
+    // 새로고침 시 마지막에 보던 화면으로 복원
+    const _v = (location.hash || '').replace('#','');
+    if(_v && document.getElementById('view-'+_v)) switchView(_v);
     markCompanyActive();  // 회사 접속 기록 (하루 1회만)
     mountExcelButtons();
   }catch(e){
@@ -904,6 +932,62 @@ onAuthStateChanged(auth, async user => {
 });
 
 window.doLogout = async () => { await signOut(auth); location.href='login.html'; };
+
+// ===== 약관 재동의 =====
+// 약관이 개정되면 이 값을 올린다. 저장된 버전과 다르면 재동의를 요청한다.
+const TERMS_VER = { service:'1.0', privacy:'1.0', responsibility:'1.0', marketing:'1.0', policy:'1.0' };
+const TERMS_DOCS = [
+  { key:'serviceTermsVersion',          cur:TERMS_VER.service,        label:'서비스 이용약관' },
+  { key:'privacyConsentVersion',        cur:TERMS_VER.privacy,        label:'개인정보 수집·이용 동의' },
+  { key:'companyResponsibilityVersion', cur:TERMS_VER.responsibility, label:'가맹점주·관계자 개인정보 입력 권한 및 책임 확인' }
+];
+
+/** 재동의가 필요한 문서 목록 (없거나 버전이 다르면 대상) */
+function outdatedTerms(){
+  const c = (MY.company && MY.company.consents) || {};
+  return TERMS_DOCS.filter(d => c[d.key] !== d.cur);
+}
+
+function checkReconsent(){
+  const need = outdatedTerms();
+  if(need.length === 0) return false;
+  document.getElementById('reconsentList').innerHTML = need.map((d,i)=>`
+    <label class="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+      <input type="checkbox" class="reconsent-item mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
+      <span class="text-[13px] text-slate-700 break-keep">
+        <b>[필수]</b> ${esc(d.label)}
+        <span class="block text-[11.5px] text-slate-400 mt-0.5">개정판 v${d.cur}</span>
+      </span>
+    </label>`).join('');
+  document.getElementById('reconsentErr').classList.add('hidden');
+  document.getElementById('reconsentModal').classList.remove('hidden');
+  return true;
+}
+
+window.saveReconsent = async () => {
+  const boxes = [...document.querySelectorAll('.reconsent-item')];
+  const err = document.getElementById('reconsentErr');
+  if(!boxes.every(b => b.checked)){
+    err.textContent = '모든 항목에 동의해 주세요.'; err.classList.remove('hidden'); return;
+  }
+  const btn = document.getElementById('reconsentBtn');
+  btn.disabled = true; btn.textContent = '저장 중...';
+  try{
+    const prev = (MY.company && MY.company.consents) || {};
+    const next = { ...prev };
+    outdatedTerms().forEach(d => next[d.key] = d.cur);
+    next.privacyPolicyVersion = TERMS_VER.policy;
+    next.agreedAt = serverTimestamp();
+    next.agreedFrom = 'reconsent';
+    await updateDoc(doc(db,'companies',MY.companyId), { consents: next });
+    MY.company.consents = next;
+    document.getElementById('reconsentModal').classList.add('hidden');
+  }catch(e){
+    err.textContent = '저장 실패: ' + (e.code || e.message);
+    err.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = '동의하고 계속';
+};
 
 // 회사 접속 기록 — 하루 1회만 기록해 쓰기 최소화
 async function markCompanyActive(){
@@ -953,6 +1037,7 @@ window.changePassword = async () => {
     await updatePassword(auth.currentUser, pw);
     await updateDoc(doc(db,'users',MY.uid), { mustChangePassword: false });
     document.getElementById('pwGate').classList.add('hidden');
+    checkReconsent();     // 약관이 개정되었으면 재동의 요청
     await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
     markCompanyActive();  // 회사 접속 기록 (하루 1회만)
@@ -979,6 +1064,8 @@ window.switchView = v => {
   document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
   document.getElementById('view-'+v).classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+  // 새로고침해도 같은 화면이 유지되도록 주소에 기록
+  if(location.hash !== '#'+v) history.replaceState(null, '', '#'+v);
   // 상담 데이터는 실제로 탭을 열 때 한 번만 구독 (불필요한 읽기 방지)
   if(v === 'lead') loadLeads();
 };

@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607290908"></script>
-<script src="excel-util.js?v=202607290908"></script>
-<script src="mobile-util.js?v=202607290908"></script>
-<script src="footer-util.js?v=202607290908"></script>
+<script src="phone-util.js?v=202607290950"></script>
+<script src="excel-util.js?v=202607290950"></script>
+<script src="mobile-util.js?v=202607290950"></script>
+<script src="footer-util.js?v=202607290950"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607290908"></script>
+<script src="mail-config.js?v=202607290950"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -401,7 +401,7 @@
       <div id="adSummary" class="mt-5"></div>
 
       <div class="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 text-[12.5px] text-indigo-800 leading-relaxed">
-        지면은 <b>총 10자리</b>로 한정되어 있고, 한 지면에는 한 광고주만 게재됩니다.<br>
+        지면은 <b>총 9자리</b>로 한정되어 있고, 한 지면에는 한 광고주만 게재됩니다.<br>
         <b>비어 있는 지면에는 「이 자리에 광고를 게재하실 수 있습니다」 안내가 자동으로 표시</b>되므로,
         비워둬도 그 자체가 광고 영업이 됩니다.
       </div>
@@ -602,8 +602,7 @@ const SLOTS = [
   { code:'main_top',            label:'A급 · 메인 상단',            base:80000,  where:'본부 관리자 모든 화면 최상단' },
   { code:'main_right',          label:'A급 · 메인 우측 ①',          base:80000,  where:'본부 관리자 오른쪽 세로 (위)' },
   { code:'main_right_2',        label:'A급 · 메인 우측 ②',          base:80000,  where:'본부 관리자 오른쪽 세로 (아래)' },
-  { code:'tab_dashboard_bottom',        label:'B급 · 탭 하단',           base:60000, where:'매장·상담·오픈·파트너·POS 탭 하단' },
-  { code:'integrated_dashboard_bottom', label:'B급 · 통합 대시보드 하단', base:60000, where:'본부 대시보드 맨 아래' },
+  { code:'tab_dashboard_bottom',        label:'B급 · 본부 화면 하단',    base:60000, where:'대시보드·매장·상담·오픈·파트너·POS 모든 화면 맨 아래' },
 ];
 const slotLabel = c => (SLOTS.find(s=>s.code===c)||{label:c}).label;
 
@@ -662,6 +661,9 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('guard').remove();
     renderFooter('sideFooter','dark');
     loadAll();
+    // 새로고침 시 마지막에 보던 화면으로 복원
+    const _v = (location.hash || '').replace('#','');
+    if(_v && document.getElementById('view-'+_v)) switchView(_v);
   }catch(e){
     alert('권한 확인에 실패했습니다.'); location.href='login.html';
   }
@@ -674,6 +676,8 @@ window.switchView = v => {
   document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
   document.getElementById('view-'+v).classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+  // 새로고침해도 같은 화면이 유지되도록 주소에 기록
+  if(location.hash !== '#'+v) history.replaceState(null, '', '#'+v);
 };
 
 // ===== 데이터 로드 =====
