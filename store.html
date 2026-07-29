@@ -8,10 +8,10 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290908"></script>
-<script src="mobile-util.js?v=202607290908"></script>
-<script src="ad-util.js?v=202607290908"></script>
-<script src="footer-util.js?v=202607290908"></script>
+<script src="phone-util.js?v=202607290942"></script>
+<script src="mobile-util.js?v=202607290942"></script>
+<script src="ad-util.js?v=202607290942"></script>
+<script src="footer-util.js?v=202607290942"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>body{font-family:'Pretendard',-apple-system,sans-serif;}</style>
 </head>
@@ -255,12 +255,11 @@ if(!token){
           </div>`).join('') + '</div>';
     } else { pBox.classList.add('hidden'); }
   }, (err) => {
-    // 규칙에서 만료로 차단되면 permission-denied 가 발생한다
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('content').classList.add('hidden');
     document.getElementById('celebrate').classList.add('hidden');
     document.getElementById('notFound').classList.remove('hidden');
-    console.info('공유 페이지 열람 불가:', err && (err.code || err.message));
+    console.warn('[오픈매니저] 공유 페이지 열람 불가:', err && (err.code || err.message), err);
   });
 }
 

@@ -8,12 +8,12 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290908"></script>
-<script src="mobile-util.js?v=202607290908"></script>
+<script src="phone-util.js?v=202607290942"></script>
+<script src="mobile-util.js?v=202607290942"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202607290908"></script>
-<script src="excel-util.js?v=202607290908"></script>
-<script src="footer-util.js?v=202607290908"></script>
+<script src="ad-util.js?v=202607290942"></script>
+<script src="excel-util.js?v=202607290942"></script>
+<script src="footer-util.js?v=202607290942"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -781,7 +781,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, onSnapshot, query, where, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField, addDoc, collection, getDocs, onSnapshot, query, where, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyBxB2PoM3Ij_F35Kw3lNTIpKeTmZX0yGSI",
@@ -931,7 +931,7 @@ async function initAdsAndFooter(){
     ['ad-main-top','main_top'],
     ['ad-main-right','main_right'],
     ['ad-main-right-2','main_right_2'],
-    ['ad-integrated-bottom','integrated_dashboard_bottom'],
+    ['ad-integrated-bottom','tab_dashboard_bottom'],   // 화면 하단은 하나의 지면으로 통합
     ['ad-tab-stores','tab_dashboard_bottom'],
     ['ad-tab-lead','tab_dashboard_bottom'],
     ['ad-tab-open','tab_dashboard_bottom'],
@@ -1216,7 +1216,7 @@ async function syncPublicStore(storeId, data){
       ? { name: x, vendor: '', status: '미진행' }
       : { name: x.name || '', vendor: x.vendor || '', status: x.status || '미진행' }
   );
-  await setDoc(doc(db,'public_stores', data.shareToken), {
+  const pub = {
     companyId: MY.companyId,
     storeId,
     companyName: MY.company.companyName,
@@ -1225,11 +1225,18 @@ async function syncPublicStore(storeId, data){
     contractStatus: data.contractStatus||'', partnerStatus: data.partnerStatus||'',
     partnerItems: safeItems,
     steps: (data.steps || []).map(s => ({ name: s.name || '', status: s.status || '대기' })),
-    // 오픈 완료 시 축하 화면 표시 + 3일 뒤 링크 자동 만료
-    openedAt: data.openedAt || null,
-    expiresAt: data.openedAt ? (data.openedAt + LINK_KEEP_DAYS*86400000) : null,
     updatedAt: serverTimestamp()
-  });
+  };
+  // 오픈이 완료된 경우에만 축하 화면·만료 시각을 넣는다.
+  // (오픈 전에는 필드 자체를 두지 않아야 열람이 차단되지 않는다)
+  if(data.openedAt){
+    pub.openedAt  = data.openedAt;
+    pub.expiresAt = data.openedAt + LINK_KEEP_DAYS*86400000;
+  }else{
+    pub.openedAt  = deleteField();
+    pub.expiresAt = deleteField();
+  }
+  await setDoc(doc(db,'public_stores', data.shareToken), pub, { merge: true });
 }
 
 window.saveStore = async () => {
