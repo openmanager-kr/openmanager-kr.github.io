@@ -210,8 +210,8 @@
            <div class="flex justify-between"><span class="text-slate-500 shrink-0">월 단가</span><b class="text-indigo-600 text-right">${price}원</b></div>
          </div>
          <div class="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 text-[12.5px] text-slate-500 leading-relaxed">
-           3개월 정가 · 6개월 10% · 12개월 20% 할인<br>
-           <b class="text-slate-700">최초 1회 1개월 무료 체험</b> 가능합니다.
+           6개월 정가 · 12개월 10% 할인<br>
+           <b class="text-slate-700">첫 계약 시 1개월 무상 추가 게재</b> (6개월 → 7개월)
          </div>
          <div class="mt-4">
            <div class="text-[12.5px] font-semibold text-slate-600 mb-1.5">문의 이메일</div>

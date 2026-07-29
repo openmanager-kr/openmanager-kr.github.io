@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607280614"></script>
-<script src="excel-util.js?v=202607280614"></script>
-<script src="mobile-util.js?v=202607280614"></script>
-<script src="footer-util.js?v=202607280614"></script>
+<script src="phone-util.js?v=202607290205"></script>
+<script src="excel-util.js?v=202607290205"></script>
+<script src="mobile-util.js?v=202607290205"></script>
+<script src="footer-util.js?v=202607290205"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607280614"></script>
+<script src="mail-config.js?v=202607290205"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -507,10 +507,8 @@
         <div>
           <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">계약 기간</label>
           <select id="adMonths" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm bg-white transition" onchange="calcAdPrice()">
-            <option value="1">1개월 (무료체험)</option>
-            <option value="3" selected>3개월 (정가)</option>
-            <option value="6">6개월 (10%↓)</option>
-            <option value="12">12개월 (20%↓)</option>
+            <option value="6" selected>6개월 (정가)</option>
+            <option value="12">12개월 (10%↓)</option>
           </select>
         </div>
         <div>
@@ -522,6 +520,17 @@
           <input id="adEnd" type="date" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm bg-slate-50 transition" readonly>
         </div>
       </div>
+      <label class="flex items-start gap-2 p-3 rounded-lg border border-emerald-200 bg-emerald-50/50 cursor-pointer">
+        <input type="checkbox" id="adFreeMonth" onchange="calcAdPrice()" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0">
+        <span class="text-[13px] text-slate-700">
+          <b>1개월 무상 추가 게재</b>
+          <span class="block text-[12px] text-slate-500 mt-0.5">
+            광고주당 첫 계약 1회 한정. 금액은 그대로이고 <b class="text-emerald-700">게재 종료일이 1개월 연장</b>됩니다.
+          </span>
+        </span>
+      </label>
+      <div class="grid grid-cols-3 gap-3">
+      </div>
       <div class="flex items-center justify-between bg-slate-50 rounded-lg px-4 py-3">
         <span class="text-[13px] font-semibold text-slate-600">계약 금액 (할인 반영)</span>
         <div class="flex items-center gap-1.5 shrink-0">
@@ -530,6 +539,7 @@
           <span class="text-[13px] text-slate-500">원</span>
         </div>
       </div>
+      <div id="adPriceNote" class="text-[12px] text-slate-400 text-right -mt-1"></div>
       <div>
         <label class="block text-[13px] font-semibold text-slate-600 mb-1.5">메모 <span class="text-slate-400 font-normal">(계약 협의 내용·특이사항)</span></label>
         <textarea id="adMemo" rows="3" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm transition"></textarea>
@@ -1403,7 +1413,7 @@ function adFull(a){
     memo:       p.memo       || a.memo       || '',
     price:      (p.price !== undefined ? p.price : a.price) || 0,
     months:     (p.months || a.months) || 3,
-    freeTrialUsed: p.freeTrialUsed !== undefined ? p.freeTrialUsed : a.freeTrialUsed
+    freeMonthGiven: p.freeMonthGiven !== undefined ? p.freeMonthGiven : (p.freeTrialUsed || a.freeTrialUsed || false)
   };
 }
 
@@ -1565,7 +1575,8 @@ window.openAdModal = (adId) => {
     g('adEmail').value = a.email || '';
     g('adMemo').value = a.memo || '';
     g('adLinkUrl').value = a.linkUrl || '';
-    g('adMonths').value = String(a.months || 3);
+    g('adMonths').value = String(a.months === 12 ? 12 : 6);
+    g('adFreeMonth').checked = !!a.freeMonthGiven;
     g('adStart').value = a.startDate || '';
     g('adEnd').value = a.endDate || '';
     g('adPrice').value = (a.price||0).toLocaleString('ko-KR');
@@ -1577,7 +1588,8 @@ window.openAdModal = (adId) => {
                                showAdPreview('mobile', a.mobileImageUrl, '주소로 등록됨'); }
   }else{
     ['adCompany','adAdvertiser','adContact','adEmail','adMemo','adImageUrl','adMobileImageUrl','adLinkUrl'].forEach(id=>g(id).value='');
-    g('adMonths').value = '3';
+    g('adMonths').value = '6';
+    g('adFreeMonth').checked = false;
     g('adStart').value = todayStr();
     calcAdPrice();
   }
@@ -1587,17 +1599,31 @@ window.closeAdModal = () => document.getElementById('adModal').classList.add('hi
 
 window.calcAdPrice = () => {
   const slot = SLOTS.find(s=>s.code===document.getElementById('adSlot').value) || SLOTS[0];
-  const m = parseInt(document.getElementById('adMonths').value);
+  const m = parseInt(document.getElementById('adMonths').value);   // 6 또는 12
+  const free = document.getElementById('adFreeMonth').checked;     // 1개월 무상 추가
   const start = document.getElementById('adStart').value;
+
+  // 게재 종료일 = 시작일 + 계약기간 (+ 무상 1개월)
   if(start){
-    const d = new Date(start); d.setMonth(d.getMonth()+m);
-    document.getElementById('adEnd').value = d.toISOString().slice(0,10);
+    const d = new Date(start);
+    d.setMonth(d.getMonth() + m + (free ? 1 : 0));
+    document.getElementById('adEnd').value =
+      `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
+
+  // 금액 = 정가 × 계약기간 (12개월은 10% 할인). 무상 1개월은 금액에 영향 없음
   let price = slot.base * m;
-  if(m===1) price = 0;            // 무료 체험
-  else if(m===6) price = Math.round(price*0.9);
-  else if(m===12) price = Math.round(price*0.8);
+  if(m === 12) price = Math.round(price * 0.9);
   document.getElementById('adPrice').value = price.toLocaleString('ko-KR');
+
+  // 안내 문구
+  const note = document.getElementById('adPriceNote');
+  if(note){
+    const total = m + (free ? 1 : 0);
+    note.textContent = free
+      ? `${m}개월 요금으로 ${total}개월 게재 · 실질 월 ${Math.round(price/total).toLocaleString('ko-KR')}원`
+      : `${m}개월 게재 · 월 ${Math.round(price/m).toLocaleString('ko-KR')}원`;
+  }
 };
 document.getElementById('adSlot')?.addEventListener('change', ()=>window.calcAdPrice());
 
@@ -1643,7 +1669,7 @@ window.saveAd = async () => {
       memo: document.getElementById('adMemo').value.trim(),
       price: uncomma(document.getElementById('adPrice').value),
       months,
-      freeTrialUsed: months===1,
+      freeMonthGiven: document.getElementById('adFreeMonth').checked,   // 1개월 무상 추가 제공 여부
       updatedAt: serverTimestamp()
     };
 
