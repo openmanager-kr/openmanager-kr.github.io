@@ -211,7 +211,8 @@
          </div>
          <div class="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 text-[12.5px] text-slate-500 leading-relaxed">
            6개월 정가 · 12개월 10% 할인<br>
-           <b class="text-slate-700">첫 계약 시 1개월 무상 추가 게재</b> (6개월 → 7개월)
+           <b class="text-slate-700">첫 계약 시 1개월 무상 추가</b> (6개월 → 7개월 게재)<br>
+           소재는 계약 기간 중 언제든 무상 교체
          </div>
          <div class="mt-4">
            <div class="text-[12.5px] font-semibold text-slate-600 mb-1.5">문의 이메일</div>
