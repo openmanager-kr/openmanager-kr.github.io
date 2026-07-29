@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607290823"></script>
-<script src="excel-util.js?v=202607290823"></script>
-<script src="mobile-util.js?v=202607290823"></script>
-<script src="footer-util.js?v=202607290823"></script>
+<script src="phone-util.js?v=202607290844"></script>
+<script src="excel-util.js?v=202607290844"></script>
+<script src="mobile-util.js?v=202607290844"></script>
+<script src="footer-util.js?v=202607290844"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607290823"></script>
+<script src="mail-config.js?v=202607290844"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -396,9 +396,22 @@
           <h1 class="text-xl font-extrabold text-slate-900">광고 관리</h1>
           <p class="text-[13px] text-slate-500 mt-1">지면별 광고 등록 · 지면당 1개 독점 게재</p>
         </div>
-        <button onclick="openAdModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 광고 등록</button>
+        <button onclick="openAdModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition whitespace-nowrap">+ 직접 등록</button>
       </div>
-      <div id="adCards" class="mt-5 grid gap-3"></div>
+      <div id="adSummary" class="mt-5"></div>
+
+      <div class="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 text-[12.5px] text-indigo-800 leading-relaxed">
+        지면은 <b>총 8자리</b>로 한정되어 있고, 한 지면에는 한 광고주만 게재됩니다.<br>
+        <b>비어 있는 지면에는 「이 자리에 광고를 게재하실 수 있습니다」 안내가 자동으로 표시</b>되므로,
+        비워둬도 그 자체가 광고 영업이 됩니다.
+      </div>
+
+      <div class="mt-4 flex items-center justify-between flex-wrap gap-2">
+        <div class="text-[13px] font-bold text-slate-700">지면 현황</div>
+        <a href="ads.html" target="_blank" class="text-[12.5px] font-semibold text-indigo-600 hover:underline">광고주에게 보낼 안내 페이지 ↗</a>
+      </div>
+
+      <div id="adCards" class="mt-3 grid gap-3"></div>
     </section>
   </main>
 </div>
@@ -579,16 +592,16 @@ try{
 }
 
 // ===== 지면 정의 =====
+// 판매 가능한 광고 지면 (실제 화면에 존재하는 자리와 1:1로 대응)
 const SLOTS = [
-  { code:'store_view_top',   label:'S급 · 점주페이지 상단',   base:100000 },
-  { code:'store_view_left',  label:'S급 · 점주페이지 좌측',   base:100000 },
-  { code:'store_view_right', label:'S급 · 점주페이지 우측',   base:100000 },
-  { code:'main_top',         label:'A급 · 메인 상단',         base:80000 },
-  { code:'main_left',        label:'A급 · 메인 좌측',         base:80000 },
-  { code:'main_right',       label:'A급 · 메인 우측',         base:80000 },
-  { code:'tab_dashboard_bottom',        label:'B급 · 탭 대시보드 하단',   base:60000 },
-  { code:'integrated_dashboard_bottom', label:'B급 · 통합 대시보드 하단', base:60000 },
-  { code:'tab_new_bottom',   label:'C급 · 신규등록 화면 하단', base:50000 },
+  { code:'store_view_top',   label:'S급 · 점주페이지 상단',   base:100000, where:'점주가 진행 현황을 볼 때 최상단' },
+  { code:'store_view_left',  label:'S급 · 점주페이지 좌측',   base:100000, where:'점주 페이지 왼쪽 세로 배너' },
+  { code:'store_view_right', label:'S급 · 점주페이지 우측',   base:100000, where:'점주 페이지 오른쪽 세로 배너' },
+  { code:'main_top',         label:'A급 · 메인 상단',         base:80000,  where:'본부 관리자 모든 화면 최상단' },
+  { code:'main_right',       label:'A급 · 메인 우측',         base:80000,  where:'본부 관리자 오른쪽 세로 배너' },
+  { code:'tab_dashboard_bottom',        label:'B급 · 탭 하단',           base:60000, where:'매장·상담·오픈·파트너·POS 탭 하단' },
+  { code:'integrated_dashboard_bottom', label:'B급 · 통합 대시보드 하단', base:60000, where:'본부 대시보드 맨 아래' },
+  { code:'tab_new_bottom',   label:'C급 · 신규등록 화면 하단', base:50000,  where:'매장·상담 등록 창 하단' },
 ];
 const slotLabel = c => (SLOTS.find(s=>s.code===c)||{label:c}).label;
 
@@ -1447,40 +1460,108 @@ function adFull(a){
 }
 
 function renderAds(){
-  const today = new Date();
   const soon = new Date(Date.now()+7*86400000).toISOString().slice(0,10);
   const expSoon = adCache.filter(a=>adStatus(a)==='active' && a.endDate <= soon);
   const badge = document.getElementById('badgeAds');
   badge.textContent = expSoon.length;
   badge.classList.toggle('hidden', expSoon.length===0);
 
-  const wrap = document.getElementById('adCards');
-  if(adCache.length===0){
-    wrap.innerHTML = '<div class="bg-white border border-slate-200 rounded-xl p-10 text-center text-slate-400 text-[13px]">등록된 광고가 없습니다. [+ 광고 등록]으로 첫 광고를 추가하세요.</div>';
-    return;
+  // 지면은 한정되어 있으므로, 등록된 광고가 아니라 '지면'을 기준으로 표시한다.
+  // 비어 있는 지면은 화면에 '광고 문의' 안내가 자동 노출되므로 그대로 두어도 홍보가 된다.
+  const filled = {};
+  adCache.forEach(a => {
+    if(adStatus(a) !== 'expired') filled[a.slot] = a;   // 게재 중 또는 게재 예정
+  });
+  const filledCount = Object.keys(filled).length;
+
+  // 요약
+  const sum = document.getElementById('adSummary');
+  if(sum){
+    const income = SLOTS.reduce((n,sl) => n + (filled[sl.code] ? sl.base : 0), 0);
+    const rest   = SLOTS.reduce((n,sl) => n + (filled[sl.code] ? 0 : sl.base), 0);
+    sum.innerHTML = `
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">전체 지면</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1.5">${SLOTS.length}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">판매 완료</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-1.5">${filledCount}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">판매 가능</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1.5">${SLOTS.length - filledCount}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+          <div class="text-[12px] font-semibold text-slate-500">월 수익 / 잔여</div>
+          <div class="text-[15px] sm:text-[17px] font-extrabold text-violet-600 mt-1.5 leading-tight break-all">
+            ${income.toLocaleString('ko-KR')}<span class="text-slate-300 font-bold"> / ${rest.toLocaleString('ko-KR')}</span>
+          </div>
+        </div>
+      </div>`;
   }
-  wrap.innerHTML = adCache.map(raw=>{
+
+  // 지면 목록
+  const wrap = document.getElementById('adCards');
+  wrap.innerHTML = SLOTS.map(sl => {
+    const raw = filled[sl.code];
+
+    // ── 비어 있는 지면 ──
+    if(!raw){
+      return `<div class="bg-white border border-dashed border-slate-300 rounded-xl p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+          <div class="w-full sm:w-24 h-16 sm:h-14 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+            <span class="text-[11px] text-slate-300 font-bold">비어 있음</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-slate-600 text-[14px]">${esc(sl.label)}</span>
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[11px] font-bold">판매 가능</span>
+            </div>
+            <div class="text-[12.5px] text-slate-400 mt-1">${esc(sl.where)}</div>
+            <div class="text-[12px] text-indigo-500 font-semibold mt-1.5">
+              월 ${sl.base.toLocaleString('ko-KR')}원 · 현재 화면에는 <b>광고 문의 안내</b>가 표시됩니다
+            </div>
+          </div>
+          <button onclick="openAdModal(null,'${sl.code}')"
+            class="shrink-0 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">
+            + 광고 등록
+          </button>
+        </div>
+      </div>`;
+    }
+
+    // ── 광고가 있는 지면 ──
     const a = adFull(raw);
     const st = adStatus(a);
-    const badge = st==='active' ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">게재 중</span>'
-      : st==='pending' ? '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">게재 예정</span>'
-      : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">종료</span>';
+    const badge = st==='active'
+      ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold">게재 중</span>'
+      : '<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold">게재 예정</span>';
     const dLeft = Math.ceil((new Date(a.endDate) - new Date())/86400000);
-    const expiry = (st==='active' && dLeft<=7) ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold">만료 D-${dLeft}</span>` : '';
-    return `<div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-      <img src="${esc(a.imageData || a.imageUrl)}" alt="" class="w-full sm:w-24 h-20 sm:h-14 object-cover rounded-lg border border-slate-100 bg-slate-50" onerror="this.style.visibility='hidden'">
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-bold text-slate-800 text-[14px]">${esc(a.company || a.advertiser)}</span>${badge}${expiry}
+    const expiry = (st==='active' && dLeft<=7)
+      ? `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold">만료 D-${dLeft}</span>` : '';
+    return `<div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+        <img src="${esc(a.imageData || a.imageUrl)}" alt=""
+          class="w-full sm:w-24 h-20 sm:h-14 object-contain rounded-lg border border-slate-100 bg-slate-50 shrink-0"
+          onerror="this.style.visibility='hidden'">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-slate-800 text-[14px] break-words">${esc(a.company || a.advertiser)}</span>
+            ${badge}${expiry}
+          </div>
+          <div class="text-[12.5px] text-slate-500 mt-1">${esc(sl.label)}</div>
+          <div class="text-[12px] text-slate-400 mt-1">
+            ${esc(a.startDate)} ~ ${esc(a.endDate)}
+            ${a.price ? ' · ' + Number(a.price).toLocaleString('ko-KR') + '원' : ''}
+            ${a.freeMonthGiven ? ' · <span class="text-emerald-600 font-semibold">1개월 무상 포함</span>' : ''}
+          </div>
         </div>
-        <div class="text-[12px] text-slate-400 mt-0.5">${[a.advertiser, fmtPhone(a.contact), a.email].filter(Boolean).map(esc).join(' · ') || '담당자 정보 없음'}</div>
-        <div class="text-[12.5px] text-slate-500 mt-1">${slotLabel(a.slot)} · ${esc(a.startDate)} ~ ${esc(a.endDate)} (${a.months}개월) · <b class="text-slate-700">${comma(a.price)}원</b></div>
-        <a href="${esc(a.linkUrl)}" target="_blank" rel="noopener" class="text-[12px] text-indigo-500 hover:underline truncate block mt-0.5">${esc(a.linkUrl)}</a>
-        ${a.memo ? `<div class="text-[12px] text-slate-400 mt-1 bg-slate-50 rounded px-2 py-1">📝 ${esc(a.memo)}</div>` : ''}
-      </div>
-      <div class="shrink-0 w-full sm:w-auto flex gap-1.5">
-        <button onclick="openAdModal('${a.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">수정</button>
-        <button onclick="deleteAd('${a.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+        <div class="shrink-0 w-full sm:w-auto flex gap-1.5">
+          <button onclick="openAdModal('${a.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-[12px] font-bold hover:bg-indigo-50 transition">수정</button>
+          <button onclick="deleteAd('${a.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[12px] font-bold hover:text-rose-600 hover:border-rose-200 transition">삭제</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1582,7 +1663,7 @@ function showAdPreview(kind, src, note){
 
 let editingAdId = null;
 
-window.openAdModal = (adId) => {
+window.openAdModal = (adId, presetSlot) => {
   editingAdId = adId || null;
   adImgData = { desktop:'', mobile:'' };
   clearAdImage('desktop'); clearAdImage('mobile');
@@ -1617,6 +1698,7 @@ window.openAdModal = (adId) => {
                                showAdPreview('mobile', a.mobileImageUrl, '주소로 등록됨'); }
   }else{
     ['adCompany','adAdvertiser','adContact','adEmail','adMemo','adImageUrl','adMobileImageUrl','adLinkUrl'].forEach(id=>g(id).value='');
+    if(presetSlot) g('adSlot').value = presetSlot;   // 지면 목록에서 바로 등록한 경우
     g('adMonths').value = '6';
     g('adFreeMonth').checked = false;
     g('adStart').value = todayStr();

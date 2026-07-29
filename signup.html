@@ -8,10 +8,10 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290823"></script>
-<script src="footer-util.js?v=202607290823"></script>
+<script src="phone-util.js?v=202607290844"></script>
+<script src="footer-util.js?v=202607290844"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607290823"></script>
+<script src="mail-config.js?v=202607290844"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -123,13 +123,20 @@
 <!-- 약관 모달 -->
 <div id="termsModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-      <h3 id="termsTitle" class="font-bold text-slate-900"></h3>
-      <a id="termsFullLink" href="terms.html" target="_blank"
-       class="hidden flex-1 py-2.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition text-center">전문 보기</a>
-    <button onclick="document.getElementById('termsModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 shrink-0">
+      <h3 id="termsTitle" class="font-bold text-slate-900 text-[15px] min-w-0"></h3>
+      <button onclick="document.getElementById('termsModal').classList.add('hidden')"
+        class="text-slate-400 hover:text-slate-600 text-xl leading-none shrink-0">&times;</button>
     </div>
     <div id="termsBody" class="px-6 py-5 overflow-y-auto text-[13px] text-slate-600 leading-relaxed whitespace-pre-line"></div>
+    <div class="flex gap-2 px-6 py-4 border-t border-slate-100 shrink-0">
+      <a id="termsFullLink" href="terms.html" target="_blank"
+        class="hidden flex-1 py-2.5 rounded-lg border border-indigo-200 text-indigo-600 text-[13px] font-bold hover:bg-indigo-50 transition text-center">
+        <span id="termsFullLabel">전문 보기</span> ↗
+      </a>
+      <button onclick="document.getElementById('termsModal').classList.add('hidden')"
+        class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">닫기</button>
+    </div>
   </div>
 </div>
 
@@ -140,7 +147,7 @@ const TERMS_VER = {
 };
 
 const TERMS = {
-  service: { title: '서비스 이용약관', link: 'terms.html', body:
+  service: { title: '서비스 이용약관', link: 'terms.html', linkLabel: '이용약관 전문', body:
 `이 약관은 오픈매니저(대표: 감병주, 이하 "회사")와 이용회사 간의 계약입니다.
 가맹점주와 파트너사는 이 약관의 당사자가 아닙니다.
 
@@ -170,11 +177,9 @@ const TERMS = {
 
 ■ 책임의 제한
 회사는 고의 또는 중대한 과실이 없는 한, 불가항력·계정 관리 소홀·입력 정보 오류·
-제3자와의 분쟁 등으로 발생한 손해에 책임지지 않으며, 배상 범위는 통상손해로 한정합니다.
+제3자와의 분쟁 등으로 발생한 손해에 책임지지 않으며, 배상 범위는 통상손해로 한정합니다.` },
 
-▶ 전문은 terms.html 에서 확인하실 수 있습니다.` },
-
-  privacy: { title: '개인정보 수집·이용 동의', link: 'privacy.html', body:
+  privacy: { title: '개인정보 수집·이용 동의', link: 'privacy.html', linkLabel: '개인정보 처리방침 전문', body:
 `■ 수집 항목 (필수)
 회사명, 실무 담당자 성명, 실무 담당자 연락처, 이메일(로그인 계정)
 
@@ -197,9 +202,7 @@ const TERMS = {
 
 ■ 동의를 거부할 권리
 동의하지 않으실 권리가 있습니다. 다만 위 항목은 서비스 제공에 반드시 필요하므로,
-동의하지 않으시면 이용 신청이 제한됩니다.
-
-▶ 전문은 privacy.html 에서 확인하실 수 있습니다.` },
+동의하지 않으시면 이용 신청이 제한됩니다.` },
 
   responsibility: { title: '가맹점주·관계자 개인정보 입력 권한 및 책임 확인', body:
 `가맹본부가 가맹점주·담당자·파트너사 등 제3자의 개인정보를 직접 입력하는 구조이므로,
@@ -270,9 +273,13 @@ function showTerms(key){
   document.getElementById('termsBody').textContent = t.body;
   const lk = document.getElementById('termsFullLink');
   if(lk){
-    if(t.link){ lk.href = t.link; lk.classList.remove('hidden'); }
-    else lk.classList.add('hidden');
+    if(t.link){
+      lk.href = t.link;
+      document.getElementById('termsFullLabel').textContent = t.linkLabel || '전문 보기';
+      lk.classList.remove('hidden');
+    }else lk.classList.add('hidden');
   }
+  document.getElementById('termsBody').scrollTop = 0;
   document.getElementById('termsModal').classList.remove('hidden');
 }
 function toggleAll(el){
