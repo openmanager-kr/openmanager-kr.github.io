@@ -8,10 +8,11 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290908"></script>
-<script src="footer-util.js?v=202607290908"></script>
+<script src="terms-text.js?v=202607290959"></script>
+<script src="phone-util.js?v=202607290959"></script>
+<script src="footer-util.js?v=202607290959"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607290908"></script>
+<script src="mail-config.js?v=202607290959"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -121,167 +122,14 @@
 </div>
 
 <!-- 약관 모달 -->
-<div id="termsModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50" onclick="if(event.target===this)this.classList.add('hidden')">
-  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col">
-    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 shrink-0">
-      <h3 id="termsTitle" class="font-bold text-slate-900 text-[15px] min-w-0"></h3>
-      <button onclick="document.getElementById('termsModal').classList.add('hidden')"
-        class="text-slate-400 hover:text-slate-600 text-xl leading-none shrink-0">&times;</button>
-    </div>
-    <div id="termsBody" class="px-6 py-5 overflow-y-auto text-[13px] text-slate-600 leading-relaxed whitespace-pre-line"></div>
-    <div class="flex gap-2 px-6 py-4 border-t border-slate-100 shrink-0">
-      <a id="termsFullLink" href="terms.html" target="_blank"
-        class="hidden flex-1 py-2.5 rounded-lg border border-indigo-200 text-indigo-600 text-[13px] font-bold hover:bg-indigo-50 transition text-center">
-        <span id="termsFullLabel">전문 보기</span> ↗
-      </a>
-      <button onclick="document.getElementById('termsModal').classList.add('hidden')"
-        class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">닫기</button>
-    </div>
-  </div>
-</div>
+
 
 <script>
-// 약관 버전 — 개정 시 이 값을 올리면 동의 기록에 반영됩니다
-const TERMS_VER = {
-  service: '1.0', privacy: '1.0', responsibility: '1.0', marketing: '1.0', policy: '1.0'
-};
+// 약관 본문·버전은 terms-text.js 에서 불러온다 (가입·재동의 화면이 같은 문구를 쓰도록)
+const TERMS_VER = window.OM_TERMS_VER;
 
-const TERMS = {
-  service: { title: '서비스 이용약관', link: 'terms.html', linkLabel: '이용약관 전문', body:
-`이 약관은 오픈매니저(대표: 감병주, 이하 "회사")와 이용회사 간의 계약입니다.
-가맹점주와 파트너사는 이 약관의 당사자가 아닙니다.
 
-■ 서비스의 성격
-회사는 이용회사가 스스로 업무를 수행할 수 있도록 하는 '도구'를 제공하며,
-이용회사를 대신하여 업무를 수행하거나 대행하지 않습니다.
-공유 링크를 누구에게 전달할지, 파트너사를 누구로 정할지는 모두 이용회사가 결정합니다.
-
-■ 이용료
-기본 기능은 무료로 제공되며, 서비스 화면의 광고 수익으로 운영합니다.
-향후 일부 기능이 유료로 전환될 수 있으나, 적용일 30일 전까지 공지하며
-기존에 제공되던 기능을 소급하여 유료화하지 않습니다.
-
-■ 파트너사·광고에 관한 책임
-회사는 이용회사와 파트너사 간 계약의 당사자가 아닙니다.
-서비스 화면의 광고는 광고주가 대가를 지불하고 게재하는 상업적 광고이며,
-회사가 해당 업체를 보증·추천·알선하는 것이 아닙니다.
-광고 게재만으로 회사가 그 업체를 소개한 것으로 보지 않습니다.
-
-■ 참고 정보의 성격
-오픈 준비 단계 목록 등은 일반적인 참고 자료입니다.
-인허가·세무·노무·법률 사항은 관할 기관이나 전문가를 통해 직접 확인하셔야 합니다.
-
-■ 데이터의 귀속과 파기
-이용회사가 입력한 데이터의 권리는 이용회사에 있습니다.
-탈퇴 시 접근이 즉시 차단되고 30일 후 완전 삭제되며, 그 전까지는 복구할 수 있습니다.
-
-■ 책임의 제한
-회사는 고의 또는 중대한 과실이 없는 한, 불가항력·계정 관리 소홀·입력 정보 오류·
-제3자와의 분쟁 등으로 발생한 손해에 책임지지 않으며, 배상 범위는 통상손해로 한정합니다.` },
-
-  privacy: { title: '개인정보 수집·이용 동의', link: 'privacy.html', linkLabel: '개인정보 처리방침 전문', body:
-`■ 수집 항목 (필수)
-회사명, 실무 담당자 성명, 실무 담당자 연락처, 이메일(로그인 계정)
-
-■ 자동 수집 항목
-접속 일자, 접속 기기 구분(PC/모바일), 서비스 이용 기록
-※ 서비스 개선과 이용 현황 파악에 사용하며, 개별 이용자를 추적하지 않습니다.
-
-■ 수집·이용 목적
-· 이용 신청 확인 및 승인 여부 결정
-· 계정 발급 및 관리, 비밀번호 재설정
-· 승인 안내, 장애·점검 공지, 약관 변경 안내, 문의 응대
-· 중복·허위 신청 방지
-
-■ 보유 및 이용 기간
-· 이용 중: 이용계약 존속 기간
-· 가입이 거절된 경우: 거절 처리 후 지체 없이 파기
-· 탈퇴한 경우: 즉시 접근 차단 후 30일 경과 시 완전 파기
-  (그 기간 내에는 복구를 요청하실 수 있습니다)
-· 법령상 보존 의무가 있는 경우: 해당 법령이 정한 기간
-
-■ 동의를 거부할 권리
-동의하지 않으실 권리가 있습니다. 다만 위 항목은 서비스 제공에 반드시 필요하므로,
-동의하지 않으시면 이용 신청이 제한됩니다.` },
-
-  responsibility: { title: '가맹점주·관계자 개인정보 입력 권한 및 책임 확인', body:
-`가맹본부가 가맹점주·담당자·파트너사 등 제3자의 개인정보를 직접 입력하는 구조이므로,
-그 적법성에 관한 책임 소재를 확인하는 내용입니다.
-
-■ 입력 권한의 확인
-이용회사는 서비스에 제3자의 개인정보를 입력함에 있어,
-① 해당 정보주체로부터 적법한 동의를 확보하였거나 계약 이행 등 법령상 근거를 갖추고 있으며
-② 수집 목적·항목·보유기간·동의 거부 권리 등 법령이 요구하는 사항을 고지하였고
-③ 본인이 관리 권한을 가진 정보임을 확인합니다.
-
-■ 최소 수집의 원칙
-매장 오픈 관리라는 목적에 필요한 최소한의 정보만 입력하여야 합니다.
-민감정보(건강·사상·신념 등)와 고유식별정보(주민등록번호, 여권번호 등)는 입력할 수 없습니다.
-
-■ 정확성 유지 및 파기
-입력한 정보가 변경되거나 보유할 필요가 없어진 경우 지체 없이 수정하거나 삭제하여야 합니다.
-
-■ 회사의 처리 범위
-회사는 이용회사가 스스로 업무를 수행할 수 있는 시스템을 제공할 뿐이며,
-정보의 입력·활용·전달 여부는 이용회사가 결정합니다.
-파트너사에 정보를 전달하는 행위는 이용회사가 서비스 외부에서 수행하는 것으로,
-회사는 이에 관여하지 않습니다.
-
-회사는 이용회사 데이터를 다른 이용회사에 제공하거나 마케팅 등 서비스 운영 외의
-목적으로 이용하지 않습니다. 다만 장애 대응, 보안 사고 조사, 이용회사의 요청에 따른
-지원 등 불가피한 경우 권한을 부여받은 최소한의 담당자가 접근할 수 있으며,
-그 사실은 기록됩니다.
-
-■ 공유 링크 이용 시 유의사항
-공유 링크는 로그인 없이 접근 가능하므로, 필요한 대상에게만 전달하여야 합니다.
-유출이 우려되면 서비스 내 재발급 기능으로 즉시 무효화할 수 있습니다.
-
-■ 책임의 귀속
-적법한 권한 없이 개인정보를 입력하여 발생한 분쟁·민원·행정처분·손해배상 등에 대한
-책임은 이용회사에 있습니다.` },
-
-  marketing: { title: '제휴·혜택 정보 이메일 수신 동의 (선택)', body:
-`■ 이 동의는 선택 사항입니다
-동의하지 않으셔도 서비스 이용에 어떠한 제한도 없습니다.
-
-■ 수신 매체
-이메일 (현재 문자메시지·알림톡은 발송하지 않습니다)
-※ 향후 다른 매체를 이용하게 되면 그때 별도로 동의를 받겠습니다.
-
-■ 발송 내용
-· B2B 제휴 정보 — POS, 인테리어, 간판, 보안, 통신, 세무, 노무 등
-  프랜차이즈 운영 관련 파트너 서비스 안내
-· 서비스 소식 — 신규 기능 안내, 이벤트, 서비스 개선 사항
-· 유료 기능 안내 — 향후 유료 기능 도입 시 그 내용과 조건
-
-※ 승인 결과, 장애·점검 공지, 약관 변경 안내 등 서비스 이용에 필요한 안내는
-   광고성 정보가 아니므로 수신 동의 여부와 관계없이 발송됩니다.
-
-■ 수신 거부 및 철회
-· 수신한 메일에 "수신거부"라고 회신
-· sgersg@naver.com 으로 요청
-철회 요청 시 지체 없이 처리하고, 처리 결과를 회신해 드립니다.
-
-■ 발송 시간과 표기
-광고성 정보는 오후 9시부터 다음 날 오전 8시까지 발송하지 않으며,
-제목 앞에 「(광고)」를 표기하고 본문에 수신거부 방법을 명시합니다.` }
-};
-
-function showTerms(key){
-  const t = TERMS[key];
-  document.getElementById('termsTitle').textContent = t.title;
-  document.getElementById('termsBody').textContent = t.body;
-  const lk = document.getElementById('termsFullLink');
-  if(lk){
-    if(t.link){
-      lk.href = t.link;
-      document.getElementById('termsFullLabel').textContent = t.linkLabel || '전문 보기';
-      lk.classList.remove('hidden');
-    }else lk.classList.add('hidden');
-  }
-  document.getElementById('termsBody').scrollTop = 0;
-  document.getElementById('termsModal').classList.remove('hidden');
-}
+function showTerms(key){ showTermsText(key); }
 function toggleAll(el){
   document.querySelectorAll('.agree').forEach(c => c.checked = el.checked);
   checkRequired();

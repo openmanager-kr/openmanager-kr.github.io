@@ -8,12 +8,13 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290950"></script>
-<script src="mobile-util.js?v=202607290950"></script>
+<script src="terms-text.js?v=202607290959"></script>
+<script src="phone-util.js?v=202607290959"></script>
+<script src="mobile-util.js?v=202607290959"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202607290950"></script>
-<script src="excel-util.js?v=202607290950"></script>
-<script src="footer-util.js?v=202607290950"></script>
+<script src="ad-util.js?v=202607290959"></script>
+<script src="excel-util.js?v=202607290959"></script>
+<script src="footer-util.js?v=202607290959"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -677,8 +678,9 @@
     <div class="px-6 py-5 overflow-y-auto overscroll-contain">
       <div id="reconsentList" class="space-y-2.5"></div>
       <p class="text-[12px] text-slate-400 mt-4 leading-relaxed break-keep">
+        각 항목의 <b class="text-slate-500">[보기]</b>를 눌러 내용을 확인하실 수 있습니다.<br>
         전문은 <a href="terms.html" target="_blank" class="text-indigo-500 font-semibold hover:underline">이용약관</a> ·
-        <a href="privacy.html" target="_blank" class="text-indigo-500 font-semibold hover:underline">개인정보 처리방침</a> 에서 확인하실 수 있습니다.
+        <a href="privacy.html" target="_blank" class="text-indigo-500 font-semibold hover:underline">개인정보 처리방침</a> 페이지에도 게시되어 있습니다.
       </p>
       <p id="reconsentErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
     </div>
@@ -934,12 +936,12 @@ onAuthStateChanged(auth, async user => {
 window.doLogout = async () => { await signOut(auth); location.href='login.html'; };
 
 // ===== 약관 재동의 =====
-// 약관이 개정되면 이 값을 올린다. 저장된 버전과 다르면 재동의를 요청한다.
-const TERMS_VER = { service:'1.0', privacy:'1.0', responsibility:'1.0', marketing:'1.0', policy:'1.0' };
+// 약관 본문·버전은 terms-text.js 에서 불러온다 (가입 화면과 같은 문구 사용)
+const TERMS_VER = window.OM_TERMS_VER;
 const TERMS_DOCS = [
-  { key:'serviceTermsVersion',          cur:TERMS_VER.service,        label:'서비스 이용약관' },
-  { key:'privacyConsentVersion',        cur:TERMS_VER.privacy,        label:'개인정보 수집·이용 동의' },
-  { key:'companyResponsibilityVersion', cur:TERMS_VER.responsibility, label:'가맹점주·관계자 개인정보 입력 권한 및 책임 확인' }
+  { key:'serviceTermsVersion',          cur:TERMS_VER.service,        doc:'service',        label:'서비스 이용약관' },
+  { key:'privacyConsentVersion',        cur:TERMS_VER.privacy,        doc:'privacy',        label:'개인정보 수집·이용 동의' },
+  { key:'companyResponsibilityVersion', cur:TERMS_VER.responsibility, doc:'responsibility', label:'가맹점주·관계자 개인정보 입력 권한 및 책임 확인' }
 ];
 
 /** 재동의가 필요한 문서 목록 (없거나 버전이 다르면 대상) */
@@ -951,14 +953,16 @@ function outdatedTerms(){
 function checkReconsent(){
   const need = outdatedTerms();
   if(need.length === 0) return false;
-  document.getElementById('reconsentList').innerHTML = need.map((d,i)=>`
-    <label class="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
-      <input type="checkbox" class="reconsent-item mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
-      <span class="text-[13px] text-slate-700 break-keep">
+  document.getElementById('reconsentList').innerHTML = need.map(d=>`
+    <div class="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200">
+      <input type="checkbox" id="rc_${d.doc}" class="reconsent-item mt-0.5 w-4 h-4 accent-indigo-600 shrink-0">
+      <label for="rc_${d.doc}" class="text-[13px] text-slate-700 break-keep flex-1 min-w-0 cursor-pointer">
         <b>[필수]</b> ${esc(d.label)}
         <span class="block text-[11.5px] text-slate-400 mt-0.5">개정판 v${d.cur}</span>
-      </span>
-    </label>`).join('');
+      </label>
+      <button type="button" onclick="showTermsText('${d.doc}')"
+        class="shrink-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-[12px] font-bold hover:bg-slate-50 transition">보기</button>
+    </div>`).join('');
   document.getElementById('reconsentErr').classList.add('hidden');
   document.getElementById('reconsentModal').classList.remove('hidden');
   return true;
