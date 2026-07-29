@@ -7,14 +7,16 @@
 (function(){
   // 지면 정의 (설계문서 5-1 기준)
   window.OM_AD_SLOTS = {
-    store_view_top:   { grade:'S', label:'점주페이지 상단', size:'banner', px:'1200 x 200', price:100000, who:'점주' },
-    store_view_left:  { grade:'S', label:'점주페이지 좌측', size:'tower',  px:'300 x 1050', price:100000, who:'점주' },
-    store_view_right: { grade:'S', label:'점주페이지 우측', size:'tower',  px:'300 x 1050', price:100000, who:'점주' },
-    main_top:         { grade:'A', label:'메인 상단',       size:'banner', px:'1200 x 200', price:80000,  who:'본부 관리자' },
-    main_right:       { grade:'A', label:'메인 우측',       size:'tower',  px:'300 x 1050', price:80000,  who:'본부 관리자' },
-    tab_dashboard_bottom:        { grade:'B', label:'탭 하단',           size:'banner', px:'1200 x 200', price:60000, who:'본부 관리자' },
-    integrated_dashboard_bottom: { grade:'B', label:'통합 대시보드 하단', size:'banner', px:'1200 x 200', price:60000, who:'본부 관리자' },
-    tab_new_bottom:   { grade:'C', label:'신규등록 화면 하단', size:'banner', px:'1200 x 200', price:50000, who:'본부 관리자' }
+    store_view_top:      { size:'banner' },
+    store_view_left:     { size:'tower'  },
+    store_view_left_2:   { size:'tower'  },
+    store_view_right:    { size:'tower'  },
+    store_view_right_2:  { size:'tower'  },
+    main_top:            { size:'banner' },
+    main_right:          { size:'tower'  },
+    main_right_2:        { size:'tower'  },
+    tab_dashboard_bottom:        { size:'banner' },
+    integrated_dashboard_bottom: { size:'banner' }
   };
 
   // 광고 문의 연락처 (푸터와 동일)
@@ -145,7 +147,7 @@
   window.renderAdSlot = function(elId, slot){
     const el = document.getElementById(elId);
     if(!el) return;
-    const meta = OM_AD_SLOTS[slot] || { grade:'-', label:slot, size:'banner' };
+    const meta = OM_AD_SLOTS[slot] || { size:'banner' };
     const ad = (adCache||[]).find(a => a.slot === slot);
 
     if(ad){
@@ -174,45 +176,54 @@
       return;
     }
 
-    // 빈 지면 — 위치 표시 + 광고 문의 안내 (클릭 시 안내 팝업)
+    // 빈 지면 — 광고 자리임을 알리는 안내 (등급·단가 등 내부 정보는 노출하지 않음)
     const tower = meta.size === 'tower';
-    const box = tower ? 'w-full h-full min-h-[420px] py-8 px-3 flex flex-col items-center justify-center text-center'
-                      : 'w-full py-4 px-4 text-center';
+    const box = tower
+      ? 'w-full min-h-[420px] py-10 px-4 flex flex-col items-center justify-center text-center'
+      : 'w-full py-7 px-5 flex flex-col items-center justify-center text-center';
     el.innerHTML =
       `<button type="button" onclick="openAdInquiry('${slot}')"
-          class="${box} rounded-xl border border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition group cursor-pointer">
-         <div class="text-[11px] font-bold text-slate-300 group-hover:text-indigo-400 transition">${meta.grade}급 · ${esc(meta.label)}</div>
-         <div class="text-[12px] text-slate-400 group-hover:text-indigo-500 transition mt-1 ${tower?'leading-relaxed':''}">이 자리에 광고를<br class="${tower?'':'hidden'}"> 게재하실 수 있습니다</div>
-         <div class="text-[11px] text-slate-300 group-hover:text-indigo-400 transition mt-1.5">문의 : ${OM_AD_CONTACT}</div>
-         <div class="text-[10.5px] text-indigo-300 opacity-0 group-hover:opacity-100 transition mt-1.5 font-bold">클릭하면 안내를 볼 수 있어요</div>
+          class="${box} rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white
+                 hover:border-indigo-300 hover:from-indigo-50/40 transition group cursor-pointer">
+         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-slate-200
+                      text-[10.5px] font-bold text-slate-400 group-hover:text-indigo-500 group-hover:border-indigo-200 transition">
+           <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-indigo-400 transition"></span> 광고 자리
+         </span>
+         <div class="text-[15px] sm:text-[16px] font-extrabold text-slate-500 group-hover:text-slate-700 transition mt-3 leading-snug break-keep">
+           현재 비어 있는 자리입니다
+         </div>
+         <div class="text-[12.5px] text-slate-400 mt-1.5 break-keep">광고를 신청하실 수 있습니다</div>
+         <span class="mt-4 inline-block px-4 py-2 rounded-lg bg-white border border-slate-200
+                      text-[12.5px] font-bold text-slate-500
+                      group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition">
+           문의하기
+         </span>
        </button>`;
   };
 
   /** 광고 문의 안내 팝업 (mailto 미작동 환경 대비 — 주소 복사 제공) */
   window.openAdInquiry = function(slot){
-    const m = OM_AD_SLOTS[slot] || {};
     let box = document.getElementById('omAdInquiry');
     if(!box){
       box = document.createElement('div');
       box.id = 'omAdInquiry';
-      box.className = 'fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-[200]';
+      box.className = 'fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-[200] overflow-y-auto py-8';
       box.onclick = e => { if(e.target===box) box.remove(); };
       document.body.appendChild(box);
     }
-    const price = m.price ? m.price.toLocaleString('ko-KR') : '-';
     box.innerHTML =
-      `<div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto overscroll-contain">
-         <h3 class="font-bold text-slate-900 text-[15px]">광고 게재 안내</h3>
-         <div class="mt-4 space-y-2 text-[13px]">
-           <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">지면</span><b class="text-slate-800 text-right">${m.grade}급 · ${esc(m.label)}</b></div>
-           <div class="flex justify-between"><span class="text-slate-500 shrink-0">노출 대상</span><span class="text-slate-700 text-right">${esc(m.who)}</span></div>
-           <div class="flex justify-between"><span class="text-slate-500 shrink-0">권장 규격</span><span class="text-slate-700 text-right">${esc(m.px)} px</span></div>
-           <div class="flex justify-between"><span class="text-slate-500 shrink-0">월 단가</span><b class="text-indigo-600 text-right">${price}원</b></div>
+      `<div class="bg-white rounded-2xl max-w-sm w-full p-6 sm:p-7 my-auto max-h-[90vh] overflow-y-auto overscroll-contain">
+         <div class="flex items-center gap-2.5">
+           <img src="logo-symbol.png" alt="" class="w-9 h-7 object-contain">
+           <h3 class="font-bold text-slate-900 text-[15px]">광고 문의</h3>
          </div>
-         <div class="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 text-[12.5px] text-slate-500 leading-relaxed">
-           6개월 정가 · 12개월 10% 할인<br>
-           <b class="text-slate-700">첫 계약 시 1개월 무상 추가</b> (6개월 → 7개월 게재)<br>
-           소재는 계약 기간 중 언제든 무상 교체
+         <p class="text-[13px] text-slate-500 mt-3.5 leading-relaxed break-keep">
+           오픈매니저는 프랜차이즈 <b class="text-slate-700">가맹본부와 신규 매장 점주</b>가 사용하는 서비스입니다.
+           매장을 새로 여는 시점에 필요한 업종이라면 좋은 자리가 됩니다.
+         </p>
+         <div class="mt-4 rounded-lg bg-slate-50 px-3.5 py-3 text-[12.5px] text-slate-500 leading-relaxed break-keep">
+           지면당 <b class="text-slate-700">한 광고주만</b> 게재됩니다.<br>
+           PC·모바일에 함께 노출되며 추가 비용이 없습니다.
          </div>
          <div class="mt-4">
            <div class="text-[12.5px] font-semibold text-slate-600 mb-1.5">문의 이메일</div>
@@ -222,8 +233,8 @@
            </div>
          </div>
          <div class="flex gap-2.5 mt-5">
-           <a href="ads.html" class="flex-1 py-2.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition text-center">전체 지면 보기</a>
-           <button onclick="document.getElementById('omAdInquiry').remove()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">닫기</button>
+           <a href="ads.html" class="flex-1 py-2.5 rounded-lg border border-indigo-200 text-indigo-600 text-[13px] font-bold hover:bg-indigo-50 transition text-center">자세히 보기</a>
+           <button onclick="document.getElementById('omAdInquiry').remove()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">닫기</button>
          </div>
        </div>`;
   };

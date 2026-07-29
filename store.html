@@ -8,10 +8,10 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202607290844"></script>
-<script src="mobile-util.js?v=202607290844"></script>
-<script src="ad-util.js?v=202607290844"></script>
-<script src="footer-util.js?v=202607290844"></script>
+<script src="phone-util.js?v=202607290908"></script>
+<script src="mobile-util.js?v=202607290908"></script>
+<script src="ad-util.js?v=202607290908"></script>
+<script src="footer-util.js?v=202607290908"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>body{font-family:'Pretendard',-apple-system,sans-serif;}</style>
 </head>
@@ -22,7 +22,10 @@
 
 <div class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex gap-5 items-start">
   <!-- 좌측 광고 (S급 store_view_left) -->
-  <div id="ad-left" class="hidden lg:block w-[168px] shrink-0 sticky top-6"></div>
+  <div class="hidden lg:block w-[168px] shrink-0 sticky top-6 space-y-4">
+    <div id="ad-left"></div>
+    <div id="ad-left-2"></div>
+  </div>
 
   <div class="flex-1 min-w-0 max-w-2xl mx-auto">
     <div id="loading" class="text-center text-slate-400 text-sm py-20">불러오는 중...</div>
@@ -130,7 +133,10 @@
   </div>
 
   <!-- 우측 광고 (S급 store_view_right) -->
-  <div id="ad-right" class="hidden lg:block w-[168px] shrink-0 sticky top-6"></div>
+  <div class="hidden lg:block w-[168px] shrink-0 sticky top-6 space-y-4">
+    <div id="ad-right"></div>
+    <div id="ad-right-2"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -265,7 +271,9 @@ if(!token){
   renderAdSlots([
     ['ad-top','store_view_top'],
     ['ad-left','store_view_left'],
+    ['ad-left-2','store_view_left_2'],
     ['ad-right','store_view_right'],
+    ['ad-right-2','store_view_right_2'],
     ['ad-mobile-mid','store_view_top']
   ]);
   renderFooter('pageFooter','light');
