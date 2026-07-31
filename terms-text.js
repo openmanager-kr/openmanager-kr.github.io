@@ -149,7 +149,7 @@ window.showTermsText = function(key){
       <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 shrink-0">
         <h3 class="font-bold text-slate-900 text-[15px] min-w-0">${esc(t.title)}</h3>
         <button onclick="document.getElementById('omTermsView').remove()"
-          class="text-slate-400 hover:text-slate-600 text-xl leading-none shrink-0">&times;</button>
+          class="text-slate-400 hover:text-slate-600 text-xl leading-none shrink-0" aria-label="닫기">&times;</button>
       </div>
       <div class="px-6 py-5 overflow-y-auto overscroll-contain text-[13px] text-slate-600 leading-relaxed whitespace-pre-line">${esc(t.body)}</div>
       <div class="flex gap-2 px-6 py-4 border-t border-slate-100 shrink-0">

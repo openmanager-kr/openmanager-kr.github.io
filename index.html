@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="footer-util.js?v=202607290908"></script>
+<script src="footer-util.js?v=202607310824"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 
@@ -29,11 +29,15 @@
 <!-- ===== 헤더 ===== -->
 <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
   <div class="max-w-6xl mx-auto px-5 py-3.5 flex items-center justify-between">
-    <a href="index.html"><img src="logo-horizontal.png" alt="오픈매니저 OpenManager" class="h-7 sm:h-8 w-auto object-contain"></a>
-    <nav class="flex items-center gap-1.5">
-      <a href="ads.html" class="hidden sm:block px-3 py-2 text-[13px] font-semibold text-slate-500 hover:text-indigo-600 transition">광고 안내</a>
-      <a href="login.html" class="px-3.5 py-2 rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition">로그인</a>
-      <a href="signup.html" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">무료로 시작</a>
+    <a href="index.html"><img src="logo-horizontal.png" alt="오픈매니저 OpenManager" class="h-6 sm:h-8 w-auto object-contain"></a>
+    <nav class="flex items-center gap-0.5 sm:gap-1.5">
+      <a href="ads.html" class="px-2 sm:px-3 py-2 text-[12.5px] sm:text-[13px] font-semibold text-slate-500 hover:text-indigo-600 transition whitespace-nowrap">
+        광고<span class="hidden sm:inline"> 안내</span>
+      </a>
+      <a href="login.html" class="px-2 sm:px-3.5 py-2 rounded-lg text-[12.5px] sm:text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition whitespace-nowrap">로그인</a>
+      <a href="signup.html" class="px-3 sm:px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12.5px] sm:text-[13px] font-bold transition whitespace-nowrap">
+        무료<span class="hidden sm:inline">로</span> 시작
+      </a>
     </nav>
   </div>
 </header>
@@ -44,15 +48,15 @@
     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-indigo-100 text-indigo-600 text-[12px] font-bold">
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 무료로 제공되는 서비스입니다
     </div>
-    <h1 class="text-[34px] sm:text-[52px] font-extrabold text-slate-900 mt-5 leading-[1.2] tracking-tight break-keep">
+    <h1 class="text-[38px] sm:text-[58px] font-extrabold text-slate-900 mt-5 leading-[1.15] tracking-tight break-keep">
       본부와 점주가<br><span class="text-indigo-600">같은 화면</span>을 봅니다
     </h1>
-    <p class="text-[17px] sm:text-[20px] text-slate-500 mt-6 leading-relaxed break-keep">
+    <p class="text-[18px] sm:text-[22px] text-slate-500 mt-6 leading-relaxed break-keep">
       상담부터 오픈까지, 흩어진 과정을 한곳에서.<br class="hidden sm:block">
       점주에게는 <b class="text-slate-700">링크 하나로</b>.
     </p>
     <div class="flex flex-wrap gap-2.5 justify-center mt-8">
-      <a href="signup.html" class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[15px] font-bold transition shadow-sm">무료로 시작하기</a>
+      <a href="signup.html" class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[16px] font-bold transition shadow-sm">무료로 시작하기</a>
       <a href="#how" class="px-7 py-3.5 rounded-xl border border-slate-200 text-slate-600 text-[15px] font-bold hover:bg-slate-50 transition">기능 살펴보기</a>
     </div>
     <p class="text-[12.5px] text-slate-400 mt-4">신청 후 승인까지 영업일 1~2일 · 설치 없이 웹에서 바로 사용</p>
@@ -133,7 +137,7 @@
 <!-- ===== 문제 제기 ===== -->
 <section class="max-w-6xl mx-auto px-5 py-16">
   <div class="text-center">
-    <h2 class="text-[26px] sm:text-[32px] font-extrabold text-slate-900 break-keep">이런 적, 있으셨죠?</h2>
+    <h2 class="text-[29px] sm:text-[38px] font-extrabold text-slate-900 break-keep">이런 적, 있으셨죠?</h2>
   </div>
   <div class="grid sm:grid-cols-3 gap-4 mt-9">
     <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50">
@@ -297,10 +301,10 @@
 <!-- ===== 기능 ===== -->
 <section id="how" class="max-w-6xl mx-auto px-5 py-16">
   <div class="text-center">
-    <h2 class="text-[26px] sm:text-[32px] font-extrabold text-slate-900 break-keep">하나의 흐름으로</h2>
+    <h2 class="text-[29px] sm:text-[38px] font-extrabold text-slate-900 break-keep">하나의 흐름으로</h2>
   </div>
 
-  <div class="flex flex-wrap items-center justify-center gap-2 mt-9 text-[12.5px] font-bold">
+  <div class="flex flex-wrap items-center justify-center gap-2 mt-9 text-[14px] font-bold">
     <span class="px-3.5 py-2 rounded-lg bg-violet-50 text-violet-700 border border-violet-100">상담 접수</span>
     <span class="text-slate-300">→</span>
     <span class="px-3.5 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">매장 등록</span>
@@ -315,8 +319,8 @@
   <div class="grid lg:grid-cols-2 gap-5 mt-10">
     <div class="border border-slate-200 rounded-2xl overflow-hidden">
       <div class="p-6">
-        <div class="text-[12px] font-extrabold text-indigo-600">상담 관리</div>
-        <div class="text-[18px] font-bold text-slate-900 mt-1.5 break-keep">놓치는 상담이 없도록</div>
+        <div class="text-[13px] font-extrabold text-indigo-600">상담 관리</div>
+        <div class="text-[19px] sm:text-[20px] font-bold text-slate-900 mt-1.5 break-keep">놓치는 상담이 없도록</div>
         <p class="text-[14.5px] text-slate-500 mt-2.5 leading-relaxed break-keep">
           연락할 때가 된 상담을 화면 위에 모아 보여줍니다.
           가입이 확정되면 <b class="text-slate-700">버튼 하나로 매장 전환</b>.
@@ -357,8 +361,8 @@
 
     <div class="border border-slate-200 rounded-2xl overflow-hidden">
       <div class="p-6">
-        <div class="text-[12px] font-extrabold text-indigo-600">오픈 관리</div>
-        <div class="text-[18px] font-bold text-slate-900 mt-1.5 break-keep">어느 매장이 어디까지 왔는지</div>
+        <div class="text-[13px] font-extrabold text-indigo-600">오픈 관리</div>
+        <div class="text-[19px] sm:text-[20px] font-bold text-slate-900 mt-1.5 break-keep">어느 매장이 어디까지 왔는지</div>
         <p class="text-[14.5px] text-slate-500 mt-2.5 leading-relaxed break-keep">
           모든 매장의 진행률을 한 줄로. 오픈일이 지났는데 미완료면 <b class="text-slate-700">자동 경고</b>합니다.
         </p>
@@ -416,8 +420,8 @@
 
     <div class="border border-slate-200 rounded-2xl overflow-hidden">
       <div class="p-6">
-        <div class="text-[12px] font-extrabold text-indigo-600">파트너사 매칭</div>
-        <div class="text-[18px] font-bold text-slate-900 mt-1.5 break-keep">어느 업체가 어디까지 진행했는지</div>
+        <div class="text-[13px] font-extrabold text-indigo-600">파트너사 매칭</div>
+        <div class="text-[19px] sm:text-[20px] font-bold text-slate-900 mt-1.5 break-keep">어느 업체가 어디까지 진행했는지</div>
         <p class="text-[14.5px] text-slate-500 mt-2.5 leading-relaxed break-keep">
           항목별로 <b class="text-slate-700">업체·상태·금액</b>을 관리하고, 매장 화면과 자동 연동됩니다.
         </p>
@@ -453,8 +457,8 @@
 
     <div class="border border-slate-200 rounded-2xl overflow-hidden">
       <div class="p-6">
-        <div class="text-[12px] font-extrabold text-indigo-600">매장 관리 · 엑셀 백업</div>
-        <div class="text-[18px] font-bold text-slate-900 mt-1.5 break-keep">쓰던 엑셀도 그대로 가져오기</div>
+        <div class="text-[13px] font-extrabold text-indigo-600">매장 관리 · 엑셀 백업</div>
+        <div class="text-[19px] sm:text-[20px] font-bold text-slate-900 mt-1.5 break-keep">쓰던 엑셀도 그대로 가져오기</div>
         <p class="text-[14.5px] text-slate-500 mt-2.5 leading-relaxed break-keep">
           쓰던 엑셀을 그대로 올리고 언제든 내려받습니다.
           가져오기 전 <b class="text-slate-700">미리보기</b>로 실수를 막습니다.
@@ -499,7 +503,7 @@
 <section class="bg-slate-50 border-y border-slate-200">
   <div class="max-w-6xl mx-auto px-5 py-16">
     <div class="text-center">
-      <h2 class="text-[26px] sm:text-[32px] font-extrabold text-slate-900 break-keep">데이터는 회사의 것입니다</h2>
+      <h2 class="text-[29px] sm:text-[38px] font-extrabold text-slate-900 break-keep">데이터는 회사의 것입니다</h2>
       <p class="text-[15px] text-slate-500 mt-3 break-keep">약속이 아니라 시스템으로 막았습니다.</p>
     </div>
     <div class="grid sm:grid-cols-3 gap-4 mt-9">
@@ -537,8 +541,8 @@
 
   <div class="max-w-2xl mx-auto mt-9 bg-white border-2 border-indigo-200 rounded-2xl overflow-hidden">
     <div class="bg-indigo-600 px-6 py-4 text-center">
-      <div class="text-white font-extrabold text-[20px]">무료</div>
-      <div class="text-indigo-100 text-[12.5px] mt-0.5">기본 기능 전체 제공 · 기간 제한 없음</div>
+      <div class="text-white font-extrabold text-[26px]">무료</div>
+      <div class="text-indigo-100 text-[14px] mt-1">기본 기능 전체 제공 · 기간 제한 없음</div>
     </div>
     <div class="p-6">
       <div class="grid sm:grid-cols-2 gap-x-6 gap-y-3">

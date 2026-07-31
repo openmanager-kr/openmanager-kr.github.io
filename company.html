@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>오픈매니저 — 관리자</title>
   <link rel="icon" type="image/png" href="favicon.png?v=2">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="terms-text.js?v=202607290959"></script>
-<script src="phone-util.js?v=202607290959"></script>
-<script src="mobile-util.js?v=202607290959"></script>
+<script src="terms-text.js?v=202607310824"></script>
+<script src="phone-util.js?v=202607310824"></script>
+<script src="mobile-util.js?v=202607310824"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202607290959"></script>
-<script src="excel-util.js?v=202607290959"></script>
-<script src="footer-util.js?v=202607290959"></script>
+<script src="ad-util.js?v=202607310824"></script>
+<script src="excel-util.js?v=202607310824"></script>
+<script src="footer-util.js?v=202607310824"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -541,7 +542,7 @@
 
 <!-- 매장 등록/수정 모달 -->
 <div id="storeModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-7 mx-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
     <h3 id="storeModalTitle" class="font-bold text-slate-900 text-[15px]">매장 등록</h3>
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
       <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">지점명 <span class="text-rose-500">*</span></label>
@@ -587,7 +588,7 @@
         <textarea id="f_memo" rows="2" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
     </div>
     <p id="storeErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
-    <div class="flex gap-2.5 mt-5">
+    <div class="flex gap-2.5 mt-5 sticky bottom-0 bg-white pt-3 pb-1 -mx-5 px-5 sm:-mx-7 sm:px-7 border-t border-slate-100">
       <button onclick="closeStoreModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
       <button id="storeSaveBtn" onclick="saveStore()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
     </div>
@@ -596,13 +597,13 @@
 
 <!-- 공유 링크 모달 -->
 <div id="shareModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
-  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[88dvh] overflow-y-auto overscroll-contain">
     <div class="flex items-start justify-between gap-3">
       <div>
         <h3 class="font-bold text-slate-900 text-[15px]">점주 공유 링크</h3>
         <p class="text-[12.5px] text-slate-500 mt-1.5">점주는 이 링크로 로그인 없이 진행 현황을 열람합니다.</p>
       </div>
-      <button onclick="regenToken()" title="기존 링크를 즉시 무효화하고 새 링크를 발급합니다"
+      <button onclick="regenToken()" aria-label="공유 링크 재발급" title="기존 링크를 즉시 무효화하고 새 링크를 발급합니다"
         class="shrink-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 text-[11.5px] font-bold hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50 transition whitespace-nowrap">↻ 링크 재발급</button>
     </div>
     <div class="mt-4 flex gap-2">
@@ -616,7 +617,7 @@
 
 <!-- 상담 등록/수정 모달 -->
 <div id="leadModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
     <h3 id="leadModalTitle" class="font-bold text-slate-900 text-[15px]">상담 등록</h3>
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3.5">
       <div><label class="block text-[12.5px] font-semibold text-slate-600 mb-1">상담일자 <span class="text-rose-500">*</span></label>
@@ -659,7 +660,7 @@
         <textarea id="l_memo" rows="3" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
     </div>
     <p id="leadErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
-    <div class="flex gap-2.5 mt-5">
+    <div class="flex gap-2.5 mt-5 sticky bottom-0 bg-white pt-3 pb-1 -mx-5 px-5 sm:-mx-7 sm:px-7 border-t border-slate-100">
       <button onclick="closeLeadModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
       <button id="leadSaveBtn" onclick="saveLead()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
     </div>
@@ -668,7 +669,7 @@
 
 <!-- 약관 재동의 -->
 <div id="reconsentModal" class="hidden fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center px-4 py-8">
-  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[88dvh] flex flex-col">
     <div class="px-6 py-5 border-b border-slate-100 shrink-0">
       <h3 class="font-extrabold text-slate-900 text-[16px]">약관이 개정되었습니다</h3>
       <p class="text-[13px] text-slate-500 mt-1.5 leading-relaxed break-keep">
@@ -693,7 +694,7 @@
 
 <!-- POS 관리 등록/수정 모달 -->
 <div id="posModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 mx-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
     <h3 id="posModalTitle" class="font-bold text-slate-900 text-[15px]">POS 연동 등록</h3>
     <div id="posStoreWrap" class="mt-4">
       <label class="block text-[12.5px] font-semibold text-slate-600 mb-1">매장 <span class="text-rose-500">*</span></label>
@@ -728,7 +729,7 @@
         <textarea id="pos_memo" rows="2" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm transition"></textarea></div>
     </div>
     <p id="posErr" class="hidden mt-3 text-[13px] text-rose-600 font-medium"></p>
-    <div class="flex gap-2.5 mt-5">
+    <div class="flex gap-2.5 mt-5 sticky bottom-0 bg-white pt-3 pb-1 -mx-5 px-5 sm:-mx-7 sm:px-7 border-t border-slate-100">
       <button onclick="closePosModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
       <button id="posSaveBtn" onclick="savePos()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
     </div>
@@ -737,7 +738,7 @@
 
 <!-- 파트너 항목 수정 모달 -->
 <div id="pmModal" class="hidden fixed inset-0 bg-slate-900/40 flex items-center justify-center px-4 z-50">
-  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-7 max-h-[88dvh] overflow-y-auto overscroll-contain">
     <h3 id="pmTitle" class="font-bold text-slate-900 text-[15px]">파트너사 정보</h3>
     <div id="pmInfo" class="mt-2 text-[13px] text-slate-500 bg-slate-50 rounded-lg px-3.5 py-2.5"></div>
     <div id="pmNewFields" class="hidden mt-4 grid grid-cols-2 gap-3">
@@ -773,7 +774,7 @@
         <textarea id="pm_memo" rows="3" placeholder="공기·일정·특이사항 등" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-base sm:text-sm placeholder-slate-300 transition"></textarea>
       </div>
     </div>
-    <div class="flex gap-2.5 mt-5">
+    <div class="flex gap-2.5 mt-5 sticky bottom-0 bg-white pt-3 pb-1 -mx-5 px-5 sm:-mx-7 sm:px-7 border-t border-slate-100">
       <button onclick="closePmModal()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
       <button id="pmSaveBtn" onclick="savePmItem()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
     </div>
@@ -782,7 +783,7 @@
 
 <!-- 오픈 진행 타임라인 모달 -->
 <div id="timelineModal" class="hidden fixed inset-0 bg-slate-900/40 z-50 overflow-y-auto py-8 px-4">
-  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 mx-auto max-h-[92vh] overflow-y-auto overscroll-contain">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-7 mx-auto max-h-[88dvh] overflow-y-auto overscroll-contain">
     <h3 class="font-bold text-slate-900 text-[15px]"><span id="tlBranch"></span> — 오픈 진행 타임라인</h3>
     <p class="text-[12.5px] text-slate-500 mt-1.5">단계 상태를 변경하면 <b class="text-indigo-600">점주 공유 페이지에 실시간 반영</b>됩니다. 단계명은 자유롭게 수정·추가할 수 있어요.</p>
     <div class="mt-4 flex items-center gap-3">
@@ -797,7 +798,7 @@
     </div>
     <div id="tlRows" class="mt-4 space-y-2"></div>
     <button onclick="tlAddStep()" class="mt-3 w-full py-2 rounded-lg border border-dashed border-slate-300 text-slate-400 text-[12.5px] font-semibold hover:border-indigo-300 hover:text-indigo-500 transition">+ 단계 추가</button>
-    <div class="flex gap-2.5 mt-5">
+    <div class="flex gap-2.5 mt-5 sticky bottom-0 bg-white pt-3 pb-1 -mx-5 px-5 sm:-mx-7 sm:px-7 border-t border-slate-100">
       <button onclick="closeTimeline()" class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition">취소</button>
       <button onclick="saveTimeline()" class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition">저장</button>
     </div>
@@ -1423,7 +1424,7 @@ function renderTlRows(){
         <option ${st.status==='진행중'?'selected':''}>진행중</option>
         <option ${st.status==='완료'?'selected':''}>완료</option>
       </select>
-      <button onclick="tlSteps.splice(${i},1);renderTlRows()" class="shrink-0 w-6 text-slate-300 hover:text-rose-500 text-lg leading-none">&times;</button>
+      <button onclick="tlSteps.splice(${i},1);renderTlRows()" class="shrink-0 w-6 text-slate-300 hover:text-rose-500 text-lg leading-none" aria-label="닫기">&times;</button>
     </div>`).join('');
 }
 window.renderTlRows = renderTlRows;
