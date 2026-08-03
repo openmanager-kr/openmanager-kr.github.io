@@ -57,9 +57,13 @@
             <span class="${tCls}">|</span>
             <a href="privacy.html" class="${lCls} font-semibold transition">개인정보 처리방침</a>
           </div>
-          <div class="text-[10px] ${tCls} mt-1.5">© ${new Date().getFullYear()} ${esc(c.serviceName)}</div>
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="text-[10px] ${tCls}">© ${new Date().getFullYear()} ${esc(c.serviceName)}</span>
+            <span id="${elId}_ver"></span>
+          </div>
         </div>
       </div>`;
+    if(window.renderVersion) renderVersion(elId + '_ver', tone);
   };
 
   /** 문의 안내 팝업 — 메일 앱이 없어도 주소 복사가 가능하도록 */

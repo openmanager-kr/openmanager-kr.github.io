@@ -10,12 +10,13 @@
   <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202607310824"></script>
-<script src="excel-util.js?v=202607310824"></script>
-<script src="mobile-util.js?v=202607310824"></script>
-<script src="footer-util.js?v=202607310824"></script>
+<script src="phone-util.js?v=202608030229"></script>
+<script src="excel-util.js?v=202608030229"></script>
+<script src="mobile-util.js?v=202608030229"></script>
+<script src="version.js?v=202608030229"></script>
+<script src="footer-util.js?v=202608030229"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202607310824"></script>
+<script src="mail-config.js?v=202608030229"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -136,6 +137,19 @@
         </button>
       </div>
       <div id="dashAlerts" class="mt-6 space-y-2"></div>
+
+      <div class="mt-6 bg-white border border-slate-200 rounded-xl p-5 flex flex-wrap items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[13px] font-bold text-slate-700">서비스 버전 <b class="text-indigo-600">v<span id="dashVersion">–</span></b></div>
+          <div class="text-[12.5px] text-slate-400 mt-1 break-keep">
+            기능을 업데이트하면 <b class="text-slate-600">version.js</b> 에 내역을 추가하세요. 화면 하단 버전이 자동으로 바뀝니다.
+          </div>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <button onclick="showChangelog()" class="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-600 text-[12.5px] font-bold hover:bg-slate-50 transition whitespace-nowrap">업데이트 내역</button>
+          <button onclick="copyUpdateNotice()" class="px-3.5 py-2 rounded-lg border border-indigo-200 text-indigo-600 text-[12.5px] font-bold hover:bg-indigo-50 transition whitespace-nowrap">📋 공지 문안 복사</button>
+        </div>
+      </div>
     </section>
 
     <!-- ── 가입 승인 ── -->
@@ -1002,6 +1016,29 @@ window.purgeCompany = async (companyId, early) => {
   }
 };
 
+// ── 업데이트 공지 ──
+window.copyUpdateNotice = () => {
+  const r = OM_CHANGELOG[0];
+  const label = { feature:'[신규]', improve:'[개선]', fix:'[수정]' };
+  const lines = r.items.map(it => `\u00b7 ${label[it.type] || '[개선]'} ${it.text}`).join('\n');
+  const text =
+`오픈매니저가 v${r.version} 으로 업데이트되었습니다.
+
+${r.title ? r.title + '\n\n' : ''}${lines}
+
+이용에 참고해 주세요.
+개선 의견은 언제든 이 메일로 회신해 주시면 검토하겠습니다.
+
+오픈매니저 드림
+${OM_COMPANY.email}`;
+
+  navigator.clipboard.writeText(text).then(()=>{
+    alert(`v${r.version} 업데이트 공지 문안을 복사했습니다.\n\n\u00b7 이 안내는 광고성 정보가 아니므로\n  수신 동의 여부와 관계없이 발송할 수 있습니다.\n\u00b7 여러 회사에 보낼 때는 숨은참조(BCC)를 사용하세요.`);
+  }).catch(()=>{
+    prompt('아래 내용을 복사하세요:', text);
+  });
+};
+
 // ── 서비스 통계 ──
 let activityCache = [], adStatCache = null, statTab = 'use';
 
@@ -1823,6 +1860,8 @@ window.deleteAd = async id => {
 
 // ── 대시보드 ──
 function renderDashboard(){
+  const dv = document.getElementById('dashVersion');
+  if(dv) dv.textContent = OM_VERSION;
   const now = Date.now();
   const pending = signupCache.filter(s=>s.status==='pending').length;
   const activeCompanies = companyCache.filter(c=>c.status==='approved').length;
