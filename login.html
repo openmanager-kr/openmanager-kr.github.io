@@ -7,11 +7,17 @@
 <title>로그인 — 오픈매니저 OpenManager</title>
   <link rel="icon" type="image/png" href="favicon.png?v=2">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
-  <meta name="theme-color" content="#4F46E5">
+  <link rel="manifest" href="manifest.json?v=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="오픈매니저">
+<meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202608030229"></script>
-<script src="version.js?v=202608030229"></script>
-<script src="footer-util.js?v=202608030229"></script>
+<script src="phone-util.js?v=202608030256"></script>
+<script src="mobile-util.js?v=202608030256"></script>
+<script src="version.js?v=202608030256"></script>
+<script src="footer-util.js?v=202608030256"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -58,6 +64,7 @@
   <p class="text-center text-[12px] text-slate-400 mt-6">
     이용 신청 후 승인이 완료되면 로그인 안내 메일이 발송됩니다.
   </p>
+  <div id="loginInstall" class="hidden mt-6"></div>
   <div id="pageFooter" class="mt-8 pt-5 border-t border-slate-200"></div>
 </div>
 
@@ -127,6 +134,16 @@ window.resetPassword = async function(){
 
 document.addEventListener('keydown', e => { if(e.key==='Enter') window.doLogin(); });
 </script>
-<script>renderFooter("pageFooter","light");</script>
+<script>renderFooter("pageFooter","light");
+if(window.renderInstallButton) renderInstallButton("loginInstall","full");</script>
+<script>
+// 홈 화면 앱으로 설치할 수 있게 등록 (화면만 저장하며 데이터는 항상 서버에서 가져옵니다)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 등록 실패:', e));
+  });
+}
+</script>
+<div id="omInstallPad" class="h-16 md:hidden"></div>
 </body>
 </html>

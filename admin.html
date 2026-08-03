@@ -7,16 +7,21 @@
 <title>오픈매니저 — 슈퍼 어드민</title>
   <link rel="icon" type="image/png" href="favicon.png?v=2">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
-  <meta name="theme-color" content="#4F46E5">
+  <link rel="manifest" href="manifest.json?v=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="오픈매니저">
+<meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202608030229"></script>
-<script src="excel-util.js?v=202608030229"></script>
-<script src="mobile-util.js?v=202608030229"></script>
-<script src="version.js?v=202608030229"></script>
-<script src="footer-util.js?v=202608030229"></script>
+<script src="phone-util.js?v=202608030256"></script>
+<script src="excel-util.js?v=202608030256"></script>
+<script src="mobile-util.js?v=202608030256"></script>
+<script src="version.js?v=202608030256"></script>
+<script src="footer-util.js?v=202608030256"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202608030229"></script>
+<script src="mail-config.js?v=202608030256"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -107,6 +112,7 @@
         <div id="adminEmail" class="text-[11.5px] text-slate-500 truncate min-w-0"></div>
       </div>
       <button onclick="doLogout()" class="w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">로그아웃</button>
+      <div id="sideInstall" class="hidden mt-3"></div>
       <div id="sideFooter" class="px-3 pt-3 mt-3 border-t border-slate-800"></div>
     </div>
   </aside>
@@ -675,6 +681,7 @@ onAuthStateChanged(auth, async user => {
     if(ai) ai.textContent = (user.email||'?').charAt(0).toUpperCase();
     document.getElementById('guard').remove();
     renderFooter('sideFooter','dark');
+  if(window.renderInstallButton) renderInstallButton('sideInstall','full');
     loadAll();
     // 새로고침 시 마지막에 보던 화면으로 복원
     const _v = (location.hash || '').replace('#','');
@@ -1880,6 +1887,14 @@ function renderDashboard(){
   if(exp>0) alerts.push(`<div class="border border-amber-200 bg-amber-50 rounded-lg px-4 py-3 text-[13px] text-amber-700 font-semibold">⏰ 7일 이내 만료 예정 광고가 ${exp}건 있습니다.</div>`);
   document.getElementById('dashAlerts').innerHTML = alerts.join('') ||
     '<div class="border border-slate-200 bg-white rounded-lg px-4 py-3 text-[13px] text-slate-400">처리할 알림이 없습니다.</div>';
+}
+</script>
+<script>
+// 홈 화면 앱으로 설치할 수 있게 등록 (화면만 저장하며 데이터는 항상 서버에서 가져옵니다)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 등록 실패:', e));
+  });
 }
 </script>
 </body>
