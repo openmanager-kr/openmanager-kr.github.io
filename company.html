@@ -14,14 +14,15 @@
 <meta name="apple-mobile-web-app-title" content="오픈매니저">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="terms-text.js?v=202608030727"></script>
-<script src="phone-util.js?v=202608030727"></script>
-<script src="mobile-util.js?v=202608030727"></script>
+<script src="terms-text.js?v=202608030740"></script>
+<script src="phone-util.js?v=202608030740"></script>
+<script src="idle-util.js?v=202608030740"></script>
+<script src="mobile-util.js?v=202608030740"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202608030727"></script>
-<script src="excel-util.js?v=202608030727"></script>
-<script src="version.js?v=202608030727"></script>
-<script src="footer-util.js?v=202608030727"></script>
+<script src="ad-util.js?v=202608030740"></script>
+<script src="excel-util.js?v=202608030740"></script>
+<script src="version.js?v=202608030740"></script>
+<script src="footer-util.js?v=202608030740"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -933,6 +934,8 @@ onAuthStateChanged(auth, async user => {
     checkReconsent();     // 약관이 개정되었으면 재동의 요청
     await loadStores();   // 상담(leads)은 해당 탭 최초 진입 시 구독 (읽기 절약)
     initAdsAndFooter();
+    // 1시간 동안 조작이 없으면 자동 로그아웃 (공용 PC 대비)
+    if(window.startIdleLogout) startIdleLogout(doLogout);
     // 새로고침 시 마지막에 보던 화면으로 복원
     const _v = (location.hash || '').replace('#','');
     if(_v && document.getElementById('view-'+_v)) switchView(_v);

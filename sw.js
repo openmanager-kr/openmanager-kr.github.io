@@ -6,7 +6,7 @@
    =========================================================== */
 
 // 파일을 수정하면 이 번호를 올린다 → 이용자에게 새 화면이 배포됨
-const CACHE = 'openmanager-v2';
+const CACHE = 'openmanager-v3';
 
 // 처음 설치할 때 미리 받아둘 화면 구성 요소
 const ASSETS = [
@@ -23,6 +23,7 @@ const ASSETS = [
   './excel-util.js',
   './footer-util.js',
   './mobile-util.js',
+  './idle-util.js',
   './phone-util.js',
   './terms-text.js',
   './version.js',
