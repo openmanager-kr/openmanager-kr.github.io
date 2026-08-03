@@ -79,11 +79,13 @@
 
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
-    installEvent = e;                 // 안드로이드·크롬: 나중에 버튼으로 띄운다
-    showInstallBar();
+    installEvent = e;   // 헤더의 설치 버튼을 눌렀을 때 사용
   });
 
-  window.addEventListener('appinstalled', () => { hideInstallBar(); installEvent = null; });
+  window.addEventListener('appinstalled', () => {
+    installEvent = null;
+    document.querySelectorAll('[data-install-slot]').forEach(el => el.innerHTML = '');
+  });
 
   function isStandalone(){
     return window.matchMedia('(display-mode: standalone)').matches
@@ -92,78 +94,12 @@
   function isIOS(){
     return /iphone|ipad|ipod/i.test(navigator.userAgent);
   }
-  function dismissed(){
-    try{ return localStorage.getItem('omInstallHidden') === '1'; }catch(e){ return false; }
-  }
-
-  function showInstallBar(){
-    if(isStandalone() || dismissed() || document.getElementById('omInstallBar')) return;
-    const bar = document.createElement('div');
-    bar.id = 'omInstallBar';
-    bar.className = 'fixed bottom-0 inset-x-0 z-[90] md:hidden bg-white border-t border-slate-200 px-4 py-3 flex items-center gap-3';
-    bar.innerHTML = `
-      <img src="icon-192.png" alt="" class="w-9 h-9 rounded-lg border border-slate-100 shrink-0">
-      <div class="flex-1 min-w-0">
-        <div class="text-[13px] font-bold text-slate-800">홈 화면에 추가</div>
-        <div class="text-[11.5px] text-slate-400 break-keep">앱처럼 바로 열 수 있습니다</div>
-      </div>
-      <button onclick="omInstall()" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[12.5px] font-bold transition shrink-0">추가</button>
-      <button onclick="omInstallDismiss()" aria-label="닫기" class="text-slate-300 hover:text-slate-500 text-lg leading-none shrink-0 px-1">&times;</button>`;
-    document.body.appendChild(bar);
-  }
-  function hideInstallBar(){
-    const b = document.getElementById('omInstallBar');
-    if(b) b.remove();
-  }
-
-  /**
-   * 상시 설치 버튼 — 원하는 위치에 넣어두면 언제든 설치할 수 있다
-   * @param {string} elId  버튼을 넣을 요소 id
-   * @param {string} style 'full'(전체폭) | 'inline'(작게)
-   */
-  window.renderInstallButton = function(elId, style){
-    const el = document.getElementById(elId);
-    if(!el) return;
-    // 이미 앱으로 실행 중이면 버튼을 숨긴다
-    if(isStandalone()){ el.innerHTML = ''; el.classList.add('hidden'); return; }
-    el.classList.remove('hidden');
-
-    if(style === 'inline'){
-      el.innerHTML = `
-        <button type="button" onclick="omInstall()"
-          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200
-                 text-slate-500 text-[12.5px] font-semibold hover:bg-slate-50 hover:text-indigo-600 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 8v6M9.5 11.5L12 14l2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          홈 화면에 추가
-        </button>`;
-    }else{
-      el.innerHTML = `
-        <button type="button" onclick="omInstall()"
-          class="w-full flex items-center gap-3 p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/40
-                 hover:bg-indigo-50 transition text-left">
-          <img src="icon-192.png" alt="" class="w-10 h-10 rounded-lg border border-white shrink-0">
-          <span class="flex-1 min-w-0">
-            <span class="block text-[13.5px] font-bold text-slate-800">홈 화면에 추가하기</span>
-            <span class="block text-[12px] text-slate-500 mt-0.5 break-keep">앱처럼 바로 열 수 있습니다</span>
-          </span>
-          <span class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-[12.5px] font-bold shrink-0">추가</span>
-        </button>`;
-    }
-  };
-
-  window.omInstallDismiss = function(){
-    try{ localStorage.setItem('omInstallHidden','1'); }catch(e){}
-    hideInstallBar();
-  };
-
   window.omInstall = async function(){
     if(installEvent){
       installEvent.prompt();
       await installEvent.userChoice;
       installEvent = null;
-      hideInstallBar();
+      document.querySelectorAll('[data-install-slot]').forEach(el => el.innerHTML = '');
       return;
     }
     // 자동 설치를 지원하지 않는 브라우저(사파리 등)는 방법을 안내한다
@@ -210,11 +146,6 @@
           class="w-full mt-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">확인</button>
       </div>`;
   }
-
-  // 설치 버튼이 화면에 상시 노출되므로, 자동 안내 바는 첫 방문 때만 가볍게 띄운다
-  document.addEventListener('DOMContentLoaded', () => {
-    if(isIOS() && !isStandalone() && !dismissed()) setTimeout(showInstallBar, 2000);
-  });
 
   /** 현재 기기 구분 — 광고 통계·소재 분기용 */
   window.omDevice = function(){

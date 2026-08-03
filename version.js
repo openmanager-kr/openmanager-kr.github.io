@@ -4,8 +4,8 @@
    - 화면 하단과 [업데이트 내역]에 자동 반영됨
    =========================================================== */
 
-window.OM_VERSION = '1.0.0';
-window.OM_RELEASED = '2026-07-31';
+window.OM_VERSION = '1.1.0';
+window.OM_RELEASED = '2026-08-03';
 
 /**
  * 버전 표기 규칙 (예: 1.2.3)
@@ -16,6 +16,18 @@ window.OM_RELEASED = '2026-07-31';
  * type: 'feature'(신규) | 'improve'(개선) | 'fix'(수정)
  */
 window.OM_CHANGELOG = [
+  {
+    version: '1.1.0',
+    date: '2026-08-03',
+    title: '휴대폰 사용 편의 개선',
+    items: [
+      { type:'feature', text:'홈 화면에 추가 — 앱처럼 바로 열 수 있습니다' },
+      { type:'improve', text:'연락 예정·오픈 지연 알림이 휴대폰에서 보기 편하게 정리되었습니다' },
+      { type:'improve', text:'등록·수정 창의 저장·취소 버튼이 항상 화면에 보입니다' },
+      { type:'improve', text:'새로고침해도 보던 화면이 그대로 유지됩니다' },
+      { type:'feature', text:'약관이 개정되면 재동의 안내가 표시됩니다' }
+    ]
+  },
   {
     version: '1.0.0',
     date: '2026-07-31',

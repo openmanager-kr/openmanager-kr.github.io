@@ -14,14 +14,14 @@
 <meta name="apple-mobile-web-app-title" content="오픈매니저">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="terms-text.js?v=202608030256"></script>
-<script src="phone-util.js?v=202608030256"></script>
-<script src="mobile-util.js?v=202608030256"></script>
+<script src="terms-text.js?v=202608030727"></script>
+<script src="phone-util.js?v=202608030727"></script>
+<script src="mobile-util.js?v=202608030727"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202608030256"></script>
-<script src="excel-util.js?v=202608030256"></script>
-<script src="version.js?v=202608030256"></script>
-<script src="footer-util.js?v=202608030256"></script>
+<script src="ad-util.js?v=202608030727"></script>
+<script src="excel-util.js?v=202608030727"></script>
+<script src="version.js?v=202608030727"></script>
+<script src="footer-util.js?v=202608030727"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -70,7 +70,7 @@
 
 <!-- 모바일 헤더 -->
 <header class="md:hidden sticky top-0 z-40 bg-white border-b border-slate-200">
-  <div class="flex items-center justify-between px-4 py-3">
+  <div class="flex items-center justify-between px-4 py-3 gap-2">
     <div class="flex items-center gap-2 min-w-0">
       <img src="logo-symbol.png" alt="오픈매니저" class="w-8 h-6 object-contain shrink-0">
       <div class="min-w-0">
@@ -78,6 +78,7 @@
         <div id="mobSubtitle" class="text-[10.5px] text-slate-400 truncate mt-0.5">&nbsp;</div>
       </div>
     </div>
+    <span id="headInstall" data-install-slot class="hidden"></span>
     <button onclick="omDrawerToggle()" aria-label="메뉴 열기"
       class="w-11 h-11 -mr-2 rounded-lg flex flex-col items-center justify-center gap-[5px] hover:bg-slate-50 transition">
       <span class="block w-5 h-0.5 rounded bg-slate-700"></span>
@@ -104,6 +105,8 @@
     </div>
     <nav class="flex-1 px-3 py-4">
       <button data-view="home" onclick="switchView('home')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▦ 대시보드</button>
+
+      <div id="drawerInstall" data-install-slot class="hidden mb-3"></div>
 
       <!-- 오픈 진행 -->
       <div class="px-3 pt-4 pb-1.5 text-[10.5px] font-bold text-slate-600 tracking-wider">오픈 진행</div>
@@ -133,7 +136,6 @@
         <button data-view="settings" onclick="switchView('settings')" class="nav-item flex-1 px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">설정</button>
         <button onclick="doLogout()" class="flex-1 px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">로그아웃</button>
       </div>
-      <div id="sideInstall" class="hidden mt-3"></div>
       <div id="sideFooter" class="px-3 pt-3 mt-3 border-t border-slate-800"></div>
     </div>
   </aside>
@@ -1021,7 +1023,6 @@ async function markCompanyActive(){
 // 광고 지면 + 푸터 초기화
 async function initAdsAndFooter(){
   renderFooter('sideFooter','dark');
-  if(window.renderInstallButton) renderInstallButton('sideInstall','full');
   initAdStats(db, { doc, setDoc, increment });   // 광고 노출·클릭 집계
   await loadAdsOnce(db, getDocs, collection);
   renderAdSlots([
@@ -2014,12 +2015,16 @@ window.renderOpenTab = () => {
     .map(s=>{
       const d = Math.round((new Date(today)-new Date(s.openDate))/86400000);
       const inf = stepInfo(s);
-      return `<div class="flex items-center justify-between bg-white border border-rose-200 rounded-lg px-4 py-2.5">
-        <div class="text-[13px]"><b class="text-slate-800">${esc(s.branchName)}</b>
-          <span class="text-slate-500 ml-2">${esc(s.ownerName)} · 진행률 ${inf.pct}%</span></div>
-        <div class="flex items-center gap-2">
-          <span class="text-[12px] text-rose-600 font-bold">${esc(s.openDate)} (${d}일 경과)</span>
-          <button onclick="openTimeline('${s.id}')" class="px-2.5 py-1 rounded-lg border border-rose-300 text-rose-700 text-[12px] font-bold hover:bg-rose-100 transition">단계 관리</button>
+      return `<div class="bg-white border border-rose-200 rounded-lg px-3.5 py-3">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <b class="text-[13.5px] text-slate-800">${esc(s.branchName)}</b>
+            <div class="text-[12.5px] text-slate-500 mt-0.5 break-keep">${esc(s.ownerName)} · 진행률 ${inf.pct}%</div>
+          </div>
+          <span class="text-[12px] text-rose-600 font-bold whitespace-nowrap shrink-0 text-right">${esc(s.openDate)}<br>${d}일 경과</span>
+        </div>
+        <div class="flex gap-1.5 mt-2.5">
+          <button onclick="openTimeline('${s.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-rose-300 text-rose-700 text-[12.5px] font-bold hover:bg-rose-100 transition whitespace-nowrap">단계 관리</button>
         </div></div>`;
     }).join('');
 
@@ -2479,14 +2484,21 @@ function renderLeadStats(){
   const box = document.getElementById('remindBox');
   box.classList.toggle('hidden', due.length===0);
   document.getElementById('remindRows').innerHTML = due.map(l=>`
-    <div class="flex items-center justify-between bg-white border border-amber-200 rounded-lg px-4 py-2.5">
-      <div class="text-[13px]"><b class="text-slate-800">${esc(l.name)}</b>
-        <span class="text-slate-500 ml-2">${esc(fmtPhone(l.phone))} · ${esc(l.region)||''}</span></div>
-      <div class="flex items-center gap-2">
-        <span class="text-[12px] text-amber-700 font-bold">${esc(l.remindDate)}</span>
-        <button onclick="doneRemind('${l.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-bold transition">✓ 연락 완료</button>
-        <button onclick="openLeadModal('${l.id}')" class="px-2.5 py-1 rounded-lg border border-amber-300 text-amber-700 text-[12px] font-bold hover:bg-amber-100 transition">열기</button>
-      </div></div>`).join('');
+    <div class="bg-white border border-amber-200 rounded-lg px-3.5 py-3">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <b class="text-[13.5px] text-slate-800">${esc(l.name)}</b>
+          <div class="text-[12.5px] text-slate-500 mt-0.5 break-keep">
+            ${esc(fmtPhone(l.phone))}${l.region ? ' · ' + esc(l.region) : ''}
+          </div>
+        </div>
+        <span class="text-[12px] text-amber-700 font-bold whitespace-nowrap shrink-0">${esc(l.remindDate)}</span>
+      </div>
+      <div class="flex gap-1.5 mt-2.5">
+        <button onclick="doneRemind('${l.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-bold transition whitespace-nowrap">✓ 연락 완료</button>
+        <button onclick="openLeadModal('${l.id}')" class="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 rounded-lg border border-amber-300 text-amber-700 text-[12.5px] font-bold hover:bg-amber-100 transition whitespace-nowrap">열기</button>
+      </div>
+    </div>`).join('');
 }
 
 window.openLeadModal = id => {

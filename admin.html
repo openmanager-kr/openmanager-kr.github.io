@@ -15,13 +15,13 @@
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="phone-util.js?v=202608030256"></script>
-<script src="excel-util.js?v=202608030256"></script>
-<script src="mobile-util.js?v=202608030256"></script>
-<script src="version.js?v=202608030256"></script>
-<script src="footer-util.js?v=202608030256"></script>
+<script src="phone-util.js?v=202608030727"></script>
+<script src="excel-util.js?v=202608030727"></script>
+<script src="mobile-util.js?v=202608030727"></script>
+<script src="version.js?v=202608030727"></script>
+<script src="footer-util.js?v=202608030727"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="mail-config.js?v=202608030256"></script>
+<script src="mail-config.js?v=202608030727"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -112,7 +112,6 @@
         <div id="adminEmail" class="text-[11.5px] text-slate-500 truncate min-w-0"></div>
       </div>
       <button onclick="doLogout()" class="w-full px-3 py-2.5 rounded-lg text-[13px] font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition text-center">로그아웃</button>
-      <div id="sideInstall" class="hidden mt-3"></div>
       <div id="sideFooter" class="px-3 pt-3 mt-3 border-t border-slate-800"></div>
     </div>
   </aside>
@@ -144,19 +143,7 @@
       </div>
       <div id="dashAlerts" class="mt-6 space-y-2"></div>
 
-      <div class="mt-6 bg-white border border-slate-200 rounded-xl p-5 flex flex-wrap items-center justify-between gap-3">
-        <div class="min-w-0">
-          <div class="text-[13px] font-bold text-slate-700">서비스 버전 <b class="text-indigo-600">v<span id="dashVersion">–</span></b></div>
-          <div class="text-[12.5px] text-slate-400 mt-1 break-keep">
-            기능을 업데이트하면 <b class="text-slate-600">version.js</b> 에 내역을 추가하세요. 화면 하단 버전이 자동으로 바뀝니다.
-          </div>
-        </div>
-        <div class="flex gap-2 shrink-0">
-          <button onclick="showChangelog()" class="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-600 text-[12.5px] font-bold hover:bg-slate-50 transition whitespace-nowrap">업데이트 내역</button>
-          <button onclick="copyUpdateNotice()" class="px-3.5 py-2 rounded-lg border border-indigo-200 text-indigo-600 text-[12.5px] font-bold hover:bg-indigo-50 transition whitespace-nowrap">📋 공지 문안 복사</button>
-        </div>
-      </div>
-    </section>
+          </section>
 
     <!-- ── 가입 승인 ── -->
     <section id="view-signups" class="hidden">
@@ -681,7 +668,9 @@ onAuthStateChanged(auth, async user => {
     if(ai) ai.textContent = (user.email||'?').charAt(0).toUpperCase();
     document.getElementById('guard').remove();
     renderFooter('sideFooter','dark');
-  if(window.renderInstallButton) renderInstallButton('sideInstall','full');
+    // 슈퍼어드민은 운영자 본인만 쓰므로 버전·업데이트 표시를 숨긴다
+    const _v = document.getElementById('sideFooter_ver');
+    if(_v) _v.innerHTML = '';
     loadAll();
     // 새로고침 시 마지막에 보던 화면으로 복원
     const _v = (location.hash || '').replace('#','');
