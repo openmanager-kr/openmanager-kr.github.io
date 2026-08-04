@@ -4,7 +4,7 @@
    - 화면 하단과 [업데이트 내역]에 자동 반영됨
    =========================================================== */
 
-window.OM_VERSION = '1.1.1';
+window.OM_VERSION = '1.1.2';
 window.OM_RELEASED = '2026-08-03';
 
 /**
@@ -17,11 +17,12 @@ window.OM_RELEASED = '2026-08-03';
  */
 window.OM_CHANGELOG = [
   {
-    version: '1.1.1',
+    version: '1.1.2',
     date: '2026-08-03',
     title: '보안 강화 · 휴대폰 사용 편의 개선',
     items: [
       { type:'feature', text:'1시간 동안 사용하지 않으면 자동으로 로그아웃됩니다 (공용 PC 보안)' },
+      { type:'improve', text:'앱 아이콘에 서비스 이름을 넣어 홈 화면에서 쉽게 찾을 수 있습니다' },
       { type:'feature', text:'홈 화면에 추가 — 앱처럼 바로 열 수 있습니다' },
       { type:'improve', text:'연락 예정·오픈 지연 알림이 휴대폰에서 보기 편하게 정리되었습니다' },
       { type:'improve', text:'등록·수정 창의 저장·취소 버튼이 항상 화면에 보입니다' },
