@@ -14,11 +14,11 @@
 <meta name="apple-mobile-web-app-title" content="오픈매니저">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="phone-util.js?v=202608050108"></script>
-<script src="idle-util.js?v=202608050108"></script>
-<script src="mobile-util.js?v=202608050108"></script>
-<script src="version.js?v=202608050108"></script>
-<script src="footer-util.js?v=202608050108"></script>
+<script src="phone-util.js?v=202608050133"></script>
+<script src="idle-util.js?v=202608050133"></script>
+<script src="mobile-util.js?v=202608050133"></script>
+<script src="version.js?v=202608050133"></script>
+<script src="footer-util.js?v=202608050133"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -140,7 +140,7 @@ document.addEventListener('keydown', e => { if(e.key==='Enter') window.doLogin()
 </script>
 <script>renderFooter("pageFooter","light");
 if(window.wasIdleLogout && wasIdleLogout()) document.getElementById('idleNotice').classList.remove('hidden');
-if(window.renderInstallButton) renderInstallButton("loginInstall","full");</script>
+if(window.renderInstallButton) renderInstallButton("loginInstall","light");</script>
 <script>
 // 홈 화면 앱으로 설치할 수 있게 등록 (화면만 저장하며 데이터는 항상 서버에서 가져옵니다)
 if('serviceWorker' in navigator){

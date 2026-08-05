@@ -14,15 +14,15 @@
 <meta name="apple-mobile-web-app-title" content="오픈매니저">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="terms-text.js?v=202608050126"></script>
-<script src="phone-util.js?v=202608050126"></script>
-<script src="idle-util.js?v=202608050126"></script>
-<script src="mobile-util.js?v=202608050126"></script>
+<script src="terms-text.js?v=202608050133"></script>
+<script src="phone-util.js?v=202608050133"></script>
+<script src="idle-util.js?v=202608050133"></script>
+<script src="mobile-util.js?v=202608050133"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202608050126"></script>
-<script src="excel-util.js?v=202608050126"></script>
-<script src="version.js?v=202608050126"></script>
-<script src="footer-util.js?v=202608050126"></script>
+<script src="ad-util.js?v=202608050133"></script>
+<script src="excel-util.js?v=202608050133"></script>
+<script src="version.js?v=202608050133"></script>
+<script src="footer-util.js?v=202608050133"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -1030,6 +1030,7 @@ async function initAdsAndFooter(){
     renderInstallButton('headInstall','icon');    // 모바일 헤더 아이콘
     renderInstallButton('drawerInstall','full');  // 메뉴 안 안내 카드
   }
+  if(window.startInstallIntro) startInstallIntro();   // 첫 진입 시 1회 안내
   initAdStats(db, { doc, setDoc, increment });   // 광고 노출·클릭 집계
   await loadAdsOnce(db, getDocs, collection);
   renderAdSlots([

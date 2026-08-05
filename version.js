@@ -4,7 +4,7 @@
    - 화면 하단과 [업데이트 내역]에 자동 반영됨
    =========================================================== */
 
-window.OM_VERSION = '1.1.3';
+window.OM_VERSION = '1.1.4';
 window.OM_RELEASED = '2026-08-03';
 
 /**
@@ -17,7 +17,7 @@ window.OM_RELEASED = '2026-08-03';
  */
 window.OM_CHANGELOG = [
   {
-    version: '1.1.3',
+    version: '1.1.4',
     date: '2026-08-03',
     title: '보안 강화 · 휴대폰 사용 편의 개선',
     items: [

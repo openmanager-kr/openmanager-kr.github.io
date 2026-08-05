@@ -51,8 +51,14 @@
   });
 
   // 데스크톱으로 넓어지면 잠금 해제
+  let resizeTimer = null;
   window.addEventListener('resize', () => {
     if(window.matchMedia('(min-width: 768px)').matches && opened) omDrawerClose();
+    // PC ↔ 모바일 전환 시 설치 버튼 표시 여부를 다시 판단
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      installSlots.forEach(s => renderInstallButton(s.id, s.style));
+    }, 200);
   });
 
   // ── 모달이 열리면 배경 스크롤 잠금 (모든 모달에 자동 적용) ──
@@ -103,9 +109,12 @@
    *       그래서 설치 여부를 판단하지 않고 버튼을 항상 띄우되,
    *       앱으로 실행 중일 때만(= 확실히 설치된 상태) 숨긴다.
    */
+  const installSlots = [];   // 화면 크기가 바뀌면 다시 그리기 위해 기억
+
   window.renderInstallButton = function(elId, style){
     const el = document.getElementById(elId);
     if(!el) return;
+    if(!installSlots.some(s => s.id === elId)) installSlots.push({ id:elId, style });
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
     // 앱으로 실행 중이거나, 설치가 의미 없는 PC 화면에서는 숨긴다
     if(isStandalone() || !isMobile){ el.innerHTML = ''; el.classList.add('hidden'); return; }
@@ -134,7 +143,22 @@
         </button>`;
       return;
     }
-    // full — 안내 카드 (어두운 사이드바에서도 보이도록 반투명 배경)
+    if(style === 'light'){
+      // 밝은 배경용 안내 카드 (점주 페이지·로그인 화면 등)
+      el.innerHTML = `
+        <button type="button" onclick="omInstall()"
+          class="w-full flex items-center gap-3 p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50
+                 hover:bg-indigo-50 transition text-left">
+          <img src="icon-192.png" alt="" class="w-10 h-10 rounded-lg border border-white shrink-0">
+          <span class="flex-1 min-w-0">
+            <span class="block text-[13.5px] font-bold text-slate-800">홈 화면에 추가</span>
+            <span class="block text-[12px] text-slate-500 mt-0.5 break-keep">앱처럼 바로 열 수 있습니다</span>
+          </span>
+          <span class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-[12.5px] font-bold shrink-0">추가</span>
+        </button>`;
+      return;
+    }
+    // full — 어두운 사이드바용 안내 카드
     el.innerHTML = `
       <button type="button" onclick="omInstall()"
         class="w-full flex items-center gap-3 p-3 rounded-xl border border-indigo-400/40 bg-indigo-500/15
@@ -202,6 +226,62 @@
   }
 
   /** 현재 기기 구분 — 광고 통계·소재 분기용 */
+  // ===== 첫 진입 안내 (기기당 1회) =====
+  function introShown(){
+    try{ return localStorage.getItem('omInstallIntro') === '1'; }catch(e){ return false; }
+  }
+  function markIntro(){
+    try{ localStorage.setItem('omInstallIntro','1'); }catch(e){}
+  }
+
+  window.omInstallIntroClose = function(){
+    markIntro();
+    const b = document.getElementById('omInstallIntro');
+    if(b) b.remove();
+  };
+  window.omInstallIntroGo = function(){
+    markIntro();
+    const b = document.getElementById('omInstallIntro');
+    if(b) b.remove();
+    omInstall();
+  };
+
+  function showIntro(){
+    if(document.getElementById('omInstallIntro')) return;
+    const box = document.createElement('div');
+    box.id = 'omInstallIntro';
+    box.className = 'fixed inset-0 bg-slate-900/50 flex items-end sm:items-center justify-center px-4 py-6 z-[350]';
+    box.onclick = e => { if(e.target===box) omInstallIntroClose(); };
+    box.innerHTML = `
+      <div class="bg-white rounded-2xl w-full max-w-sm p-6">
+        <div class="flex items-center gap-3">
+          <img src="icon-192.png" alt="" class="w-12 h-12 rounded-xl border border-slate-100 shrink-0">
+          <div class="min-w-0">
+            <h3 class="font-bold text-slate-900 text-[15px]">홈 화면에 추가하시겠어요?</h3>
+            <p class="text-[12px] text-slate-400 mt-0.5">앱처럼 바로 열 수 있습니다</p>
+          </div>
+        </div>
+        <p class="text-[13px] text-slate-500 mt-4 leading-relaxed break-keep">
+          매번 주소를 입력하지 않아도 되고, 화면이 더 넓게 보입니다.<br>
+          나중에 필요하시면 <b class="text-slate-700">메뉴에서 언제든</b> 추가하실 수 있습니다.
+        </p>
+        <div class="flex gap-2.5 mt-5">
+          <button onclick="omInstallIntroClose()"
+            class="flex-1 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-[13px] font-bold hover:bg-slate-50 transition">나중에</button>
+          <button onclick="omInstallIntroGo()"
+            class="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold transition">추가하기</button>
+        </div>
+      </div>`;
+    document.body.appendChild(box);
+  }
+
+  /** 첫 진입 안내 시작 — 로그인 후 화면에서 호출 */
+  window.startInstallIntro = function(){
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if(isStandalone() || !isMobile || introShown()) return;   // 앱 실행 중·PC·이미 본 경우 제외
+    setTimeout(showIntro, 2000);   // 화면을 먼저 보여준 뒤 안내
+  };
+
   window.omDevice = function(){
     return window.matchMedia('(max-width: 767px)').matches ? 'mobile' : 'desktop';
   };
