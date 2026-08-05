@@ -14,15 +14,15 @@
 <meta name="apple-mobile-web-app-title" content="오픈매니저">
 <meta name="theme-color" content="#4F46E5">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="terms-text.js?v=202608050108"></script>
-<script src="phone-util.js?v=202608050108"></script>
-<script src="idle-util.js?v=202608050108"></script>
-<script src="mobile-util.js?v=202608050108"></script>
+<script src="terms-text.js?v=202608050126"></script>
+<script src="phone-util.js?v=202608050126"></script>
+<script src="idle-util.js?v=202608050126"></script>
+<script src="mobile-util.js?v=202608050126"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="ad-util.js?v=202608050108"></script>
-<script src="excel-util.js?v=202608050108"></script>
-<script src="version.js?v=202608050108"></script>
-<script src="footer-util.js?v=202608050108"></script>
+<script src="ad-util.js?v=202608050126"></script>
+<script src="excel-util.js?v=202608050126"></script>
+<script src="version.js?v=202608050126"></script>
+<script src="footer-util.js?v=202608050126"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   body{font-family:'Pretendard',-apple-system,sans-serif;}
@@ -95,7 +95,7 @@
 
 <div class="flex min-h-screen">
   <!-- 사이드바 -->
-  <aside id="omSidebar" class="w-60 shrink-0 bg-slate-900 flex flex-col fixed md:sticky top-0 left-0 h-screen z-50 overflow-y-auto -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out">
+  <aside id="omSidebar" class="w-60 shrink-0 bg-slate-900 flex flex-col fixed md:sticky top-0 left-0 h-[100dvh] z-50 overflow-hidden -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out">
     <div class="px-5 py-6 flex items-center gap-2.5 border-b border-slate-800">
       <img src="logo-symbol-white.png" alt="오픈매니저 로고"
         class="w-10 h-7 object-contain shrink-0">
@@ -104,7 +104,7 @@
         <div id="sideCompanyName" class="text-[10.5px] text-indigo-300/70 font-semibold mt-1 truncate">–</div>
       </div>
     </div>
-    <nav class="flex-1 px-3 py-4">
+    <nav class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-4">
       <button data-view="home" onclick="switchView('home')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▦ 대시보드</button>
 
       <div id="drawerInstall" data-install-slot class="hidden mb-3"></div>
@@ -124,7 +124,7 @@
         <button data-view="pos" onclick="switchView('pos')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-semibold text-slate-400 hover:text-slate-200 transition text-left">▣ POS 관리</button>
       </div>
     </nav>
-    <div class="px-3 py-4 border-t border-slate-800">
+    <div class="shrink-0 px-3 py-4 border-t border-slate-800">
       <!-- 로그인 계정 -->
       <div class="flex items-center gap-2 px-3 pb-3">
         <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
@@ -1026,6 +1026,10 @@ async function markCompanyActive(){
 // 광고 지면 + 푸터 초기화
 async function initAdsAndFooter(){
   renderFooter('sideFooter','dark');
+  if(window.renderInstallButton){
+    renderInstallButton('headInstall','icon');    // 모바일 헤더 아이콘
+    renderInstallButton('drawerInstall','full');  // 메뉴 안 안내 카드
+  }
   initAdStats(db, { doc, setDoc, increment });   // 광고 노출·클릭 집계
   await loadAdsOnce(db, getDocs, collection);
   renderAdSlots([

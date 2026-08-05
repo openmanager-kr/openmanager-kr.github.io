@@ -94,6 +94,60 @@
   function isIOS(){
     return /iphone|ipad|ipod/i.test(navigator.userAgent);
   }
+  /**
+   * 설치 버튼 렌더 — 원하는 위치에 넣어두면 언제든 설치할 수 있다
+   * @param {string} elId  버튼을 넣을 요소 id
+   * @param {string} style 'full'(안내 카드) | 'icon'(아이콘만) | 'inline'(작은 버튼)
+   *
+   * 참고: 브라우저는 "이미 설치했는지"를 알려주지 않는다.
+   *       그래서 설치 여부를 판단하지 않고 버튼을 항상 띄우되,
+   *       앱으로 실행 중일 때만(= 확실히 설치된 상태) 숨긴다.
+   */
+  window.renderInstallButton = function(elId, style){
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    // 앱으로 실행 중이거나, 설치가 의미 없는 PC 화면에서는 숨긴다
+    if(isStandalone() || !isMobile){ el.innerHTML = ''; el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+
+    if(style === 'icon'){
+      el.innerHTML = `
+        <button type="button" onclick="omInstall()" aria-label="홈 화면에 추가"
+          class="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-slate-50 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <rect x="6" y="2" width="12" height="20" rx="2"/>
+            <path d="M12 8v6M9.5 11.5L12 14l2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>`;
+      return;
+    }
+    if(style === 'inline'){
+      el.innerHTML = `
+        <button type="button" onclick="omInstall()"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200
+                 text-slate-500 text-[12.5px] font-semibold hover:bg-slate-50 hover:text-indigo-600 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 8v6M9.5 11.5L12 14l2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          홈 화면에 추가
+        </button>`;
+      return;
+    }
+    // full — 안내 카드 (어두운 사이드바에서도 보이도록 반투명 배경)
+    el.innerHTML = `
+      <button type="button" onclick="omInstall()"
+        class="w-full flex items-center gap-3 p-3 rounded-xl border border-indigo-400/40 bg-indigo-500/15
+               hover:bg-indigo-500/25 transition text-left">
+        <img src="icon-192.png" alt="" class="w-9 h-9 rounded-lg bg-white shrink-0">
+        <span class="flex-1 min-w-0">
+          <span class="block text-[13px] font-bold text-slate-100">홈 화면에 추가</span>
+          <span class="block text-[11.5px] text-slate-400 mt-0.5 break-keep">앱처럼 바로 열 수 있습니다</span>
+        </span>
+        <span class="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-[12px] font-bold shrink-0">추가</span>
+      </button>`;
+  };
+
   window.omInstall = async function(){
     if(installEvent){
       installEvent.prompt();
